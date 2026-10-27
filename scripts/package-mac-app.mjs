@@ -17,6 +17,7 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { validateMacNative, smokeMacNative } from './mac-native.mjs';
 import { signMacApp } from './sign-mac-app.js';
+import { downloadElectronZip } from './lib/electron-download.mjs';
 
 const require = createRequire(import.meta.url);
 const asar = require('@electron/asar');
@@ -33,37 +34,6 @@ const outDir = path.join(root, '__Bin');
 const finalAppDir = path.join(outDir, `${appName}-darwin-${arch}`);
 const finalAppPath = path.join(finalAppDir, `${appName}.app`);
 
-
-function downloadElectronZip(version, targetArch) {
-	const filename = `electron-v${version}-darwin-${targetArch}.zip`;
-	const cacheDir = path.join(os.homedir(), '.electron');
-	fs.mkdirSync(cacheDir, { recursive: true });
-	const dest = path.join(cacheDir, filename);
-	if (fs.existsSync(dest) && fs.statSync(dest).size > 1024 * 1024) {
-		console.log(`[package-mac-app] using cached ${dest}`);
-		return dest;
-	}
-
-	const urls = [
-		`https://npmmirror.com/mirrors/electron/v${version}/${filename}`,
-		`https://cdn.npmmirror.com/binaries/electron/v${version}/${filename}`,
-		`https://github.com/electron/electron/releases/download/v${version}/${filename}`,
-	];
-
-	for (const url of urls) {
-		console.log(`[package-mac-app] downloading ${url}`);
-		const result = spawnSync('curl.exe', ['-L', '--retry', '3', '--progress-bar', '-o', dest, url], {
-			stdio: 'inherit',
-			windowsHide: true,
-		});
-		if (result.status === 0 && fs.existsSync(dest) && fs.statSync(dest).size > 1024 * 1024) {
-			return dest;
-		}
-		console.warn(`[package-mac-app] download failed from ${url}`);
-	}
-
-	throw new Error(`Failed to download ${filename}`);
-}
 
 function listProductionTopLevelIds() {
 	const result = spawnSync('npm', ['ls', '--omit=dev', '--all', '--parseable'], {
@@ -210,7 +180,7 @@ async function main() {
 	}
 
 	console.log(`[package-mac-app] packaging ${appName} darwin-${arch} (Electron ${electronPkg.version})`);
-	const zipPath = downloadElectronZip(electronPkg.version, arch);
+	const zipPath = await downloadElectronZip(electronPkg.version, arch);
 	console.log(`[package-mac-app] electron zip: ${zipPath}`);
 
 	const workRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'qm-mac-app-'));

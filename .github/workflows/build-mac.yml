@@ -2,6 +2,12 @@ name: Build Mac portable candidates
 
 on:
   workflow_dispatch:
+    inputs:
+      architecture:
+        description: Mac architecture to build and launch-test
+        type: choice
+        default: arm64
+        options: [arm64, x64, all]
 
 permissions:
   contents: read
@@ -11,14 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: arm64
-            runner: macos-15
-            script: dist:mac:app
-          - arch: x64
-            runner: macos-15-intel
-            script: dist:mac:app:x64
-    runs-on: ${{ matrix.runner }}
+        arch: ${{ fromJSON(inputs.architecture == 'all' && '["arm64","x64"]' || inputs.architecture == 'x64' && '["x64"]' || '["arm64"]') }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'macos-15' || 'macos-15-intel' }}
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +28,10 @@ jobs:
         with:
           node-version: '22'
           cache: yarn
+      - name: Verify native runner architecture
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: node -e "require('node:assert/strict').equal(process.arch, process.env.TARGET_ARCH); console.log(process.platform, process.arch)"
       # npm bindings' install scripts cannot build until thirdparty sources exist.
       # Install dependencies without scripts, then run the required scripts explicitly.
       - name: Install dependencies
@@ -38,7 +42,22 @@ jobs:
           node node_modules/electron/install.js
           yarn run postinstall
       - name: Build, sign and test native modules inside ASAR
-        run: yarn run ${{ matrix.script }}
+        env:
+          QUENCHING_ELECTRON_CACHE: ${{ github.workspace }}/_tmp/cold-electron-${{ matrix.arch }}
+        run: |
+          test ! -e "$QUENCHING_ELECTRON_CACHE"
+          node scripts/test-electron-download.mjs
+          yarn run ${{ matrix.arch == 'arm64' && 'dist:mac:app' || 'dist:mac:app:x64' }}
+      - name: Extract candidate ZIP and launch the packaged app
+        run: node scripts/smoke-mac-archive.mjs ${{ matrix.arch }}
+      - name: Save startup evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: QMClient-darwin-${{ matrix.arch }}-startup-evidence
+          path: _tmp/mac-roundtrip-*/startup*
+          if-no-files-found: warn
+          retention-days: 14
       - name: Save candidate ZIP
         uses: actions/upload-artifact@v4
         with:
