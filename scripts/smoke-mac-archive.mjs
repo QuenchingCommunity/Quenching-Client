@@ -78,7 +78,7 @@ try {
       const root=document.getElementById('react-app-root');
       const ready=document.readyState==='complete'&&root?.querySelectorAll('button').length>=4&&typeof window.electronAPI?.getConfig==='function';
       return {ready,title:document.title,url:location.href,buttons:root?.querySelectorAll('button').length||0,
-        errorBoundary:document.body.innerText.includes('应用程序出现错误'),
+        errorBoundary:document.body?.innerText.includes('应用程序出现错误')||false,
         gameChannel:ready?await window.electronAPI.getConfig('gameChannel'):null};})()` });
     if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails));
     state = result.result.value;
