@@ -28,6 +28,12 @@ jobs:
         with:
           node-version: '22'
           cache: yarn
+      # The pinned electron-rebuild/node-gyp still imports distutils (removed
+      # from Python 3.12). Keep the Electron toolchain unchanged and use 3.11.
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.11'
       - name: Verify native runner architecture
         env:
           TARGET_ARCH: ${{ matrix.arch }}
@@ -44,6 +50,7 @@ jobs:
       - name: Build, sign and test native modules inside ASAR
         env:
           QUENCHING_ELECTRON_CACHE: ${{ github.workspace }}/_tmp/cold-electron-${{ matrix.arch }}
+          PYTHON: ${{ steps.python.outputs.python-path }}
         run: |
           test ! -e "$QUENCHING_ELECTRON_CACHE"
           node scripts/test-electron-download.mjs
