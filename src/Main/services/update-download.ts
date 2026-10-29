@@ -16,7 +16,7 @@ function canMirrorGithubRelease(url: string): boolean {
   try {
     const parsed = new URL(url);
     if (parsed.origin !== 'https://github.com' || parsed.username || parsed.password || parsed.search || parsed.hash ||
-        !/^\/UIZorrot\/Quenching-(?:Client|Assets)\/releases\/download\/[^/]+\/[^/]+$/.test(parsed.pathname)) return false;
+        !/^\/(?:UIZorrot|QuenchingCommunity)\/Quenching-(?:Client|Assets)\/releases\/download\/[^/]+\/[^/]+$/.test(parsed.pathname)) return false;
     return true;
   } catch { return false; }
 }

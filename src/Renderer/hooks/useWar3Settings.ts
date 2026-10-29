@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { reaction } from 'mobx';
 import { reaxel, createReaxable } from 'reaxes';
-import { EffectiveGraphics, EffectiveVersion, GraphicsSelection, VersionSelection, normalizeGraphicsSelection } from '../../shared/mod-profile';
+import { EffectiveGraphics, EffectiveVersion, GraphicsSelection, VersionSelection, normalizeVersionSelection, normalizeGraphicsSelection } from '../../shared/mod-profile';
 import { graphicsFromHdValue, hdValueForGraphics, patchWar3Preferences, warcraftPreferencesFolder } from '../../shared/war3-preferences';
+import { createSettingsProgressReporter } from '../../shared/settings-progress';
 
 async function getSelectedGameBuildDir(war3Path: string): Promise<string> {
   const channel = await window.electronAPI?.getConfig('gameChannel');
@@ -35,13 +36,18 @@ export interface ModSettings {
   objectShader: boolean; // 物体着色器
   postProcessing: boolean; // 后处理阴影
   postProcessingGlow: boolean; // 后处理辉光（两份 Bloom 和 Gaussian Blur）
+  hdr: boolean; // 独立的色调映射开关
+  postProcessingOutline: boolean; // 3.0.1+ 物体描边，AO 强度由光照模式决定
   volumetricFog: boolean; // 体积雾
   water: 'transparent' | 'realistic' | 'off'; // 水面效果
   foliage: boolean;      // 植被效果
   blight: boolean;       // 淬火腐蚀之地覆盖
   lighting: 'standard' | 'enhanced' | 'battle' | 'rpg'; // 光照效果
-  /** 直射光亮度等级 1–5，对应 ×0.7 / ×0.9 / ×1.1 / ×1.3 / ×1.5（不含 Amb） */
+  /** 3.x：以3档为基准，主光每档15%，环境光每档0.015；2.04保留旧档位规则。 */
   lightingBrightness: 1 | 2 | 3 | 4 | 5;
+  rotatingLighting: boolean; // 实验性：仅地表单位光照旋转，默认关闭
+  atmosphericLight?: boolean;
+  lightingAngle?: number; // 单位水平方位角；未设置时保留原模型方向
   half: boolean;         // 半透明效果
   ui: 'classic' | 'quenching' | 'carnival'; // UI风格
   cam: boolean;          // 自定义相机
@@ -49,8 +55,7 @@ export interface ModSettings {
   terrain: 'original' | 'latest' | 'retro' | 'v16' | 'v18' | 'decisive'; // 地形
   tree: 'original' | 'tall' | 'short' | 'retro' | 'v16' | 'v18'; // 树木
   modelEnhance: boolean; // 模型加强
-  useLegacyWar3Shaders: boolean; // 由魔兽版本自动决定（<2.0.3 → shaders2.02），不再手动切换
-  useIntelAmdShaderFix: boolean; // Intel/AMD bloomextract 修复
+  improveReadability: boolean; // 3.0.1 HD team-color effects and reversible unit scaling
   visionModPath: string; // VisionMod目录
   modEnabled: boolean;   // MOD总开关
   classicMode: boolean;  // 经典版锁定
@@ -78,12 +83,16 @@ export const reaxel_War3Settings = reaxel(() => {
       objectShader: true,
       postProcessing: true,
       postProcessingGlow: true,
+      hdr: true,
+      postProcessingOutline: false,
       volumetricFog: true,
       water: 'off' as const,
       foliage: true,
       blight: true,
       lighting: 'standard' as const,
       lightingBrightness: 3 as const,
+      rotatingLighting: false,
+      atmosphericLight: false,
       half: false,
       ui: 'classic' as const,
       cam: false,
@@ -91,8 +100,7 @@ export const reaxel_War3Settings = reaxel(() => {
       terrain: 'latest' as const,
       tree: 'tall' as const,
       modelEnhance: false,
-      useLegacyWar3Shaders: false,
-      useIntelAmdShaderFix: false,
+      improveReadability: false,
       visionModPath: '',
       modEnabled: true
     } as ModSettings,
@@ -244,6 +252,7 @@ export const reaxel_War3Settings = reaxel(() => {
         if (stored && typeof stored === 'object') {
           savedVisualSettings = stored;
           loadedSettings = { ...loadedSettings, ...stored };
+          loadedSettings.versionSelection = normalizeVersionSelection(loadedSettings.versionSelection);
           loadedSettings.graphicsSelection = normalizeGraphicsSelection(loadedSettings.graphicsSelection);
 
           // 迁移: 如果是旧的 'enhanced' (淬火) 模式，自动切换回 'standard' (普通)
@@ -267,6 +276,10 @@ export const reaxel_War3Settings = reaxel(() => {
       console.log(`[useWar3Settings] Detected terrain: ${detectedTerrain}`);
       loadedSettings.terrain = detectedTerrain;
       loadedSettings.blight = loadedSettings.blight !== false;
+      loadedSettings.rotatingLighting = loadedSettings.rotatingLighting === true;
+      loadedSettings.atmosphericLight = loadedSettings.atmosphericLight === true;
+      if (typeof loadedSettings.lightingAngle !== 'number' || !Number.isFinite(loadedSettings.lightingAngle) ||
+          loadedSettings.lightingAngle < 0 || loadedSettings.lightingAngle > 360) delete loadedSettings.lightingAngle;
 
       // 检测树木模式
       const detectedTree = await detectTreeMode(war3Path);
@@ -295,6 +308,12 @@ export const reaxel_War3Settings = reaxel(() => {
       if (loadedSettings.postProcessingGlow === undefined) {
         loadedSettings.postProcessingGlow = loadedSettings.postProcessing !== false;
       }
+      if (savedVisualSettings && typeof savedVisualSettings.hdr !== 'boolean') {
+        loadedSettings.hdr = savedVisualSettings.postProcessing !== false;
+      } else if (typeof loadedSettings.hdr !== 'boolean') loadedSettings.hdr = loadedSettings.postProcessing !== false;
+      delete (loadedSettings as ModSettings & { useIntelAmdShaderFix?: boolean }).useIntelAmdShaderFix;
+      if (loadedSettings.improveReadability === undefined) loadedSettings.improveReadability = false;
+      if (loadedSettings.postProcessingOutline === undefined) loadedSettings.postProcessingOutline = false;
 
       // 检测后处理阴影和辉光
       const detectedPostProcessing = await detectPostProcessingMode(war3Path);
@@ -314,15 +333,6 @@ export const reaxel_War3Settings = reaxel(() => {
       if (window.electronAPI?.detectWar3Version) {
         const versionInfo = await window.electronAPI.detectWar3Version(war3Path);
         console.log('[useWar3Settings] Detected War3 version:', versionInfo);
-        loadedSettings.useLegacyWar3Shaders = !!versionInfo?.useLegacyShaders;
-        if (branchEnabled && versionInfo?.source !== 'unknown' && loadedSettings.versionSelection === 'auto' &&
-            loadedSettings.graphicsSelection !== 'sd' && !loadedSettings.classicMode) {
-          try {
-            await window.electronAPI.syncVersionedShaders?.(war3Path);
-          } catch (error) {
-            console.error('[useWar3Settings] Could not apply detected shader version:', error);
-          }
-        }
       }
 
       // SD and the MOD switch park visual overrides. Keep saved preferences
@@ -330,14 +340,13 @@ export const reaxel_War3Settings = reaxel(() => {
       if (!branchEnabled || loadedSettings.graphicsSelection === 'sd' || loadedSettings.classicMode) {
         if (savedVisualSettings) {
           for (const key of ['terrain', 'tree', 'water', 'foliage', 'objectShader',
-            'postProcessing', 'postProcessingGlow', 'glow'] as const) {
+            'postProcessing', 'postProcessingGlow', 'hdr', 'glow'] as const) {
             if (savedVisualSettings[key] !== undefined) (loadedSettings as any)[key] = savedVisualSettings[key];
           }
         }
       }
 
       console.log('[useWar3Settings] Final merged settings to be set in store:', loadedSettings);
-      if (branchEnabled) await window.electronAPI?.syncUISettings?.(war3Path);
       loadedSettings = await readResolvedProfile(loadedSettings);
       setState({ modSettings: loadedSettings });
 
@@ -484,6 +493,29 @@ export const reaxel_War3Settings = reaxel(() => {
     onProgress?: (step: string, percent: number) => void,
   ) => {
     console.log('[useWar3Settings] saveModSettings called:', { war3Path, newSettings });
+    const reportProgress = createSettingsProgressReporter(onProgress);
+    // Keep the request pending until its worker really settles. A renderer-only
+    // timeout cannot stop filesystem writes and must not roll back live work.
+    const awaitResourceUpdate = async (
+      operation: 'terrain' | 'foliage',
+      invoke: (requestId: string) => Promise<boolean>,
+      start: number,
+      span: number,
+    ) => {
+      const requestId = crypto.randomUUID();
+      const listener = (event: Event) => {
+        const detail = (event as CustomEvent<{ operation?: string; requestId?: string; step: string; percent: number }>).detail;
+        if (detail?.operation === operation && detail.requestId === requestId) {
+          reportProgress(detail.step, start + detail.percent * span / 100);
+        }
+      };
+      window.addEventListener('mod-profile-progress', listener);
+      try {
+        if (await invoke(requestId) === false) throw new Error(`${operation === 'terrain' ? '地形' : '植被'}设置未完成`);
+      } finally { window.removeEventListener('mod-profile-progress', listener); }
+    };
+    let foliageAppliedByTerrain = false;
+    let removeLightingProgress: (() => void) | undefined;
     let previousSettings = { ...store.modSettings };
     setState({ isLoading: true });
 
@@ -509,9 +541,46 @@ export const reaxel_War3Settings = reaxel(() => {
       const branchEnabled = branchStates?.[selectedChannel === 'ptr' ? 'ptr' : 'retail']?.enabled
         ?? newSettings.modEnabled ?? store.modSettings.modEnabled;
 
+      if (newSettings.atmosphericLight !== undefined && Object.keys(newSettings).length === 1) {
+        if(typeof newSettings.atmosphericLight!=='boolean')throw new Error('Invalid atmospheric light setting');
+        const next={...previousSettings,atmosphericLight:newSettings.atmosphericLight};
+        if(branchEnabled){
+          if(!window.electronAPI?.updateAtmosphericLight)throw new Error('大气光设置不可用');
+          if(await window.electronAPI.updateAtmosphericLight(war3Path,next.atmosphericLight)===false)throw new Error('大气光设置未完成');
+        }else await window.electronAPI.setConfig('modSettings',next);
+        setState({modSettings:next});reportProgress('finish',100);return;
+      }
+      if (newSettings.rotatingLighting !== undefined && Object.keys(newSettings).length === 1) {
+        if (typeof newSettings.rotatingLighting !== 'boolean') throw new Error('Invalid rotating lighting setting');
+        const next = { ...previousSettings, rotatingLighting: newSettings.rotatingLighting };
+        if (branchEnabled) {
+          if (!window.electronAPI?.updateRotatingLighting) throw new Error('旋转光照设置不可用');
+          const applied = await window.electronAPI.updateRotatingLighting(war3Path, next.rotatingLighting);
+          if (applied === false) throw new Error('旋转光照设置未完成');
+        } else {
+          await window.electronAPI.setConfig('modSettings', next);
+        }
+        setState({ modSettings: next });
+        reportProgress('finish', 100);
+        return;
+      }
+
+      if (newSettings.lightingAngle !== undefined && Object.keys(newSettings).length === 1) {
+        const angle=newSettings.lightingAngle;
+        if (!Number.isFinite(angle) || angle<0 || angle>360) throw new Error('Invalid unit lighting angle');
+        const next={...previousSettings,lightingAngle:angle};
+        if(branchEnabled) {
+          if(!window.electronAPI?.updateLightingAngle)throw new Error('光照角度设置不可用');
+          if(await window.electronAPI.updateLightingAngle(war3Path,angle)===false)throw new Error('光照角度设置未完成');
+        } else await window.electronAPI.setConfig('modSettings',next);
+        setState({modSettings:next});
+        reportProgress('finish',100);
+        return;
+      }
+
       // Apply the independent Blight toggle before persisting its preference.
       // A custom-file conflict leaves both the previous setting and files intact.
-      if (newSettings.blight !== undefined) {
+      if (newSettings.blight !== undefined && Object.keys(newSettings).length === 1) {
         const next = { ...previousSettings, blight: newSettings.blight };
         if (branchEnabled) {
           if (!window.electronAPI?.updateBlightSettings) throw new Error('腐蚀之地设置不可用');
@@ -522,7 +591,7 @@ export const reaxel_War3Settings = reaxel(() => {
         return;
       }
 
-      onProgress?.('save', 8);
+      reportProgress('save', 8);
       const previousLighting = store.modSettings.lighting;
       const previousLightingBrightness = store.modSettings.lightingBrightness ?? 3;
       const previousTerrain =
@@ -554,35 +623,36 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // The selected graphics profile still controls the game's hd flag.
       if (newSettings.graphicsSelection === 'sd' || newSettings.graphicsSelection === 'hd' || newSettings.graphicsSelection === 'de') {
-        onProgress?.('write-graphics', 18);
+        reportProgress('write-graphics', 18);
         await saveSettings(war3Path, { hd: hdValueForGraphics(newSettings.graphicsSelection) });
       }
 
       // Store preferences while off, without recreating UI, lighting, terrain or other overrides.
       if (!branchEnabled) {
-        onProgress?.('finish', 100);
+        reportProgress('finish', 100);
         return;
       }
+
+      if (newSettings.blight !== undefined) await window.electronAPI.updateBlightSettings(war3Path, updatedSettings.blight);
 
       // Version/graphics profile changes require a complete resource transition.
       const profileChanged = newSettings.versionSelection !== undefined || newSettings.graphicsSelection !== undefined;
       if (profileChanged) {
         if (!window.electronAPI?.syncAssets) throw new Error('Resource sync is unavailable');
-        onProgress?.('sync-start', 24);
+        reportProgress('sync-start', 24);
         await window.electronAPI.syncAssets(war3Path);
         updatedSettings = await readResolvedProfile(updatedSettings);
         setState({ modSettings: updatedSettings });
         // Tree skins are applied by syncAssets using the resolved version's table.
         // Re-apply terrain/water after graphics layout (DE doodads/water, HD restore).
         if (branchEnabled && updatedSettings.graphicsSelection !== 'sd' && window.electronAPI?.updateTerrainSettings) {
-          onProgress?.('terrain', 88);
+          reportProgress('terrain', 88);
           await window.electronAPI.updateTerrainSettings(war3Path, updatedSettings.terrain, updatedSettings.water, previousTerrain);
         }
         if (branchEnabled && updatedSettings.graphicsSelection !== 'sd' && updatedSettings.graphicsSelection !== 'de' && window.electronAPI?.updateWaterSettings) {
-          onProgress?.('water', 97);
+          reportProgress('water', 97);
           await window.electronAPI.updateWaterSettings(war3Path, updatedSettings.water);
         }
-        onProgress?.('finish', 100);
       }
 
       // 优化触发逻辑：
@@ -591,12 +661,23 @@ export const reaxel_War3Settings = reaxel(() => {
       // 3. 只有在 MOD 处于开启状态时，才去修改 _retail_ 下的 MDL 文件
       if (
         (newSettings.lighting !== undefined || newSettings.lightingBrightness !== undefined) &&
+        !profileChanged &&
         newSettings.modEnabled === undefined &&
         branchEnabled
       ) {
         console.log('[useWar3Settings] Lighting / brightness changed, updating MDL files...');
         // 确保调用正确的 API 名称
         if (window.electronAPI?.updateMdlLighting) {
+          const requestId = crypto.randomUUID();
+          const listener = (event: Event) => {
+            const detail = (event as CustomEvent<{ operation?: string; requestId?: string; step: string; percent: number }>).detail;
+            if (detail?.operation === 'lighting' && detail.requestId === requestId) {
+              reportProgress(detail.step, 12 + detail.percent * 0.53);
+            }
+          };
+          window.addEventListener('mod-profile-progress', listener);
+          removeLightingProgress = () => window.removeEventListener('mod-profile-progress', listener);
+          reportProgress('sync-start', 12);
           // 人为延迟以显示Loading效果，提升用户体验
           // await new Promise(resolve => setTimeout(resolve, 800)); // 已移除
 
@@ -608,7 +689,8 @@ export const reaxel_War3Settings = reaxel(() => {
             updatedSettings.lighting,
             updatedSettings.lightingBrightness,
             previousLighting,
-            previousLightingBrightness
+            previousLightingBrightness,
+            requestId
           );
 
           const result = await new Promise<boolean>((resolve, reject) => {
@@ -625,6 +707,8 @@ export const reaxel_War3Settings = reaxel(() => {
             );
           });
           console.log('[useWar3Settings] updateMdlLighting result:', result);
+          removeLightingProgress();
+          removeLightingProgress = undefined;
         } else {
           console.warn('[useWar3Settings] window.electronAPI.updateMdlLighting is undefined');
         }
@@ -634,6 +718,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了 UI 设置，执行 UI 资源替换和 unitskinMode 切换
       if (newSettings.ui !== undefined) {
+        reportProgress('layout', 66);
         console.log('[useWar3Settings] UI setting changed, triggering updateUISettings and switchUnitSkinMode...');
         if (window.electronAPI?.updateUISettings) {
           console.log('[useWar3Settings] Invoking updateUISettings IPC...');
@@ -653,22 +738,15 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了地形设置，执行地形资源切换 (terrainart <-> QMoff)
       if (newSettings.terrain !== undefined && !profileChanged) {
+        reportProgress('terrain', 68);
         console.log('[useWar3Settings] Terrain setting changed, triggering updateTerrainSettings...');
         if (window.electronAPI?.updateTerrainSettings) {
           console.log('[useWar3Settings] Invoking updateTerrainSettings IPC...');
 
-          // 增加超时保护
-          const updateTerrainPromise = window.electronAPI.updateTerrainSettings(
-            war3Path,
-            updatedSettings.terrain,
-            updatedSettings.water,
-            previousTerrain
-          );
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Update terrain settings timeout')), 45000)
-          );
-
-          await Promise.race([updateTerrainPromise, timeoutPromise]);
+          await awaitResourceUpdate('terrain', requestId => window.electronAPI.updateTerrainSettings(
+            war3Path, updatedSettings.terrain, updatedSettings.water, previousTerrain, requestId,
+          ), 68, 7);
+          foliageAppliedByTerrain = newSettings.foliage === true;
           // 切换完成后，重新检测实际文件状态以更新高亮
           const detectedTerrainAfter = await detectTerrainMode(war3Path);
           const detectedFoliageAfter =
@@ -690,6 +768,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了树木设置，执行树木设置更新
       if (newSettings.tree !== undefined) {
+        reportProgress('trees', 76);
         console.log(`\n>>> [TREE-FRONTEND] Setting change requested: ${newSettings.tree}`);
         if (window.electronAPI?.updateTreeSettings) {
           console.log('[useWar3Settings] Calling updateTreeSettings API...');
@@ -714,6 +793,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了水面设置，执行水面效果更新
       if (newSettings.water !== undefined) {
+        reportProgress('water', 80);
         console.log(`\n>>> [WATER-FRONTEND] Setting change requested: ${newSettings.water}`);
         if (window.electronAPI?.updateWaterSettings) {
           console.log('[useWar3Settings] Calling updateWaterSettings API...');
@@ -729,26 +809,21 @@ export const reaxel_War3Settings = reaxel(() => {
       }
 
       // 如果修改了植被设置，执行植被效果更新
-      if (newSettings.foliage !== undefined) {
+      if (newSettings.foliage !== undefined && !foliageAppliedByTerrain) {
+        reportProgress('environment', 82);
         if (updatedSettings.terrain === 'retro') {
           console.log('[useWar3Settings] Retro terrain: forcing foliage off');
           if (window.electronAPI?.updateFoliageSettings) {
-            await window.electronAPI.updateFoliageSettings(war3Path, false, 'retro');
+            await awaitResourceUpdate('foliage', requestId => window.electronAPI.updateFoliageSettings(war3Path, false, 'retro', requestId), 82, 3);
           }
           setState({ modSettings: { ...store.modSettings, foliage: false } });
         } else {
           console.log(`\n>>> [FOLIAGE-FRONTEND] Setting change requested: ${newSettings.foliage}`);
           if (window.electronAPI?.updateFoliageSettings) {
             console.log('[useWar3Settings] Calling updateFoliageSettings API...');
-            const updateFoliagePromise = window.electronAPI.updateFoliageSettings(
-              war3Path,
-              updatedSettings.foliage,
-              updatedSettings.terrain
-            );
-            const timeoutPromise = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Update foliage settings timeout')), 60000)
-            );
-            await Promise.race([updateFoliagePromise, timeoutPromise]);
+            await awaitResourceUpdate('foliage', requestId => window.electronAPI.updateFoliageSettings(
+              war3Path, updatedSettings.foliage, updatedSettings.terrain, requestId,
+            ), 82, 3);
             const detectedFoliageAfter = await detectFoliageMode(war3Path);
             console.log(`[useWar3Settings] updateFoliageSettings completed. Detected: ${detectedFoliageAfter}`);
             setState({ modSettings: { ...store.modSettings, foliage: detectedFoliageAfter } });
@@ -758,6 +833,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了物体着色器设置，执行更新
       if (newSettings.objectShader !== undefined) {
+        reportProgress('shaders', 86);
         console.log(`\n>>> [SHADER-FRONTEND] Object Shader change requested: ${newSettings.objectShader}`);
         if (window.electronAPI?.updateObjectShader) {
           const applied = await window.electronAPI.updateObjectShader(war3Path, updatedSettings.objectShader);
@@ -769,6 +845,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了后处理阴影设置，执行更新
       if (newSettings.postProcessing !== undefined) {
+        reportProgress('shaders', 89);
         console.log(`\n>>> [SHADER-FRONTEND] Post-processing shadow change requested: ${newSettings.postProcessing}`);
         if (window.electronAPI?.updatePostProcessing) {
           const applied = await window.electronAPI.updatePostProcessing(war3Path, updatedSettings.postProcessing);
@@ -778,7 +855,20 @@ export const reaxel_War3Settings = reaxel(() => {
         } else throw new Error('后处理阴影设置不可用');
       }
 
+      if (newSettings.postProcessingOutline !== undefined) {
+        reportProgress('shaders', 91);
+        const applied = await window.electronAPI.updatePostProcessingOutline(war3Path, updatedSettings.postProcessingOutline);
+        if (applied === false) throw new Error('描边设置未完成');
+      }
+
+      if (newSettings.hdr !== undefined) {
+        reportProgress('shaders', 92);
+        const applied = await window.electronAPI.updateHdr(war3Path, updatedSettings.hdr);
+        if (applied === false) throw new Error('HDR 色调映射设置未完成');
+      }
+
       if (newSettings.postProcessingGlow !== undefined) {
+        reportProgress('shaders', 93);
         console.log(`\n>>> [SHADER-FRONTEND] Post-processing glow change requested: ${newSettings.postProcessingGlow}`);
         if (window.electronAPI?.updatePostProcessingGlow) {
           const applied = await window.electronAPI.updatePostProcessingGlow(war3Path, updatedSettings.postProcessingGlow);
@@ -788,36 +878,15 @@ export const reaxel_War3Settings = reaxel(() => {
         } else throw new Error('后处理辉光设置不可用');
       }
 
-      // 旧版着色器开关已废弃：始终按魔兽版本自动同步
-      if (newSettings.useLegacyWar3Shaders !== undefined) {
-        console.log('\n>>> [SHADER-FRONTEND] Legacy shader toggle ignored; syncing from War3 version');
-        if (window.electronAPI?.syncVersionedShaders) {
-          const result = await window.electronAPI.syncVersionedShaders(war3Path);
-          if (result?.version) {
-            const synced = {
-              ...updatedSettings,
-              useLegacyWar3Shaders: !!result.version.useLegacyShaders,
-            };
-            setState({ modSettings: synced });
-            if (window.electronAPI?.setConfig) {
-              await window.electronAPI.setConfig('modSettings', synced);
-            }
-          }
-        } else if (window.electronAPI?.updateLegacyWar3Shader) {
-          await window.electronAPI.updateLegacyWar3Shader(war3Path);
-        }
-      }
-
-      // 如果修改了 Intel/AMD 修复设置，替换 bloomextract.bls
-      if (newSettings.useIntelAmdShaderFix !== undefined) {
-        console.log(`\n>>> [SHADER-FRONTEND] Intel/AMD shader fix change requested: ${newSettings.useIntelAmdShaderFix}`);
-        if (window.electronAPI?.updateIntelAmdShaderFix) {
-          await window.electronAPI.updateIntelAmdShaderFix(war3Path, updatedSettings.useIntelAmdShaderFix);
-        }
+      if (newSettings.improveReadability !== undefined) {
+        reportProgress('shaders', 95);
+        const applied = await window.electronAPI.updateReadability(war3Path, updatedSettings.improveReadability);
+        if (applied === false) throw new Error('Readability settings were not applied');
       }
 
       // 如果修改了光晕设置
       if (newSettings.glow !== undefined) {
+        reportProgress('layout', 97);
         console.log(`\n>>> [GLOW-FRONTEND] Glow change requested: ${newSettings.glow}`);
         if (window.electronAPI?.updateGlowSettings) {
           await window.electronAPI.updateGlowSettings(war3Path, updatedSettings.glow);
@@ -828,13 +897,14 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了半身头像设置
       if (newSettings.half !== undefined) {
+        reportProgress('layout', 98);
         console.log(`\n>>> [VISION-FRONTEND] Half Portrait change requested: ${newSettings.half}`);
         if (window.electronAPI?.updateHalfPortrait) {
           if (!updatedSettings.visionModPath) {
             console.warn('[useWar3Settings] VisionMod path not set, reverting half portrait setting');
             setState({ modSettings: { ...updatedSettings, half: !newSettings.half } });
             // 不抛出错误防止阻断其他逻辑，但显示错误消息
-            // throw new Error('请先设置 VisionMod 路径'); 
+            // throw new Error('请先设置 VisionMod 路径');
             // 实际上这里的 throw 会被 catch 捕获并显示 toast，所以 throw 是合适的
             throw new Error('请先设置 VisionMod 路径 / Please set VisionMod path first');
           }
@@ -844,6 +914,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       // 如果修改了模型增强设置
       if (newSettings.modelEnhance !== undefined) {
+        reportProgress('layout', 99);
         console.log(`\n>>> [VISION-FRONTEND] Model Enhance change requested: ${newSettings.modelEnhance}`);
         if (window.electronAPI?.updateModelEnhance) {
           if (!updatedSettings.visionModPath) {
@@ -854,6 +925,7 @@ export const reaxel_War3Settings = reaxel(() => {
           await window.electronAPI.updateModelEnhance(war3Path, updatedSettings.visionModPath, updatedSettings.modelEnhance);
         }
       }
+      reportProgress('finish', 100);
     } catch (error) {
       console.error('Failed to save mod settings:', error);
       if (window.electronAPI?.setConfig) {
@@ -864,6 +936,7 @@ export const reaxel_War3Settings = reaxel(() => {
       setState({ modSettings: previousSettings });
       throw error;
     } finally {
+      removeLightingProgress?.();
       // 确保在任何情况下都关闭 loading
       console.log('[useWar3Settings] saveModSettings finished, setting isLoading to false');
       setState({ isLoading: false });
@@ -876,20 +949,22 @@ export const reaxel_War3Settings = reaxel(() => {
 objectShader=${settings.objectShader ? '1' : '0'}
 postProcessing=${settings.postProcessing ? '1' : '0'}
 postProcessingGlow=${settings.postProcessingGlow ? '1' : '0'}
+hdr=${settings.hdr ? '1' : '0'}
+postProcessingOutline=${settings.postProcessingOutline ? '1' : '0'}
 volumetricFog=${settings.volumetricFog ? '1' : '0'}
 water=${settings.water === 'realistic' ? '1' : settings.water === 'transparent' ? '2' : '0'}
 foliage=${settings.foliage ? '1' : '0'}
 blight=${settings.blight ? '1' : '0'}
 lighting=${settings.lighting === 'enhanced' ? '1' : settings.lighting === 'battle' ? '2' : settings.lighting === 'rpg' ? '3' : '0'}
 lightingBrightness=${settings.lightingBrightness ?? 3}
+lightingAngle=${settings.lightingAngle ?? ''}
 half=${settings.half ? '1' : '0'}
 ui=${settings.ui}
 cam=${settings.cam ? '1' : '0'}
 glow=${settings.glow ? '1' : '0'}
 terrain=${settings.terrain}
 tree=${settings.tree}
-useLegacyWar3Shaders=${settings.useLegacyWar3Shaders ? '1' : '0'}
-useIntelAmdShaderFix=${settings.useIntelAmdShaderFix ? '1' : '0'}
+improveReadability=${settings.improveReadability ? '1' : '0'}
     modelEnhance=${settings.modelEnhance ? '1' : '0'}
     visionModPath=${settings.visionModPath}
     modEnabled=${settings.modEnabled ? '1' : '0'}

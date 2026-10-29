@@ -3,6 +3,7 @@ import path from 'path';
 import { registerAllAPIs } from './api';
 import { configManager } from './services/config-manager';
 import { assertNoInterruptedLegacyChannelSwitch } from './services/game-channel-switch';
+import { LOCAL_APP_TITLE } from '../shared/local-release';
 
 // =====================================================================
 // 【修复】搜狗输入法/中文输入法兼容性 & 单实例锁（必须在 app.whenReady 之前执行）
@@ -35,12 +36,13 @@ let tray: Tray | null = null;
 // 开发环境检测
 const isDev = process.env.NODE_ENV === 'development';
 
-console.log(`\n[Main] Quenching Client Starting... (v1.0.1-debug)`);
+console.log(`\n[Main] ${LOCAL_APP_TITLE} Starting...`);
 console.log(`[Main] NODE_ENV: ${process.env.NODE_ENV}`);
 
 function createWindow(): void {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
+    title: LOCAL_APP_TITLE,
     width: 960,
     height: 640,
     minWidth: 800,

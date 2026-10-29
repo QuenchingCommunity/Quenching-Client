@@ -1,0 +1,55 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "transport": "quic-copies-v2",
+  "tlsVerified": true,
+  "serverSelfAddress": true,
+  "publicQuicVerified": false,
+  "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "tickMs": 30,
+  "gameId": "057ce9a6-94f6-4fc7-aed3-2ec540d31c35",
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true,
+  "transportEvents": [
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "stats": {
+        "sentFrames": 22,
+        "duplicateCopies": 142,
+        "fastCopiesWon": 10
+      }
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "closed"
+    }
+  ]
+}

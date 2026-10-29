@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { IS_TEST_RELEASE } from '../shared/local-release';
 
 // 暴露安全的API给渲染进程
 const electronAPI: ElectronAPI = {
@@ -17,8 +18,15 @@ const electronAPI: ElectronAPI = {
   getCurrentDirectory: () => ipcRenderer.invoke('file:getCurrentDirectory'),
 
   // 游戏启动
+  ...(IS_TEST_RELEASE ? {launchOfflineStarterMap: () => ipcRenderer.invoke('game:launch-offline-starter')} : {}),
   launchGame: (executablePath?: string) => ipcRenderer.invoke('game:launch', executablePath),
   ensureLocalFiles: () => ipcRenderer.invoke('game:ensure-local-files'),
+  startBundledResourcePreparation: () => ipcRenderer.invoke('resources:startup-ready'),
+  onBundledResourceProgress: callback => {
+    const listener=(_event:unknown,status:BundledResourceStartupStatus)=>callback(status);
+    ipcRenderer.on('resources:startup-progress',listener);
+    return ()=>ipcRenderer.removeListener('resources:startup-progress',listener);
+  },
   onStartupRenderingResult: callback => {
     const listener = (_event: unknown, result: StartupRenderingResult) => callback(result);
     ipcRenderer.on('mod:startup-rendering-result', listener);
@@ -38,7 +46,8 @@ const electronAPI: ElectronAPI = {
     lightingMode: string,
     lightingBrightness?: number,
     previousLightingMode?: string,
-    previousLightingBrightness?: number
+    previousLightingBrightness?: number,
+    requestId?: string,
   ) =>
     ipcRenderer.invoke(
       'mdl:update-lighting',
@@ -46,23 +55,29 @@ const electronAPI: ElectronAPI = {
       lightingMode,
       lightingBrightness,
       previousLightingMode,
-      previousLightingBrightness
+      previousLightingBrightness,
+      requestId
     ),
   updateUISettings: (war3Path: string, uiMode: string) => ipcRenderer.invoke('ui:update-settings', war3Path, uiMode),
+  updateAtmosphericLight: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('mdl:update-atmospheric-light', war3Path, enabled),
+  updateRotatingLighting: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('mdl:update-rotating-lighting', war3Path, enabled),
+  updateLightingAngle: (war3Path: string, angle: number) => ipcRenderer.invoke('mdl:update-lighting-angle', war3Path, angle),
   syncUISettings: (war3Path: string) => ipcRenderer.invoke('ui:sync-settings', war3Path),
-  updateTerrainSettings: (war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string) => ipcRenderer.invoke('terrain:update-settings', war3Path, terrainMode, waterMode, previousTerrainMode),
+  updateTerrainSettings: (war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string, requestId?: string) => ipcRenderer.invoke('terrain:update-settings', war3Path, terrainMode, waterMode, previousTerrainMode, requestId),
   updateTreeSettings: (war3Path: string, treeMode: string) => ipcRenderer.invoke('tree:update-settings', war3Path, treeMode),
   updateWaterSettings: (war3Path: string, waterMode: string) => ipcRenderer.invoke('water:update-settings', war3Path, waterMode),
-  updateFoliageSettings: (war3Path: string, enabled: boolean, terrainMode?: string) => ipcRenderer.invoke('foliage:update-settings', war3Path, enabled, terrainMode),
+  updateFoliageSettings: (war3Path: string, enabled: boolean, terrainMode?: string, requestId?: string) => ipcRenderer.invoke('foliage:update-settings', war3Path, enabled, terrainMode, requestId),
   updateBlightSettings: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('blight:update-settings', war3Path, enabled),
   updateObjectShader: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-object-shader', war3Path, enabled),
   updatePostProcessing: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing', war3Path, enabled),
   updatePostProcessingGlow: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing-glow', war3Path, enabled),
+  updateHdr: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-hdr', war3Path, enabled),
+  updatePostProcessingOutline: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing-outline', war3Path, enabled),
   /** @deprecated Manual toggle removed; always syncs shaders from detected War3 version. */
   updateLegacyWar3Shader: (war3Path: string, enabled?: boolean) => ipcRenderer.invoke('shader:update-legacy-war3', war3Path, enabled),
   syncVersionedShaders: (war3Path?: string) => ipcRenderer.invoke('shader:sync-versioned', war3Path),
   detectWar3Version: (war3Path?: string) => ipcRenderer.invoke('war3:detect-version', war3Path),
-  updateIntelAmdShaderFix: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-intel-amd', war3Path, enabled),
+  updateReadability: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-readability', war3Path, enabled),
   updateGlowSettings: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('glow:update-settings', war3Path, enabled),
   getAntiHarmonyStatus: (war3Path?: string) => ipcRenderer.invoke('anti-harmony:get-status', war3Path),
   setAntiHarmonyEnabled: (war3Path: string | undefined, enabled: boolean) =>
@@ -118,7 +133,7 @@ const electronAPI: ElectronAPI = {
 
   // 文件扫描和解压
   readDirectory: (dirPath: string) => ipcRenderer.invoke('file:readDir', dirPath),
-  // extractArchive 已从 ElectronAPI 类型中移除，使用 extractZip 代替
+  extractArchive: (archivePath: string, targetPath: string) => ipcRenderer.invoke('file:extractArchive', archivePath, targetPath),
   copyFiles: (sourcePattern: string, targetDir: string) => ipcRenderer.invoke('file:copyFiles', sourcePattern, targetDir),
   extractZip: (zipPath: string, extractPath: string) => ipcRenderer.invoke('file:extractZip', zipPath, extractPath),
   createZip: (sourceDir: string, outputPath: string) => ipcRenderer.invoke('file:createZip', sourceDir, outputPath),

@@ -298,6 +298,15 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
               { field: 'unitSound', value: 'HeroArchMage' },
               { field: 'modelScale:hd', value: '1.05' }
             ]
+          },
+          {
+            id: 'h1_5',
+            name: '海之女儿吉安娜',
+            config: [
+              { field: 'file:hd', value: 'Units\\Human\\JainaSea\\JainaSea' },
+              { field: 'unitSound', value: 'Jaina' },
+              { field: 'modelScale:hd', value: '1.15' }
+            ]
           }
         ]
       },
@@ -683,6 +692,15 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
               { field: 'unitSound', value: 'HeroFarSeer' },
               { field: 'modelScale:hd', value: '1.2' }
             ]
+          },
+          {
+            id: 'o6_5',
+            name: '部落勇士萨尔',
+            config: [
+              { field: 'file:hd', value: 'Units\\Orc\\ThrallChampion\\ThrallChampion' },
+              { field: 'unitSound', value: 'Thrall' },
+              { field: 'modelScale:hd', value: '1.02' }
+            ]
           }
         ]
       },
@@ -873,6 +891,24 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
               { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNDeathknightMounted.dds' },
               { field: 'unitSound', value: 'HeroDeathKnight' },
               { field: 'modelScale:hd', value: '1.2' }
+            ]
+          },
+          {
+            id: 'u9_4',
+            name: '堕落之王阿尔萨斯',
+            config: [
+              { field: 'file:hd', value: 'Units\\Undead\\FallenKingArthas\\FallenKingArthas' },
+              { field: 'unitSound', value: 'EvilArthas' },
+              { field: 'modelScale:hd', value: '1.15' }
+            ]
+          },
+          {
+            id: 'u9_5',
+            name: '女死亡骑士',
+            config: [
+              { field: 'file:hd', value: 'Units\\Undead\\HeroFemaleDeathKnight\\HeroFemaleDeathKnight' },
+              { field: 'unitSound', value: 'HeroDeathKnight' },
+              { field: 'modelScale:hd', value: '1.15' }
             ]
           }
         ]
@@ -1151,6 +1187,15 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
               { field: 'unitSound', value: 'Furion' },
               { field: 'modelScale:hd', value: '1.06' }
             ]
+          },
+          {
+            id: 'n14_4',
+            name: '翡翠梦魇塞纳留斯',
+            config: [
+              { field: 'file:hd', value: 'Units\\NightElf\\CenariusNightmare\\CenariusNightmare' },
+              { field: 'unitSound', value: 'HeroKeeperOfTheGrove' },
+              { field: 'modelScale:hd', value: '0.9' }
+            ]
           }
         ]
       },
@@ -1180,6 +1225,15 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
               { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNEvilIllidan.blp' },
               { field: 'unitSound', value: 'EvilIllidan' },
               { field: 'modelScale:hd', value: '1.12' }
+            ]
+          },
+          {
+            id: 'n15_4',
+            name: '女恶魔猎手',
+            config: [
+              { field: 'file:hd', value: 'Units\\NightElf\\HeroFemaleDemonHunter\\HeroFemaleDemonHunter' },
+              { field: 'unitSound', value: 'HeroDemonHunter' },
+              { field: 'modelScale:hd', value: '1.05' }
             ]
           }
         ]

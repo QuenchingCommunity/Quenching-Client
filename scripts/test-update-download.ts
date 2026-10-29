@@ -60,6 +60,14 @@ try {
   assert.equal(UPDATE_DOWNLOAD_POLICY.graceMs + UPDATE_DOWNLOAD_POLICY.windowMs, 15_000, '15 seconds total, not an extra warmup');
   assert.deepEqual(updateDownloadSources([gitlawb, github, parts, r2], githubMirrors), [gitlawb, github, ...mirrors, parts, r2]);
   assert.deepEqual(updateDownloadSources([github]), [github], 'no policy means no hardcoded mirror');
+  for (const owner of ['UIZorrot', 'QuenchingCommunity']) {
+    for (const product of ['Client', 'Assets']) {
+      const url = `https://github.com/${owner}/Quenching-${product}/releases/download/v3.7.0/test.bin`;
+      assert.deepEqual(updateDownloadSources([url], githubMirrors), [url, ...githubMirrors.map(base => base + url)]);
+    }
+  }
+  const ugc = 'https://github.com/QuenchingCommunity/Quenching-UGC/releases/download/v1/test.bin';
+  assert.deepEqual(updateDownloadSources([ugc], githubMirrors), [ugc], 'UGC is not an official update repository');
   for (const rejected of [r2, github + '?token=secret', github + '#fragment', github.replace('github.com', 'github.com.evil.test'),
     github.replace('https://', 'https://user:secret@'), github.replace('/releases/download/', '/raw/'),
     github.replace('/UIZorrot/', '/someone-else/'), 'http://github.com/UIZorrot/Quenching-Client/releases/download/3.5/test.bin']) {

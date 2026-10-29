@@ -1,0 +1,233 @@
+{
+  "gameId": "e05ecdeb-d8c4-4594-876a-4f24241be872",
+  "timingTransitions": [
+    {
+      "at": "2026-10-28T18:27:44.412Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 33959,
+      "actionQueueMs": {
+        "count": 24707,
+        "windowSamples": 256,
+        "p50Ms": 16,
+        "p95Ms": 29.6,
+        "p99Ms": 30.2,
+        "maxMs": 5697.8,
+        "lastMs": 19.9
+      },
+      "timerDelayMs": {
+        "count": 34353,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1.1,
+        "p99Ms": 1.4,
+        "maxMs": 4.4,
+        "lastMs": 0.2
+      },
+      "syncWaitTicks": 394,
+      "peers": [
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 1073,
+            "windowSamples": 256,
+            "p50Ms": 42.1,
+            "p95Ms": 45.7,
+            "p99Ms": 49.8,
+            "maxMs": 84.9,
+            "lastMs": 41.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 1056,
+            "windowSamples": 256,
+            "p50Ms": 89.7,
+            "p95Ms": 327.7,
+            "p99Ms": 610.5,
+            "maxMs": 8354,
+            "lastMs": 61.3
+          },
+          "leadFrames": 4,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:30:04.840Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 38580,
+      "actionQueueMs": {
+        "count": 27395,
+        "windowSamples": 256,
+        "p50Ms": 15.2,
+        "p95Ms": 29.5,
+        "p99Ms": 29.8,
+        "maxMs": 5697.8,
+        "lastMs": 10.4
+      },
+      "timerDelayMs": {
+        "count": 38996,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 4.4,
+        "lastMs": 0.2
+      },
+      "syncWaitTicks": 416,
+      "peers": [
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 1213,
+            "windowSamples": 256,
+            "p50Ms": 42.1,
+            "p95Ms": 44.8,
+            "p99Ms": 51,
+            "maxMs": 84.9,
+            "lastMs": 44.5
+          },
+          "leadFrames": 0,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 1193,
+            "windowSamples": 256,
+            "p50Ms": 70,
+            "p95Ms": 304.2,
+            "p99Ms": 438.3,
+            "maxMs": 8354,
+            "lastMs": 59.2
+          },
+          "leadFrames": 67,
+          "pendingPingAgeMs": 2625
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:30:09.867Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 38744,
+      "actionQueueMs": {
+        "count": 27493,
+        "windowSamples": 256,
+        "p50Ms": 15.3,
+        "p95Ms": 29,
+        "p99Ms": 30.2,
+        "maxMs": 5697.8,
+        "lastMs": 16.9
+      },
+      "timerDelayMs": {
+        "count": 39162,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1.1,
+        "p99Ms": 1.4,
+        "maxMs": 4.4,
+        "lastMs": 0.5
+      },
+      "syncWaitTicks": 418,
+      "peers": [
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 1218,
+            "windowSamples": 256,
+            "p50Ms": 42.1,
+            "p95Ms": 44.7,
+            "p99Ms": 51,
+            "maxMs": 84.9,
+            "lastMs": 42.3
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 1199,
+            "windowSamples": 256,
+            "p50Ms": 69.9,
+            "p95Ms": 320,
+            "p99Ms": 473.7,
+            "maxMs": 8354,
+            "lastMs": 115.4
+          },
+          "leadFrames": 4,
+          "pendingPingAgeMs": null
+        }
+      ]
+    }
+  ],
+  "sidecarPid": "809",
+  "samples": [
+    {
+      "at": 1793212662.6340563,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:214 rtt:13.161/5.706 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2308235 bytes_acked:2308236 bytes_received:3023829 segs_out:78740 segs_in:74779 data_segs_out:74333 data_segs_in:55743 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 1273736646bps lastsnd:15 lastrcv:13 lastack:13 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74334 app_limited busy:653819ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                  \nESTAB 0      8          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:217 rtt:16.743/10.542 ato:58 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3023562 bytes_acked:3023554 bytes_received:2299601 segs_out:77222 segs_in:90062 data_segs_out:55720 data_segs_in:74464 bbr:(bw:40297228360bps,mrtt:0.014,pacing_gain:2.88672,cwnd_gain:2.88672) send 1376695694bps lastsnd:13 lastrcv:41 lastack:41 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55720 app_limited busy:736838ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      8          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:216 rtt:15.78/7.184 ato:49 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3023829 bytes_acked:3023821 bytes_received:2308235 segs_out:74778 segs_in:78740 data_segs_out:55743 data_segs_in:74333 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 1892284411bps lastsnd:14 lastrcv:16 lastack:16 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55743 app_limited busy:740196ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848   \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:218 rtt:17.568/5.626 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2299601 bytes_acked:2299602 bytes_received:3023562 segs_out:90062 segs_in:77223 data_segs_out:74464 data_segs_in:55720 bbr:(bw:65483000000bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 2385537341bps lastsnd:42 lastrcv:14 lastack:14 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74465 app_limited busy:395388ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848             \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212663.660567,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:217 rtt:16.834/4.493 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2308759 bytes_acked:2308760 bytes_received:3024111 segs_out:78779 segs_in:74820 data_segs_out:74368 data_segs_in:55778 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 995820839bps lastsnd:44 lastrcv:27 lastack:27 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74369 app_limited busy:654293ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                  \nESTAB 0      8          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:218 rtt:17.441/12.13 ato:51 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3023860 bytes_acked:3023852 bytes_received:2300160 segs_out:77267 segs_in:90107 data_segs_out:55756 data_segs_in:74501 bbr:(bw:40297228360bps,mrtt:0.014,pacing_gain:2.88672,cwnd_gain:2.88672) send 1321599450bps lastsnd:27 lastrcv:40 lastack:40 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55756 app_limited busy:737292ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      8          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:213 rtt:12.696/7.693 ato:52 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3024111 bytes_acked:3024103 bytes_received:2308759 segs_out:74819 segs_in:78779 data_segs_out:55778 data_segs_in:74368 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 2351941399bps lastsnd:28 lastrcv:45 lastack:45 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55778 app_limited busy:740647ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848 \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:217 rtt:16.8/5.129 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2300160 bytes_acked:2300161 bytes_received:3023860 segs_out:90107 segs_in:77268 data_segs_out:74501 data_segs_in:55756 bbr:(bw:65483000000bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 2494590476bps lastsnd:41 lastrcv:28 lastack:28 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74502 app_limited busy:395845ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848              \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212664.6849778,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \nESTAB 0      15         127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:217 rtt:16.42/5.773 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2309298 bytes_acked:2309284 bytes_received:3024393 segs_out:78819 segs_in:74859 data_segs_out:74404 data_segs_in:55813 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 1020928624bps lastsnd:22 lastrcv:23 lastack:23 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74404 app_limited busy:654802ms unacked:1 rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:214 rtt:13.792/8.159 ato:45 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3024142 bytes_acked:3024142 bytes_received:2300699 segs_out:77308 segs_in:90149 data_segs_out:55791 data_segs_in:74537 bbr:(bw:40297228360bps,mrtt:0.014,pacing_gain:2.88672,cwnd_gain:2.88672) send 1671259861bps lastsnd:23 lastrcv:4 lastack:4 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55792 app_limited busy:737746ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592    \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:212 rtt:11.932/4.92 ato:50 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3024393 bytes_acked:3024393 bytes_received:2309298 segs_out:74858 segs_in:78819 data_segs_out:55813 data_segs_in:74404 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 2502535032bps lastsnd:23 lastrcv:22 lastack:22 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55814 app_limited busy:741133ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848    \nESTAB 0      15         127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:219 rtt:18.269/6.236 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2300699 bytes_acked:2300685 bytes_received:3024142 segs_out:90149 segs_in:77309 data_segs_out:74537 data_segs_in:55791 bbr:(bw:65483000000bps,mrtt:0.099,pacing_gain:2.88672,cwnd_gain:2.88672) send 2294001861bps lastsnd:4 lastrcv:23 lastack:23 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74537 app_limited busy:396343ms unacked:1 rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848\n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212665.70779,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          \nESTAB 0      15         127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:218 rtt:17.044/4.827 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2309930 bytes_acked:2309916 bytes_received:3024817 segs_out:78863 segs_in:74902 data_segs_out:74443 data_segs_in:55848 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 983551279bps lastsnd:7 lastrcv:23 lastack:23 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74443 app_limited busy:655249ms unacked:1 rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:211 rtt:10.042/6.63 ato:47 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3024566 bytes_acked:3024566 bytes_received:2301316 segs_out:77350 segs_in:90192 data_segs_out:55826 data_segs_in:74575 bbr:(bw:40297228360bps,mrtt:0.021,pacing_gain:2.88672,cwnd_gain:2.88672) send 2295361083bps lastsnd:23 lastrcv:19 lastack:19 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55827 app_limited busy:738103ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592  \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:215 rtt:14.82/5.012 ato:52 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3024817 bytes_acked:3024817 bytes_received:2309930 segs_out:74901 segs_in:78863 data_segs_out:55848 data_segs_in:74443 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 2014861538bps lastsnd:23 lastrcv:7 lastack:7 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55849 app_limited busy:741597ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848     \nESTAB 0      15         127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:217 rtt:16.366/7.166 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2301316 bytes_acked:2301302 bytes_received:3024566 segs_out:90192 segs_in:77351 data_segs_out:74575 data_segs_in:55826 bbr:(bw:65483000000bps,mrtt:0.05,pacing_gain:2.88672,cwnd_gain:2.88672) send 2560743004bps lastsnd:20 lastrcv:24 lastack:24 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74575 app_limited busy:396872ms unacked:1 rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848\n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212666.7317712,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:212 rtt:11.256/6.089 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2310837 bytes_acked:2310838 bytes_received:3025583 segs_out:78913 segs_in:74953 data_segs_out:74492 data_segs_in:55884 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 1489307747bps lastsnd:18 lastrcv:16 lastack:16 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74493 app_limited busy:655627ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                  \nESTAB 0      42         127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:215 rtt:14.005/12.434 ato:49 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3025316 bytes_acked:3025274 bytes_received:2302191 segs_out:77397 segs_in:90245 data_segs_out:55861 data_segs_in:74623 bbr:(bw:40297228360bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 1645841914bps lastsnd:16 lastrcv:17 lastack:17 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55861 app_limited busy:738526ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      42         127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:215 rtt:14.786/6.962 ato:50 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3025583 bytes_acked:3025541 bytes_received:2310837 segs_out:74952 segs_in:78913 data_segs_out:55884 data_segs_in:74492 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 2019494657bps lastsnd:17 lastrcv:19 lastack:19 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55884 app_limited busy:742106ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848  \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:208 rtt:7.767/6.237 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2302191 bytes_acked:2302192 bytes_received:3025316 segs_out:90245 segs_in:77398 data_segs_out:74623 data_segs_in:55861 bbr:(bw:65483000000bps,mrtt:0.024,pacing_gain:2.88672,cwnd_gain:2.88672) send 5395792455bps lastsnd:18 lastrcv:17 lastack:17 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74624 app_limited busy:397255ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848              \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212667.7557187,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:209 rtt:8.419/6.584 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2311739 bytes_acked:2311740 bytes_received:3026413 segs_out:78963 segs_in:75003 data_segs_out:74541 data_segs_in:55919 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 1991168547bps lastsnd:18 lastrcv:13 lastack:13 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74542 app_limited busy:656038ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                 \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:214 rtt:13.696/7.95 ato:57 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3026146 bytes_acked:3026146 bytes_received:2303131 segs_out:77444 segs_in:90298 data_segs_out:55896 data_segs_in:74670 bbr:(bw:40297228360bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 1682974299bps lastsnd:13 lastrcv:6 lastack:6 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55897 app_limited busy:738957ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592            \nESTAB 0      26         127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:215 rtt:14.172/6.315 ato:44 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3026413 bytes_acked:3026387 bytes_received:2311739 segs_out:75002 segs_in:78963 data_segs_out:55919 data_segs_in:74541 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 2106988992bps lastsnd:13 lastrcv:18 lastack:18 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55919 app_limited busy:742524ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848\nESTAB 0      15         127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:212 rtt:11.973/10.558 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2303131 bytes_acked:2303117 bytes_received:3026146 segs_out:90298 segs_in:77445 data_segs_out:74670 data_segs_in:55896 bbr:(bw:65483000000bps,mrtt:0.024,pacing_gain:2.88672,cwnd_gain:2.88672) send 3500302347bps lastsnd:7 lastrcv:14 lastack:14 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74670 app_limited busy:397643ms unacked:1 rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848 \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212668.7792673,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:213 rtt:12.684/6.647 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2312760 bytes_acked:2312761 bytes_received:3027381 segs_out:79018 segs_in:75054 data_segs_out:74592 data_segs_in:55954 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 1321637338bps lastsnd:26 lastrcv:9 lastack:9 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74593 app_limited busy:656427ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                  \nESTAB 0      39         127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:212 rtt:11.498/6.233 ato:41 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3027130 bytes_acked:3027091 bytes_received:2304172 segs_out:77498 segs_in:90355 data_segs_out:55932 data_segs_in:74722 bbr:(bw:40297228360bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 2004697860bps lastsnd:9 lastrcv:12 lastack:12 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55932 app_limited busy:739358ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      39         127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:217 rtt:16.443/6.955 ato:42 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3027381 bytes_acked:3027342 bytes_received:2312760 segs_out:75053 segs_in:79018 data_segs_out:55954 data_segs_in:74592 bbr:(bw:43655322920bps,mrtt:0.035,pacing_gain:2.88672,cwnd_gain:2.88672) send 1815985404bps lastsnd:9 lastrcv:26 lastack:26 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55954 app_limited busy:742951ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848 \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:213 rtt:12.316/6.781 ato:59 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2304172 bytes_acked:2304173 bytes_received:3027130 segs_out:90355 segs_in:77499 data_segs_out:74722 data_segs_in:55932 bbr:(bw:65483000000bps,mrtt:0.024,pacing_gain:2.88672,cwnd_gain:2.88672) send 3402819097bps lastsnd:13 lastrcv:10 lastack:10 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74723 app_limited busy:398039ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848           \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212669.8024204,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:208 rtt:7.459/4.494 ato:61 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2314191 bytes_acked:2314192 bytes_received:3028976 segs_out:79079 segs_in:75108 data_segs_out:74649 data_segs_in:55989 bbr:(bw:24945903272bps,mrtt:0.042,pacing_gain:2.88672,cwnd_gain:2.88672) send 2247439067bps lastsnd:5 lastrcv:8 lastack:5 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74650 app_limited busy:656833ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440       \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:215 rtt:14.39/5.799 ato:41 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3028725 bytes_acked:3028725 bytes_received:2305547 segs_out:77549 segs_in:90411 data_segs_out:55967 data_segs_in:74776 bbr:(bw:40297228360bps,mrtt:0.015,pacing_gain:2.88672,cwnd_gain:2.88672) send 1601807922bps lastsnd:8 lastrcv:1 lastack:1 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:55968 app_limited busy:739780ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:214 rtt:13.445/7.025 ato:41 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3028976 bytes_acked:3028976 bytes_received:2314191 segs_out:75107 segs_in:79079 data_segs_out:55989 data_segs_in:74649 bbr:(bw:43655322920bps,mrtt:0.066,pacing_gain:2.88672,cwnd_gain:2.88672) send 2220918408bps lastsnd:9 lastrcv:6 lastack:6 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:55990 app_limited busy:743375ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848\nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:210 rtt:9.73/5.33 ato:61 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2305547 bytes_acked:2305548 bytes_received:3028725 segs_out:90411 segs_in:77550 data_segs_out:74776 data_segs_in:55967 bbr:(bw:65483000000bps,mrtt:0.024,pacing_gain:2.88672,cwnd_gain:2.88672) send 4307206578bps lastsnd:2 lastrcv:9 lastack:2 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74777 app_limited busy:398492ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848    \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212670.8307269,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \nESTAB 0      15         127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:212 rtt:11.261/6.314 ato:62 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2315651 bytes_acked:2315637 bytes_received:3030645 segs_out:79141 segs_in:75165 data_segs_out:74710 data_segs_in:56024 bbr:(bw:24945903272bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 1488646479bps lastsnd:1 lastrcv:6 lastack:6 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74710 app_limited busy:657248ms unacked:1 rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440         \nESTAB 0      68         127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:214 rtt:13.379/6.726 ato:46 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3030394 bytes_acked:3030326 bytes_received:2306963 segs_out:77605 segs_in:90472 data_segs_out:56002 data_segs_in:74834 bbr:(bw:40297228360bps,mrtt:0.015,pacing_gain:2.88672,cwnd_gain:2.88672) send 1722850437bps lastsnd:6 lastrcv:27 lastack:27 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:56002 app_limited busy:740225ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:212 rtt:11.222/6.355 ato:41 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3030645 bytes_acked:3030645 bytes_received:2315651 segs_out:75164 segs_in:79141 data_segs_out:56024 data_segs_in:74710 bbr:(bw:43655322920bps,mrtt:0.066,pacing_gain:2.88672,cwnd_gain:2.88672) send 2660866869bps lastsnd:6 lastrcv:1 lastack:1 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:56025 app_limited busy:743781ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848             \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:212 rtt:11.669/10.949 ato:62 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2306963 bytes_acked:2306964 bytes_received:3030394 segs_out:90472 segs_in:77606 data_segs_out:74834 data_segs_in:56002 bbr:(bw:65483000000bps,mrtt:0.024,pacing_gain:2.88672,cwnd_gain:2.88672) send 3591491987bps lastsnd:29 lastrcv:7 lastack:7 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74835 app_limited busy:398836ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848            \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212671.85565,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:208 rtt:7.52/6.258 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2317303 bytes_acked:2317304 bytes_received:3032461 segs_out:79208 segs_in:75226 data_segs_out:74776 data_segs_in:56060 bbr:(bw:24945903272bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 2229208511bps lastsnd:5 lastrcv:5 lastack:5 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74777 app_limited busy:657602ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440                    \nESTAB 0      379        127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:223 rtt:22.51/7.981 ato:40 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3032194 bytes_acked:3031815 bytes_received:2308434 segs_out:77658 segs_in:90547 data_segs_out:56037 data_segs_in:74894 bbr:(bw:40297228360bps,mrtt:0.015,pacing_gain:2.88672,cwnd_gain:2.88672) send 1023990049bps lastsnd:5 lastrcv:32 lastack:32 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:56037 app_limited busy:740702ms unacked:1 rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718592\nESTAB 0      379        127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:212 rtt:11.395/5.936 ato:40 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3032461 bytes_acked:3032082 bytes_received:2317303 segs_out:75225 segs_in:79208 data_segs_out:56060 data_segs_in:74776 bbr:(bw:43655322920bps,mrtt:0.049,pacing_gain:2.88672,cwnd_gain:2.88672) send 2620469329bps lastsnd:5 lastrcv:5 lastack:5 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:56060 app_limited busy:744220ms unacked:1 rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848  \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:202 rtt:1.372/2.443 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2308434 bytes_acked:2308435 bytes_received:3032194 segs_out:90547 segs_in:77659 data_segs_out:74894 data_segs_in:56037 bbr:(bw:65483000000bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 30546005831bps lastsnd:33 lastrcv:6 lastack:6 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74895 app_limited busy:398861ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848            \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212672.8775773,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:212 rtt:11.971/6.193 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2319073 bytes_acked:2319074 bytes_received:3034550 segs_out:79282 segs_in:75288 data_segs_out:74848 data_segs_in:56094 bbr:(bw:24945903272bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 1400354858bps lastsnd:1 lastrcv:26 lastack:1 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74849 app_limited busy:658009ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440        \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:228 rtt:27.067/4.931 ato:40 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3034283 bytes_acked:3034283 bytes_received:2310195 segs_out:77705 segs_in:90627 data_segs_out:56071 data_segs_in:74958 bbr:(bw:40297228360bps,mrtt:0.015,pacing_gain:2.88672,cwnd_gain:2.88672) send 851591089bps lastsnd:26 lastrcv:66 lastack:26 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:56072 app_limited busy:741202ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718336\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:209 rtt:8.126/3.093 ato:40 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3034550 bytes_acked:3034550 bytes_received:2319073 segs_out:75287 segs_in:79282 data_segs_out:56094 data_segs_in:74848 bbr:(bw:43655322920bps,mrtt:0.049,pacing_gain:2.88672,cwnd_gain:2.88672) send 3674655181bps lastsnd:28 lastrcv:2 lastack:2 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:56095 app_limited busy:744555ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848   \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:206 rtt:5.75/7.984 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2310195 bytes_acked:2310196 bytes_received:3034283 segs_out:90627 segs_in:77706 data_segs_out:74958 data_segs_in:56071 bbr:(bw:65483000000bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 7288542609bps lastsnd:67 lastrcv:27 lastack:27 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:74959 app_limited busy:398980ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848   \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    },
+    {
+      "at": 1793212673.900968,
+      "tcp": "State Recv-Q Send-Q Local Address:Port  Peer Address:Port Process                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         \nESTAB 0      0          127.0.0.1:33312    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=6))\n\t bbr wscale:7,7 rto:213 rtt:12.343/6.74 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:32 bytes_sent:2320974 bytes_acked:2320975 bytes_received:3036560 segs_out:79356 segs_in:75352 data_segs_out:74922 data_segs_in:56129 bbr:(bw:24945903272bps,mrtt:0.028,pacing_gain:2.88672,cwnd_gain:2.88672) send 1358150207bps lastsnd:4 lastrcv:24 lastack:4 pacing_rate 226833702760bps delivery_rate 24945904760bps delivered:74923 app_limited busy:658431ms rcv_rtt:3 rcv_space:54918 rcv_ssthresh:1934778 minrtt:0.013 snd_wnd:1229440          \nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33362 users:((\"MainThread\",pid=15060,fd=23))\n\t bbr wscale:7,7 rto:224 rtt:23.152/9.995 ato:40 mss:65483 pmtu:65535 rcvmss:1031 advmss:65483 cwnd:44 bytes_sent:3036309 bytes_acked:3036309 bytes_received:2311709 segs_out:77757 segs_in:90698 data_segs_out:56107 data_segs_in:75017 bbr:(bw:40297228360bps,mrtt:0.015,pacing_gain:2.88672,cwnd_gain:2.88672) send 995595024bps lastsnd:25 lastrcv:177 lastack:25 pacing_rate 312153570224bps delivery_rate 40297230768bps delivered:56108 app_limited busy:741672ms rcv_rtt:6.343 rcv_space:65886 rcv_ssthresh:1230766 minrtt:0.014 snd_wnd:2718464\nESTAB 0      0          127.0.0.1:3785     127.0.0.1:33312 users:((\"MainThread\",pid=15060,fd=22))\n\t bbr wscale:7,7 rto:211 rtt:10.282/4.472 ato:40 mss:65483 pmtu:65535 rcvmss:1034 advmss:65483 cwnd:57 bytes_sent:3036560 bytes_acked:3036560 bytes_received:2320974 segs_out:75351 segs_in:79356 data_segs_out:56129 data_segs_in:74922 bbr:(bw:43655322920bps,mrtt:0.049,pacing_gain:2.88672,cwnd_gain:2.88672) send 2904128380bps lastsnd:25 lastrcv:5 lastack:5 pacing_rate 299667438136bps delivery_rate 43655333328bps delivered:56130 app_limited busy:744917ms rcv_rtt:5.63 rcv_space:65851 rcv_ssthresh:1229395 minrtt:0.023 snd_wnd:1934848   \nESTAB 0      0          127.0.0.1:33362    127.0.0.1:3785  users:((\"match-wire\",pid=809,fd=7))\n\t bbr wscale:7,7 rto:204 rtt:3.566/4.941 ato:60 mss:65483 pmtu:65535 rcvmss:1682 advmss:65483 cwnd:80 bytes_sent:2311709 bytes_acked:2311710 bytes_received:3036309 segs_out:90698 segs_in:77758 data_segs_out:75017 data_segs_in:56107 bbr:(bw:65483000000bps,mrtt:0.016,pacing_gain:2.88672,cwnd_gain:2.88672) send 11752417274bps lastsnd:177 lastrcv:25 lastack:25 pacing_rate 233922295016bps delivery_rate 65483000000bps delivered:75018 app_limited busy:399098ms rcv_rtt:10.734 rcv_space:66019 rcv_ssthresh:2718523 minrtt:0.011 snd_wnd:1230848 \n",
+      "udp": "Recv-Q Send-Q Local Address:Port Peer Address:PortProcess\n"
+    }
+  ]
+}

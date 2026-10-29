@@ -1,0 +1,160 @@
+[
+  {
+    "gameId": "b7fe346c-dfe6-4559-86ea-cec379882142",
+    "lastTiming": {
+      "at": "2026-10-28T18:46:10.260Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1992,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 29.3,
+        "p95Ms": 29.3,
+        "p99Ms": 29.3,
+        "maxMs": 29.3,
+        "lastMs": 29.3
+      },
+      "timerDelayMs": {
+        "count": 2019,
+        "windowSamples": 256,
+        "p50Ms": 0.4,
+        "p95Ms": 1.1,
+        "p99Ms": 1.4,
+        "maxMs": 1.9,
+        "lastMs": 0.1
+      },
+      "syncWaitTicks": 27,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 68,
+            "windowSamples": 68,
+            "p50Ms": 129.8,
+            "p95Ms": 443.9,
+            "p99Ms": 682.7,
+            "maxMs": 682.7,
+            "lastMs": 172.5
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 59,
+            "windowSamples": 59,
+            "p50Ms": 160.5,
+            "p95Ms": 2124.2,
+            "p99Ms": 2271.2,
+            "maxMs": 2271.2,
+            "lastMs": 191.5
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    "wireRttMs": {
+      "1": {
+        "count": 13,
+        "windowSamples": 13,
+        "p50Ms": 124.9,
+        "p95Ms": 253.9,
+        "p99Ms": 253.9,
+        "maxMs": 253.9,
+        "lastMs": 154.1
+      },
+      "2": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 122.6,
+        "p95Ms": 263.2,
+        "p99Ms": 263.2,
+        "maxMs": 263.2,
+        "lastMs": 263.2
+      }
+    },
+    "errors": []
+  },
+  {
+    "gameId": "5c27f968-a33b-49c0-8479-31e9020e5541",
+    "lastTiming": {
+      "at": "2026-10-28T18:46:01.782Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2026,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 10,
+        "p95Ms": 10,
+        "p99Ms": 10,
+        "maxMs": 10,
+        "lastMs": 10
+      },
+      "timerDelayMs": {
+        "count": 2026,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 2,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 63,
+            "windowSamples": 63,
+            "p50Ms": 124.2,
+            "p95Ms": 338.5,
+            "p99Ms": 591.3,
+            "maxMs": 591.3,
+            "lastMs": 148.4
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 62,
+            "windowSamples": 62,
+            "p50Ms": 145.8,
+            "p95Ms": 421,
+            "p99Ms": 527,
+            "maxMs": 527,
+            "lastMs": 222.5
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    "wireRttMs": {
+      "1": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.3
+      },
+      "2": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.3
+      }
+    },
+    "errors": []
+  }
+]

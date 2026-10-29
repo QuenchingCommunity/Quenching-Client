@@ -1,0 +1,602 @@
+[
+  {
+    "gameId": "b7fe346c-dfe6-4559-86ea-cec379882142",
+    "modifiedUtc": "2026-10-28T18:48:39.408473+00:00",
+    "randomSeed": 3937309028,
+    "states": [
+      {
+        "at": "2026-10-28T18:45:01.883Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:45:05.580Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:45:05.667Z",
+        "state": "countdown"
+      },
+      {
+        "at": "2026-10-28T18:45:06.667Z",
+        "state": "loading"
+      },
+      {
+        "at": "2026-10-28T18:45:09.157Z",
+        "state": "running",
+        "tickMs": 30
+      },
+      {
+        "at": "2026-10-28T18:46:10.260Z",
+        "state": "closed",
+        "reason": "players-left",
+        "frameCount": 1992
+      }
+    ],
+    "errors": [],
+    "wireRttMs": {
+      "1": {
+        "count": 13,
+        "windowSamples": 13,
+        "p50Ms": 124.9,
+        "p95Ms": 253.9,
+        "p99Ms": 253.9,
+        "maxMs": 253.9,
+        "lastMs": 154.1
+      },
+      "2": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 122.6,
+        "p95Ms": 263.2,
+        "p99Ms": 263.2,
+        "maxMs": 263.2,
+        "lastMs": 263.2
+      }
+    },
+    "lastTiming": {
+      "at": "2026-10-28T18:46:10.260Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1992,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 29.3,
+        "p95Ms": 29.3,
+        "p99Ms": 29.3,
+        "maxMs": 29.3,
+        "lastMs": 29.3
+      },
+      "timerDelayMs": {
+        "count": 2019,
+        "windowSamples": 256,
+        "p50Ms": 0.4,
+        "p95Ms": 1.1,
+        "p99Ms": 1.4,
+        "maxMs": 1.9,
+        "lastMs": 0.1
+      },
+      "syncWaitTicks": 27,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 68,
+            "windowSamples": 68,
+            "p50Ms": 129.8,
+            "p95Ms": 443.9,
+            "p99Ms": 682.7,
+            "maxMs": 682.7,
+            "lastMs": 172.5
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 59,
+            "windowSamples": 59,
+            "p50Ms": 160.5,
+            "p95Ms": 2124.2,
+            "p99Ms": 2271.2,
+            "maxMs": 2271.2,
+            "lastMs": 191.5
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    "clientDiagnostics": []
+  },
+  {
+    "gameId": "5c27f968-a33b-49c0-8479-31e9020e5541",
+    "modifiedUtc": "2026-10-28T18:48:39.407473+00:00",
+    "randomSeed": 2299873424,
+    "states": [
+      {
+        "at": "2026-10-28T18:44:58.061Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:44:59.065Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:44:59.215Z",
+        "state": "countdown"
+      },
+      {
+        "at": "2026-10-28T18:45:00.216Z",
+        "state": "loading"
+      },
+      {
+        "at": "2026-10-28T18:45:00.507Z",
+        "state": "running",
+        "tickMs": 30
+      },
+      {
+        "at": "2026-10-28T18:46:01.783Z",
+        "state": "closed",
+        "reason": "players-left",
+        "frameCount": 2026
+      }
+    ],
+    "errors": [],
+    "wireRttMs": {
+      "1": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.3
+      },
+      "2": {
+        "count": 12,
+        "windowSamples": 12,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.3
+      }
+    },
+    "lastTiming": {
+      "at": "2026-10-28T18:46:01.782Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2026,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 10,
+        "p95Ms": 10,
+        "p99Ms": 10,
+        "maxMs": 10,
+        "lastMs": 10
+      },
+      "timerDelayMs": {
+        "count": 2026,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 2,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 63,
+            "windowSamples": 63,
+            "p50Ms": 124.2,
+            "p95Ms": 338.5,
+            "p99Ms": 591.3,
+            "maxMs": 591.3,
+            "lastMs": 148.4
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 62,
+            "windowSamples": 62,
+            "p50Ms": 145.8,
+            "p95Ms": 421,
+            "p99Ms": 527,
+            "maxMs": 527,
+            "lastMs": 222.5
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    "clientDiagnostics": []
+  },
+  {
+    "gameId": "396b2fea-3be2-4f2e-84c8-3be5172aa5cd",
+    "modifiedUtc": "2026-10-28T18:48:39.407473+00:00",
+    "randomSeed": 2329526628,
+    "states": [
+      {
+        "at": "2026-10-28T18:41:44.559Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:41:45.045Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:41:45.119Z",
+        "state": "countdown"
+      },
+      {
+        "at": "2026-10-28T18:41:46.121Z",
+        "state": "loading"
+      },
+      {
+        "at": "2026-10-28T18:41:46.204Z",
+        "state": "running",
+        "tickMs": 30
+      },
+      {
+        "at": "2026-10-28T18:43:17.474Z",
+        "state": "closed",
+        "reason": "players-left",
+        "frameCount": 3017
+      }
+    ],
+    "errors": [],
+    "wireRttMs": {
+      "1": {
+        "count": 18,
+        "windowSamples": 18,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.2
+      },
+      "2": {
+        "count": 18,
+        "windowSamples": 18,
+        "p50Ms": 0.4,
+        "p95Ms": 0.5,
+        "p99Ms": 0.5,
+        "maxMs": 0.5,
+        "lastMs": 0.2
+      }
+    },
+    "lastTiming": {
+      "at": "2026-10-28T18:43:17.474Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 3017,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 12.2,
+        "p95Ms": 12.2,
+        "p99Ms": 12.2,
+        "maxMs": 12.2,
+        "lastMs": 12.2
+      },
+      "timerDelayMs": {
+        "count": 3017,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.3,
+        "maxMs": 1.8,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 92,
+            "windowSamples": 92,
+            "p50Ms": 66.8,
+            "p95Ms": 252.8,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 83
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 92,
+            "windowSamples": 92,
+            "p50Ms": 69.2,
+            "p95Ms": 198.4,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 77
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    "clientDiagnostics": []
+  },
+  {
+    "gameId": "e05ecdeb-d8c4-4594-876a-4f24241be872",
+    "modifiedUtc": "2026-10-28T18:48:39.406473+00:00",
+    "randomSeed": 1032314287,
+    "states": [
+      {
+        "at": "2026-10-28T18:09:50.909Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:09:53.160Z",
+        "state": "lobby"
+      },
+      {
+        "at": "2026-10-28T18:09:53.417Z",
+        "state": "countdown"
+      },
+      {
+        "at": "2026-10-28T18:09:54.417Z",
+        "state": "loading"
+      },
+      {
+        "at": "2026-10-28T18:10:24.822Z",
+        "state": "running",
+        "tickMs": 30
+      },
+      {
+        "at": "2026-10-28T18:38:58.345Z",
+        "state": "closed",
+        "reason": "players-left",
+        "frameCount": 56232
+      }
+    ],
+    "errors": [],
+    "wireRttMs": {
+      "1": {
+        "count": 347,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 1.5,
+        "maxMs": 12085.2,
+        "lastMs": 0.3
+      },
+      "2": {
+        "count": 346,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 0.5,
+        "p99Ms": 0.6,
+        "maxMs": 0.8,
+        "lastMs": 0.4
+      }
+    },
+    "lastTiming": {
+      "at": "2026-10-28T18:38:58.344Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 56232,
+      "actionQueueMs": {
+        "count": 39482,
+        "windowSamples": 256,
+        "p50Ms": 14.5,
+        "p95Ms": 28.8,
+        "p99Ms": 30.1,
+        "maxMs": 5697.8,
+        "lastMs": 18.3
+      },
+      "timerDelayMs": {
+        "count": 56650,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 0.6,
+        "p99Ms": 0.9,
+        "maxMs": 18.1,
+        "lastMs": 0.3
+      },
+      "syncWaitTicks": 418,
+      "peers": [
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 1733,
+            "windowSamples": 256,
+            "p50Ms": 42.1,
+            "p95Ms": 44.7,
+            "p99Ms": 53.6,
+            "maxMs": 84.9,
+            "lastMs": 41.6
+          },
+          "leadFrames": 433,
+          "pendingPingAgeMs": 13004
+        },
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 1726,
+            "windowSamples": 256,
+            "p50Ms": 88.2,
+            "p95Ms": 265.3,
+            "p99Ms": 487.2,
+            "maxMs": 8354,
+            "lastMs": 136.9
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": 2
+        }
+      ]
+    },
+    "clientDiagnostics": []
+  },
+  {
+    "gameId": "94294254-4a9b-458c-b041-540d64cb584f",
+    "modifiedUtc": "2026-10-28T18:48:39.404473+00:00",
+    "randomSeed": null,
+    "states": [],
+    "errors": [],
+    "wireRttMs": null,
+    "lastTiming": null,
+    "clientDiagnostics": [
+      {
+        "testId": "94294254-4a9b-458c-b041-540d64cb584f",
+        "at": "2026-10-28T18:08:48.602Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "94294254-4a9b-458c-b041-540d64cb584f",
+        "at": "2026-10-28T18:08:50.105Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "94294254-4a9b-458c-b041-540d64cb584f",
+        "at": "2026-10-28T18:08:51.834Z",
+        "stage": "failed",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "94294254-4a9b-458c-b041-540d64cb584f",
+        "at": "2026-10-28T18:08:51.882Z",
+        "stage": "failed",
+        "code": "game-not-running",
+        "scoreReceived": false,
+        "actionPackets": 0
+      }
+    ]
+  },
+  {
+    "gameId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+    "modifiedUtc": "2026-10-28T18:48:39.404473+00:00",
+    "randomSeed": null,
+    "states": [],
+    "errors": [],
+    "wireRttMs": null,
+    "lastTiming": null,
+    "clientDiagnostics": [
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:09:37.577Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:09:39.147Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:09:46.714Z",
+        "stage": "waiting",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:09:46.762Z",
+        "stage": "preparing",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:09:50.925Z",
+        "stage": "preparing",
+        "code": "transport-quic",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:10:24.923Z",
+        "stage": "running",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:38:50.193Z",
+        "stage": "failed",
+        "scoreReceived": false,
+        "actionPackets": 19638
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:38:50.246Z",
+        "stage": "failed",
+        "code": "game-disconnected",
+        "scoreReceived": false,
+        "actionPackets": 19638
+      },
+      {
+        "testId": "1f855b46-8595-4137-8acb-aaf57afa133e",
+        "at": "2026-10-28T18:38:50.297Z",
+        "stage": "completed",
+        "scoreReceived": false,
+        "actionPackets": 19638
+      }
+    ]
+  },
+  {
+    "gameId": "275506d1-c73e-4878-b973-024dee1ff143",
+    "modifiedUtc": "2026-10-28T18:48:39.404473+00:00",
+    "randomSeed": null,
+    "states": [],
+    "errors": [],
+    "wireRttMs": null,
+    "lastTiming": null,
+    "clientDiagnostics": [
+      {
+        "testId": "275506d1-c73e-4878-b973-024dee1ff143",
+        "at": "2026-10-28T18:08:39.422Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "275506d1-c73e-4878-b973-024dee1ff143",
+        "at": "2026-10-28T18:08:40.983Z",
+        "stage": "checking",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "275506d1-c73e-4878-b973-024dee1ff143",
+        "at": "2026-10-28T18:08:42.784Z",
+        "stage": "failed",
+        "scoreReceived": false,
+        "actionPackets": 0
+      },
+      {
+        "testId": "275506d1-c73e-4878-b973-024dee1ff143",
+        "at": "2026-10-28T18:08:42.834Z",
+        "stage": "failed",
+        "code": "game-not-running",
+        "scoreReceived": false,
+        "actionPackets": 0
+      }
+    ]
+  }
+]

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Typography, Button, Space, Row, Col, message, Spin } from 'antd';
+import { Typography, Button, Space, Row, Col, message, Spin, Slider, InputNumber } from 'antd';
 import { useTranslation } from '../../utils/i18n';
 import { OverlayModal } from './OverlayModal';
 import { useWar3Settings } from '../../hooks/useWar3Settings';
@@ -7,6 +7,7 @@ import { useWar3Detector } from '../../hooks/useWar3Detector';
 import { useSound } from '../../hooks/useSound';
 import { useGlobalLoading } from '../GlobalLoadingProvider';
 import { normalizeGraphicsSelection } from '../../../shared/mod-profile';
+import './LightingSettings.less';
 
 const { Text } = Typography;
 
@@ -40,16 +41,16 @@ interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
   isFullPackageInstalled?: boolean;
-  onModDeleted?: () => void;
+  onModDeleteFinished?: (deleted: boolean) => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isFullPackageInstalled = false, onModDeleted }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isFullPackageInstalled = false, onModDeleteFinished }) => {
   const { t } = useTranslation();
   const { modSettings, settings: war3Settings, saveModSettings, toggleGameMode, isLoading } = useWar3Settings();
   const { currentInstallation, detectInstallations } = useWar3Detector();
   const { playSmall, playHover } = useSound();
   const { showLoading, hideLoading } = useGlobalLoading();
-  const [selectedCategory, setSelectedCategory] = useState<'graphics' | 'game' | 'basic'>('graphics');
+  const [selectedCategory, setSelectedCategory] = useState<'graphics' | 'game' | 'lighting' | 'basic'>('graphics');
   const [previewInfo, setPreviewInfo] = useState<{ title: string; desc: string; image: string | null }>({
     title: '',
     desc: t('settings.preview.default'),
@@ -65,6 +66,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   const categories = [
     { id: 'game', name: t('settings.category.game') },
     { id: 'graphics', name: t('settings.category.graphics') },
+    { id: 'lighting', name: t('settings.category.lighting') },
     { id: 'basic', name: t('settings.basic.title') }
   ];
 
@@ -83,20 +85,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
 
   const handleDeleteMod = async () => {
     if (!currentInstallation?.path) return;
+    let deleted = false;
     try {
       showLoading(t('progress.hint'));
       const result = await window.electronAPI?.deleteMod(currentInstallation.path);
+      if (!result?.success) throw new Error(t('msg.mod.failed'));
+      deleted = true;
       if (result?.preserved?.length) {
         message.warning(`已删除 ${result.removed} 个 MOD 文件；保留 ${result.preserved.length} 个内容已修改的文件。`);
       } else {
         message.success(t('settings.basic.deleteMod.success'));
       }
       detectInstallations();
-      onModDeleted?.();
     } catch (e: any) {
       message.error(e.message || 'Error');
     } finally {
       hideLoading();
+      onModDeleteFinished?.(deleted);
     }
   };
 
@@ -232,6 +237,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     );
   };
 
+  const renderSettingSwitch = (
+    label: string,
+    checked: boolean,
+    onChange: (enabled: boolean) => void,
+    onPreview?: () => void,
+    disabled = false,
+    stateLabel?: string,
+  ) => (
+    <div className="settings-switch-control"
+      onMouseEnter={() => { playHover(); onPreview?.(); }}
+      onMouseLeave={() => setPreviewInfo({ title: '', desc: t('settings.preview.default'), image: null })}>
+      <button type="button" role="switch" aria-label={label} aria-checked={checked}
+        className="settings-switch" disabled={isLoading || disabled}
+        onFocus={() => onPreview?.()}
+        onClick={(event) => {
+          event.currentTarget.blur();
+          playSmall();
+          onChange(!checked);
+        }}>
+        <span className="settings-switch-thumb" aria-hidden="true" />
+      </button>
+      <span className="settings-switch-state">{stateLabel ?? t(checked ? 'settings.btn.turnon' : 'settings.btn.turnoff')}</span>
+    </div>
+  );
+
   const getSettingStatus = (key: string) => {
     // 1. Full Package Check (Highest Priority)
     const requiresFullPackage = ['water'];
@@ -240,9 +270,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     }
 
     // 2. Classic Mode Check
-    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'useIntelAmdShaderFix', 'ui', 'glow'];
+    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'postProcessingOutline', 'hdr', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'lightingAngle', 'rotatingLighting', 'atmosphericLight', 'improveReadability', 'ui', 'glow'];
     if (restrictedInClassic.includes(key) && visualSettingsDisabled) {
       return { disabled: true, reason: t('settings.basic.classicMode.disabled') };
+    }
+    if (key === 'hdr' && (modSettings.resolvedVersion || modSettings.versionSelection) === 'v30') {
+      return { disabled: true, reason: t('settings.hdr.unsupported') };
     }
 
     // 2b. DE graphics: water cannot be adjusted
@@ -280,7 +313,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   const renderStatusPlaceholder = (reason: string | null, tone: 'default' | 'danger' = 'default') => {
     const textColor = reason && tone === 'danger' ? '#ff4d4f' : '#666';
     return (
-      <div style={{
+      <div className="settings-status-placeholder" style={{
         color: textColor,
         fontSize: '12px',
         marginTop: 4,
@@ -294,104 +327,112 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
 
   const renderGraphicsSettings = () => {
     // Helper to get status for each item
-    const sWater = getSettingStatus('water');
     const sFoliage = getSettingStatus('foliage');
     const sBlight = getSettingStatus('blight');
     const sShader = getSettingStatus('objectShader');
     const sPost = getSettingStatus('postProcessing');
     const sPostGlow = getSettingStatus('postProcessingGlow');
+    const sHdr = getSettingStatus('hdr');
+    const sOutline = getSettingStatus('postProcessingOutline');
+    const sReadability = getSettingStatus('improveReadability');
+    const readabilityAvailable = !visualSettingsDisabled &&
+      (modSettings.resolvedVersion ?? modSettings.versionSelection) === 'v301' &&
+      modSettings.objectShader && modSettings.postProcessing;
     const sGlow = getSettingStatus('glow');
 
     return (
-      <div style={{ padding: '20px', height: '100%', overflowY: 'auto' }}>
-        <Row gutter={[20, 20]}>
-          <Col span={12}>
-            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.water.title')}</h3>
-            <Space wrap>
-              {renderSettingButton(t('settings.water.off'), modSettings.water, 'off', () => handleSettingChange('water', 'off'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.off.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
-              {renderSettingButton(t('settings.water.realistic'), modSettings.water, 'realistic', () => handleSettingChange('water', 'realistic'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.realistic.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
-              {renderSettingButton(t('settings.water.transparent'), modSettings.water, 'transparent', () => handleSettingChange('water', 'transparent'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.transparent.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
-            </Space>
-            {renderStatusPlaceholder(sWater.reason)}
-          </Col>
-          <Col span={12}>
+      <div style={{ padding: '8px 0' }}>
+        <Row className="settings-graphics-grid" gutter={[20, 24]}>
+
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.foliage.title')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.foliage, true, () => handleSettingChange('foliage', true), () => setPreviewInfo({ title: t('settings.foliage.title'), desc: t('settings.foliage.on.desc'), image: './assets/quenching/set4.png' }), sFoliage.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.foliage, false, () => handleSettingChange('foliage', false), () => setPreviewInfo({ title: t('settings.foliage.title'), desc: t('settings.foliage.off.desc'), image: './assets/quenching/set4.png' }), sFoliage.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.foliage.title'), Boolean(modSettings.foliage),
+              enabled => handleSettingChange('foliage', enabled),
+              Boolean(modSettings.foliage) ? (() => setPreviewInfo({ title: t('settings.foliage.title'), desc: t('settings.foliage.on.desc'), image: './assets/quenching/set4.png' })) : (() => setPreviewInfo({ title: t('settings.foliage.title'), desc: t('settings.foliage.off.desc'), image: './assets/quenching/set4.png' })),
+              sFoliage.disabled)}
             {renderStatusPlaceholder(sFoliage.reason)}
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.blight.title')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.blight, true, () => handleSettingChange('blight', true), () => setPreviewInfo({ title: t('settings.blight.title'), desc: t('settings.blight.on.desc'), image: './assets/quenching/set6.png' }), sBlight.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.blight, false, () => handleSettingChange('blight', false), () => setPreviewInfo({ title: t('settings.blight.title'), desc: t('settings.blight.off.desc'), image: './assets/quenching/set6.png' }), sBlight.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.blight.title'), Boolean(modSettings.blight),
+              enabled => handleSettingChange('blight', enabled),
+              Boolean(modSettings.blight) ? (() => setPreviewInfo({ title: t('settings.blight.title'), desc: t('settings.blight.on.desc'), image: './assets/quenching/set6.png' })) : (() => setPreviewInfo({ title: t('settings.blight.title'), desc: t('settings.blight.off.desc'), image: './assets/quenching/set6.png' })),
+              sBlight.disabled)}
             {renderStatusPlaceholder(sBlight.reason)}
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.shader.title')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.objectShader, true, () => handleSettingChange('objectShader', true), () => setPreviewInfo({ title: t('settings.shader.title'), desc: t('settings.shader.on.desc'), image: './assets/quenching/set5.png' }), sShader.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.objectShader, false, () => handleSettingChange('objectShader', false), () => setPreviewInfo({ title: t('settings.shader.title'), desc: t('settings.shader.off.desc'), image: './assets/quenching/set5.png' }), sShader.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.shader.title'), Boolean(modSettings.objectShader),
+              enabled => handleSettingChange('objectShader', enabled),
+              Boolean(modSettings.objectShader) ? (() => setPreviewInfo({ title: t('settings.shader.title'), desc: t('settings.shader.on.desc'), image: './assets/quenching/set5.png' })) : (() => setPreviewInfo({ title: t('settings.shader.title'), desc: t('settings.shader.off.desc'), image: './assets/quenching/set5.png' })),
+              sShader.disabled)}
             {renderStatusPlaceholder(sShader.reason)}
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.postprocessing.title')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.postProcessing, true, () => handleSettingChange('postProcessing', true), () => setPreviewInfo({ title: t('settings.postprocessing.title'), desc: t('settings.postprocessing.on.desc'), image: './assets/quenching/set9.png' }), sPost.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.postProcessing, false, () => handleSettingChange('postProcessing', false), () => setPreviewInfo({ title: t('settings.postprocessing.title'), desc: t('settings.postprocessing.off.desc'), image: './assets/quenching/set9.png' }), sPost.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.postprocessing.title'), Boolean(modSettings.postProcessing),
+              enabled => handleSettingChange('postProcessing', enabled),
+              Boolean(modSettings.postProcessing) ? (() => setPreviewInfo({ title: t('settings.postprocessing.title'), desc: t('settings.postprocessing.on.desc'), image: './assets/quenching/set9.png' })) : (() => setPreviewInfo({ title: t('settings.postprocessing.title'), desc: t('settings.postprocessing.off.desc'), image: './assets/quenching/set9.png' })),
+              sPost.disabled)}
             {renderStatusPlaceholder(sPost.reason)}
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.postprocessing.outline.title')}</h3>
+            {renderSettingSwitch(t('settings.postprocessing.outline.title'), Boolean(modSettings.postProcessingOutline ?? false),
+              enabled => handleSettingChange('postProcessingOutline', enabled),
+              () => setPreviewInfo({ title: t('settings.postprocessing.outline.title'), desc: t(modSettings.postProcessingOutline ? 'settings.postprocessing.outline.on.desc' : 'settings.postprocessing.outline.off.desc'), image: null }),
+              sOutline.disabled || !modSettings.postProcessing || (modSettings.resolvedVersion ?? modSettings.versionSelection) !== 'v301')}
+            {renderStatusPlaceholder(sOutline.reason)}
+          </Col>
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.postprocessing.glow.title', '后处理辉光')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.postProcessingGlow, true, () => handleSettingChange('postProcessingGlow', true), () => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.on.desc', '只开启辉光，控制两份 Bloom 和 Gaussian Blur。'), image: './assets/quenching/set9.png' }), sPostGlow.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.postProcessingGlow, false, () => handleSettingChange('postProcessingGlow', false), () => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.off.desc', '关闭后处理辉光。'), image: './assets/quenching/set9.png' }), sPostGlow.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.postprocessing.glow.title', '后处理辉光'), Boolean(modSettings.postProcessingGlow),
+              enabled => handleSettingChange('postProcessingGlow', enabled),
+              Boolean(modSettings.postProcessingGlow) ? (() => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.on.desc', '只开启辉光，控制两份 Bloom 和 Gaussian Blur。'), image: './assets/quenching/set9.png' })) : (() => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.off.desc', '关闭后处理辉光。'), image: './assets/quenching/set9.png' })),
+              sPostGlow.disabled)}
             {renderStatusPlaceholder(sPostGlow.reason)}
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.hdr.title')}</h3>
+            {renderSettingSwitch(t('settings.hdr.title'), Boolean(modSettings.hdr),
+              enabled => handleSettingChange('hdr', enabled),
+              () => setPreviewInfo({ title: t('settings.hdr.title'), desc: t(modSettings.hdr ? 'settings.hdr.on.desc' : 'settings.hdr.off.desc'), image: null }),
+              sHdr.disabled)}
+            {renderStatusPlaceholder(sHdr.reason)}
+          </Col>
+          <Col span={8}>
+            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.readability.title')}</h3>
+            {renderSettingSwitch(t('settings.readability.title'), Boolean(modSettings.improveReadability ?? false),
+              enabled => handleSettingChange('improveReadability', enabled),
+              () => setPreviewInfo({ title: t('settings.readability.title'), desc: t(modSettings.improveReadability ? 'settings.readability.on.desc' : 'settings.readability.off.desc'), image: null }),
+              sReadability.disabled || !readabilityAvailable)}
+          </Col>
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.glow.title')}</h3>
-            <Space>
-              {renderSettingButton(t('settings.glow.strong'), modSettings.glow, false, () => handleSettingChange('glow', false), () => setPreviewInfo({ title: t('settings.glow.title'), desc: t('settings.glow.strong.desc'), image: './assets/quenching/ui4.png' }), sGlow.disabled)}
-              {renderSettingButton(t('settings.glow.weak'), modSettings.glow, true, () => handleSettingChange('glow', true), () => setPreviewInfo({ title: t('settings.glow.title'), desc: t('settings.glow.weak.desc'), image: './assets/quenching/ui4.png' }), sGlow.disabled)}
-            </Space>
+            {renderSettingSwitch(t('settings.glow.title'), Boolean(modSettings.glow),
+              enabled => handleSettingChange('glow', enabled),
+              () => setPreviewInfo({ title: t('settings.glow.title'), desc: t(modSettings.glow ? 'settings.glow.weak.desc' : 'settings.glow.strong.desc'), image: './assets/quenching/ui4.png' }),
+              sGlow.disabled,
+              t(modSettings.glow ? 'settings.glow.weak' : 'settings.glow.strong'))}
             {renderStatusPlaceholder(sGlow.reason)}
           </Col>
-          <Col span={12}>
+
+          <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.antiharmony.title')}</h3>
-            <Space>
-              {renderSettingButton(
-                t('settings.btn.turnon'),
-                antiHarmonyEnabled,
-                true,
-                () => handleAntiHarmonyChange(true),
-                () =>
+            {renderSettingSwitch(t('settings.antiharmony.title'), Boolean(antiHarmonyEnabled),
+              enabled => handleAntiHarmonyChange(enabled),
+              Boolean(antiHarmonyEnabled) ? (() =>
                   setPreviewInfo({
                     title: t('settings.antiharmony.title'),
                     desc: t('settings.antiharmony.on.desc'),
                     image: './assets/quenching/set7.png',
-                  }),
-                visualSettingsDisabled || antiHarmonyBusy
-              )}
-              {renderSettingButton(
-                t('settings.btn.turnoff'),
-                antiHarmonyEnabled,
-                false,
-                () => handleAntiHarmonyChange(false),
-                () =>
+                  })) : (() =>
                   setPreviewInfo({
                     title: t('settings.antiharmony.title'),
                     desc: t('settings.antiharmony.off.desc'),
                     image: './assets/quenching/set7.png',
-                  }),
-                visualSettingsDisabled || antiHarmonyBusy
-              )}
-            </Space>
+                  })),
+              visualSettingsDisabled || antiHarmonyBusy)}
             {renderStatusPlaceholder(visualSettingsDisabled ? t('settings.basic.classicMode.disabled') : null)}
           </Col>
         </Row>
@@ -400,17 +441,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   };
 
   const renderGameSettings = () => {
+    const sWater = getSettingStatus('water');
     const sTerrain = getSettingStatus('terrain');
     const sTree = getSettingStatus('tree');
     const sTerrainMod = getModResourceStatus();
     const sTreeMod = getModResourceStatus();
-    const sLighting = getSettingStatus('lighting');
-    const sLightingBrightness = getSettingStatus('lightingBrightness');
     const sUi = getSettingStatus('ui'); // not used yet but good to have
 
     return (
       <div style={{ padding: '16px', height: '100%', overflowY: 'auto' }}>
         <Row gutter={[16, 14]}>
+          <Col span={24}>
+            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.water.title')}</h3>
+            <Space wrap>
+              {renderSettingButton(t('settings.water.off'), modSettings.water, 'off', () => handleSettingChange('water', 'off'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.off.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
+              {renderSettingButton(t('settings.water.realistic'), modSettings.water, 'realistic', () => handleSettingChange('water', 'realistic'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.realistic.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
+              {renderSettingButton(t('settings.water.transparent'), modSettings.water, 'transparent', () => handleSettingChange('water', 'transparent'), () => setPreviewInfo({ title: t('settings.water.title'), desc: t('settings.water.transparent.desc'), image: './assets/quenching/set1.png' }), sWater.disabled)}
+            </Space>
+            {renderStatusPlaceholder(sWater.reason)}
+          </Col>
           <Col span={24}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.ui.style')}</h3>
             <Space wrap>
@@ -424,37 +473,73 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           <Col span={24}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.terrain.style')}</h3>
             <Space wrap>
-              {renderSettingButton(t('settings.terrain.original'), modSettings.terrain, 'original', () => handleSettingChange('terrain', 'original'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.original'), image: './assets/quenching/set6.png' }), sTerrain.disabled)}
-              {renderSettingButton(t('settings.terrain.decisive'), modSettings.terrain, 'decisive', () => handleSettingChange('terrain', 'decisive'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.decisive'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
-              {renderSettingButton(t('settings.terrain.latest'), modSettings.terrain, 'latest', () => handleSettingChange('terrain', 'latest'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.latest'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
-              {renderSettingButton(t('settings.tree.height.16'), modSettings.terrain, 'v16', () => handleSettingChange('terrain', 'v16'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.tree.height.16'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
-              {renderSettingButton(t('settings.tree.height.18'), modSettings.terrain, 'v18', () => handleSettingChange('terrain', 'v18'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.tree.height.18'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
-              {renderSettingButton(t('settings.terrain.retro'), modSettings.terrain, 'retro', () => handleSettingChange('terrain', 'retro'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.retro'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
+              {renderSettingButton(t('settings.terrain.original'), modSettings.terrain, 'original', () => handleSettingChange('terrain', 'original'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.original.desc'), image: './assets/quenching/set6.png' }), sTerrain.disabled)}
+              {renderSettingButton(t('settings.terrain.decisive'), modSettings.terrain, 'decisive', () => handleSettingChange('terrain', 'decisive'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.decisive.desc'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
+              {renderSettingButton(t('settings.terrain.latest'), modSettings.terrain, 'latest', () => handleSettingChange('terrain', 'latest'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.latest.desc'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
+              {renderSettingButton(t('settings.tree.height.16'), modSettings.terrain, 'v16', () => handleSettingChange('terrain', 'v16'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.v16.desc'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
+              {renderSettingButton(t('settings.tree.height.18'), modSettings.terrain, 'v18', () => handleSettingChange('terrain', 'v18'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.v18.desc'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
+              {renderSettingButton(t('settings.terrain.retro'), modSettings.terrain, 'retro', () => handleSettingChange('terrain', 'retro'), () => setPreviewInfo({ title: t('settings.terrain.style'), desc: t('settings.terrain.retro.desc'), image: './assets/quenching/set6.png' }), sTerrainMod.disabled || sTerrain.disabled)}
             </Space>
             {renderStatusPlaceholder(sTerrainMod.reason || sTerrain.reason)}
           </Col>
           <Col span={24}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.tree.style')}</h3>
             <Space wrap>
-              {renderSettingButton(t('settings.tree.original'), modSettings.tree, 'original', () => handleSettingChange('tree', 'original'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.original'), image: './assets/quenching/set2.png' }), sTree.disabled)}
-              {renderSettingButton(t('settings.tree.tall'), modSettings.tree, 'tall', () => handleSettingChange('tree', 'tall'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.tall'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
-              {renderSettingButton(t('settings.tree.short'), modSettings.tree, 'short', () => handleSettingChange('tree', 'short'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.short'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
-              {renderSettingButton(t('settings.tree.height.18'), modSettings.tree, 'v18', () => handleSettingChange('tree', 'v18'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.height.18'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
-              {renderSettingButton(t('settings.tree.height.16'), modSettings.tree, 'v16', () => handleSettingChange('tree', 'v16'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.height.16'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
-              {renderSettingButton(t('settings.terrain.retro'), modSettings.tree, 'retro', () => handleSettingChange('tree', 'retro'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.terrain.retro'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
+              {renderSettingButton(t('settings.tree.original'), modSettings.tree, 'original', () => handleSettingChange('tree', 'original'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.original.desc'), image: './assets/quenching/set2.png' }), sTree.disabled)}
+              {renderSettingButton(t('settings.tree.tall'), modSettings.tree, 'tall', () => handleSettingChange('tree', 'tall'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.tall.desc'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
+              {renderSettingButton(t('settings.tree.short'), modSettings.tree, 'short', () => handleSettingChange('tree', 'short'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.short.desc'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
+              {renderSettingButton(t('settings.tree.height.18'), modSettings.tree, 'v18', () => handleSettingChange('tree', 'v18'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.v18.desc'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
+              {renderSettingButton(t('settings.tree.height.16'), modSettings.tree, 'v16', () => handleSettingChange('tree', 'v16'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.v16.desc'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
+              {renderSettingButton(t('settings.tree.retro'), modSettings.tree, 'retro', () => handleSettingChange('tree', 'retro'), () => setPreviewInfo({ title: t('settings.tree.style'), desc: t('settings.tree.retro.desc'), image: './assets/quenching/set2.png' }), sTreeMod.disabled || sTree.disabled)}
             </Space>
             {renderStatusPlaceholder(sTreeMod.reason || sTree.reason)}
+          </Col>
+
+        </Row>
+      </div>
+    );
+  };
+
+  const [lightingAngleDraft, setLightingAngleDraft] = useState(modSettings.lightingAngle ?? 45);
+  useEffect(() => { setLightingAngleDraft(modSettings.lightingAngle ?? 45); }, [modSettings.lightingAngle]);
+  const commitLightingAngle = (angle: number) => {
+    if (angle !== modSettings.lightingAngle) void handleSettingChange('lightingAngle', angle);
+  };
+  const renderLightingSettings = () => {
+    const sAtmospheric = getSettingStatus('atmosphericLight');
+    const sRotating = getSettingStatus('rotatingLighting');
+    const sLighting = getSettingStatus('lighting');
+    const sLightingBrightness = getSettingStatus('lightingBrightness');
+    const sAngle = getSettingStatus('lightingAngle');
+    return <div className="settings-lighting"><Row gutter={[32, 22]}>
+          <Col xs={12} md={8}>
+            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.rotatingLighting.title')}</h3>
+            {renderSettingSwitch(t('settings.rotatingLighting.title'), modSettings.rotatingLighting === true,
+              enabled => handleSettingChange('rotatingLighting', enabled),
+              () => setPreviewInfo({ title: t('settings.rotatingLighting.title'), desc: t('settings.rotatingLighting.desc'), image: null }),
+              sRotating.disabled)}
+            {renderStatusPlaceholder(sRotating.reason || t('settings.experimental'))}
+          </Col>
+          <Col xs={12} md={8}>
+            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.atmosphericLight.title')}</h3>
+            {renderSettingSwitch(t('settings.atmosphericLight.title'),modSettings.atmosphericLight===true,
+              enabled=>handleSettingChange('atmosphericLight',enabled),
+              ()=>setPreviewInfo({title:t('settings.atmosphericLight.title'),desc:t('settings.atmosphericLight.desc'),image:null}),sAtmospheric.disabled)}
+            {renderStatusPlaceholder(sAtmospheric.reason)}
           </Col>
           <Col span={24}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.lighting')}</h3>
             <Space wrap>
-              {renderSettingButton(t('settings.lighting.standard'), modSettings.lighting, 'standard', () => handleSettingChange('lighting', 'standard'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.standard'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
-              {renderSettingButton(t('settings.lighting.level4'), modSettings.lighting, 'battle', () => handleSettingChange('lighting', 'battle'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.level4'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
-              {renderSettingButton('RPG', modSettings.lighting, 'rpg', () => handleSettingChange('lighting', 'rpg'), () => setPreviewInfo({ title: t('settings.lighting'), desc: 'RPG', image: './assets/quenching/set3.png' }), sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.standard'), modSettings.lighting, 'standard', () => handleSettingChange('lighting', 'standard'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.standard.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.rpg'), modSettings.lighting, 'rpg', () => handleSettingChange('lighting', 'rpg'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.rpg.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.level4'), modSettings.lighting, 'battle', () => handleSettingChange('lighting', 'battle'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.level4.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
             </Space>
             {renderStatusPlaceholder(sLighting.reason)}
-            <h3 style={{ color: '#d4af37', marginBottom: '10px', marginTop: '12px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.lighting.brightness')}</h3>
-            <Space wrap>
+
+          </Col>
+      <Col span={24}>
+            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.brightness')}</h3>
+            <div className="settings-lighting-brightness">
               {([1, 2, 3, 4, 5] as const).map((lvl) =>
                 renderSettingButton(
                   String(lvl),
@@ -470,32 +555,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
                   sLightingBrightness.disabled
                 )
               )}
-            </Space>
+            </div>
             {renderStatusPlaceholder(sLightingBrightness.reason)}
-          </Col>
-        </Row>
-      </div>
-    );
+      </Col>
+      <Col span={24}>
+        <div className="settings-lighting-angle"
+          onMouseEnter={() => setPreviewInfo({title:t('settings.lighting.angle'),desc:t('settings.lighting.angle.desc'),image:null})}
+          onFocus={() => setPreviewInfo({title:t('settings.lighting.angle'),desc:t('settings.lighting.angle.desc'),image:null})}
+          onMouseLeave={() => setPreviewInfo({title:'',desc:t('settings.preview.default'),image:null})}>
+        <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.angle')}</h3>
+        <div className="settings-lighting-angle-controls">
+          <Slider min={0} max={360} step={1} value={lightingAngleDraft} disabled={sAngle.disabled || isLoading}
+            aria-label={t('settings.lighting.angle')}
+            onChange={setLightingAngleDraft} onChangeComplete={commitLightingAngle} />
+          <InputNumber min={0} max={360} precision={0} value={lightingAngleDraft} disabled={sAngle.disabled || isLoading}
+            aria-label={t('settings.lighting.angle')} formatter={value => `${value}°`}
+            parser={value => Number(value?.replace('°', '') || 0)}
+            onChange={value=>{if(typeof value==='number')setLightingAngleDraft(value);}}
+            onBlur={()=>commitLightingAngle(lightingAngleDraft)} onPressEnter={event=>event.currentTarget.blur()} />
+        </div>
+        {renderStatusPlaceholder(sAngle.reason)}
+        </div>
+      </Col>
+    </Row></div>;
   };
 
   const renderBasicSettings = () => {
-    const sIntelAmdShaderFix = getSettingStatus('useIntelAmdShaderFix');
+
 
     return (
     <div style={{ padding: '14px', height: '100%', overflowY: 'auto' }}>
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
-        <div>
-          <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.basic.intelAmdShaderFix.title')}</h3>
-          <Space direction="vertical" size={6} style={{ width: '100%' }}>
-            <div style={BASIC_SETTINGS_DESC}>{t('settings.basic.intelAmdShaderFix.desc')}</div>
-            <Space size={6}>
-              {renderSettingButton(t('settings.btn.turnon'), modSettings.useIntelAmdShaderFix, true, () => handleSettingChange('useIntelAmdShaderFix', true), undefined, sIntelAmdShaderFix.disabled)}
-              {renderSettingButton(t('settings.btn.turnoff'), modSettings.useIntelAmdShaderFix, false, () => handleSettingChange('useIntelAmdShaderFix', false), undefined, sIntelAmdShaderFix.disabled)}
-            </Space>
-            {renderStatusPlaceholder(sIntelAmdShaderFix.reason)}
-          </Space>
-        </div>
-
         <div>
           <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.basic.resetRendering')}</h3>
           <Space direction="vertical" size={6} style={{ width: '100%' }}>
@@ -629,6 +719,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           <div style={{ flex: 1, minHeight: 0, padding: '30px', overflowY: 'auto' }}>
             {selectedCategory === 'graphics' && renderGraphicsSettings()}
             {selectedCategory === 'game' && renderGameSettings()}
+            {selectedCategory === 'lighting' && renderLightingSettings()}
             {selectedCategory === 'basic' && renderBasicSettings()}
           </div>
 

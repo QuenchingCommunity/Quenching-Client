@@ -1,0 +1,175 @@
+{
+  "capturedAtUtc": "2026-10-27T12:21:31.569473+00:00",
+  "server": "191.40.41.124",
+  "gameId": "f3b3c704-c624-49ac-8dde-435acf7fa725",
+  "instanceId": "d8ccca2d-f196-47c7-a324-a46fb05d6d29",
+  "source": "server-real-warcraft-game-report",
+  "realWarcraftGame": true,
+  "syntheticClients": false,
+  "state": {
+    "at": "2026-10-27T12:16:27.419Z",
+    "gameId": "f3b3c704-c624-49ac-8dde-435acf7fa725",
+    "instanceId": "d8ccca2d-f196-47c7-a324-a46fb05d6d29",
+    "gameVersion": "3.0.1.24371",
+    "mode": "duel",
+    "state": "closed",
+    "reason": "players-left",
+    "frameCount": 47034,
+    "keepAliveCount": 93993
+  },
+  "errors": [],
+  "wireRttMs": {
+    "1": {
+      "count": 286,
+      "windowSamples": 256,
+      "p50Ms": 53.4,
+      "p95Ms": 174,
+      "p99Ms": 894.8,
+      "maxMs": 2037.5,
+      "lastMs": 55.4
+    },
+    "2": {
+      "count": 286,
+      "windowSamples": 256,
+      "p50Ms": 31.7,
+      "p95Ms": 311.1,
+      "p99Ms": 869.4,
+      "maxMs": 929.1,
+      "lastMs": 57
+    }
+  },
+  "timingRetention": {
+    "snapshots": 120,
+    "firstAt": "2026-10-27T12:06:32.547Z",
+    "lastAt": "2026-10-27T12:16:27.419Z",
+    "percentiles": "last 256 observations per metric, NOT full-game percentiles",
+    "maxMs": "lifetime maximum, NOT the percentile window"
+  },
+  "finalTiming": {
+    "at": "2026-10-27T12:16:27.419Z",
+    "tickMs": 30,
+    "maxAheadFrames": 67,
+    "frameCount": 47034,
+    "actionQueueMs": {
+      "count": 5356,
+      "windowSamples": 256,
+      "p50Ms": 14,
+      "p95Ms": 29,
+      "p99Ms": 30.1,
+      "maxMs": 1451.6,
+      "lastMs": 16.1
+    },
+    "timerDelayMs": {
+      "count": 47096,
+      "windowSamples": 256,
+      "p50Ms": 0.4,
+      "p95Ms": 1.4,
+      "p99Ms": 1.6,
+      "maxMs": 6,
+      "lastMs": 0.3
+    },
+    "syncWaitTicks": 62,
+    "peers": [
+      {
+        "playerId": 1,
+        "nativeRttMs": {
+          "count": 1429,
+          "windowSamples": 256,
+          "p50Ms": 55.2,
+          "p95Ms": 437.2,
+          "p99Ms": 1692,
+          "maxMs": 1886.1,
+          "lastMs": 53.3
+        },
+        "leadFrames": 72,
+        "pendingPingAgeMs": null
+      },
+      {
+        "playerId": 2,
+        "nativeRttMs": {
+          "count": 1424,
+          "windowSamples": 256,
+          "p50Ms": 29.6,
+          "p95Ms": 446.9,
+          "p99Ms": 783.3,
+          "maxMs": 2755.5,
+          "lastMs": 53.5
+        },
+        "leadFrames": 3,
+        "pendingPingAgeMs": null
+      }
+    ]
+  },
+  "retainedSyncWaitChanges": [
+    {
+      "at": "2026-10-27T12:08:52.913Z",
+      "addedWaitTicks": 52,
+      "peers": [
+        {
+          "playerId": 1,
+          "leadFrames": 6,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-27T12:12:53.659Z",
+      "addedWaitTicks": 6,
+      "peers": [
+        {
+          "playerId": 1,
+          "leadFrames": 48,
+          "pendingPingAgeMs": 990
+        },
+        {
+          "playerId": 2,
+          "leadFrames": 11,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-27T12:12:58.669Z",
+      "addedWaitTicks": 2,
+      "peers": [
+        {
+          "playerId": 1,
+          "leadFrames": 5,
+          "pendingPingAgeMs": 0
+        },
+        {
+          "playerId": 2,
+          "leadFrames": 10,
+          "pendingPingAgeMs": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-10-27T12:13:13.674Z",
+      "addedWaitTicks": 2,
+      "peers": [
+        {
+          "playerId": 1,
+          "leadFrames": 8,
+          "pendingPingAgeMs": 0
+        },
+        {
+          "playerId": 2,
+          "leadFrames": 4,
+          "pendingPingAgeMs": 0
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "wire RTT terminates in client bridge; it excludes Warcraft native event-loop handling but still includes client scheduling and network queues.",
+    "No per-connection TCP retransmission history retained for this game; current host-wide counters cannot prove this game suffered TCP loss.",
+    "Do not attribute spikes to a particular ISP, user, or server network without correlated capture.",
+    "No production restart or configuration change performed for this investigation."
+  ]
+}

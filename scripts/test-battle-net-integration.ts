@@ -10,7 +10,7 @@ import { readMapName } from '../src/Main/services/map-name';
 const parent = path.resolve('_irys/work');
 await fs.ensureDir(parent);
 const work = await fs.mkdtemp(path.join(parent, 'battle-launch-'));
-const sourceMap = path.resolve('assets/quenching/camp/cfix.w3x');
+const sourceMap = path.resolve('assets/unpacked/camp/cfix.w3x');
 const hash = (file: string) => fs.readFile(file).then(bytes => crypto.createHash('sha256').update(bytes).digest('hex'));
 const originalHash = await hash(sourceMap);
 const f = {

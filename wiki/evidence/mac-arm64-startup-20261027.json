@@ -1,0 +1,22 @@
+{
+  "platform": "darwin",
+  "arch": "arm64",
+  "commit": "c43fc5b5b6ece2c24e06f1d3d48fca0a0a6ef661",
+  "archive": "/Users/runner/work/Quenching-Client/Quenching-Client/__Bin/QMClient-darwin-arm64.zip",
+  "bytes": 433297029,
+  "sha256": "f213aec397ab06391dd357500458fbb4695f17983e5301d2e49a519120e7517e",
+  "adHocSignatureVerified": true,
+  "nativeBindingsLoaded": true,
+  "extractedZipLaunched": true,
+  "renderer": {
+    "ready": true,
+    "title": "QuenChing Mod Client",
+    "url": "file:///Users/runner/work/Quenching-Client/Quenching-Client/_tmp/mac-roundtrip-arm64-ThkZaU/extracted/QMClient.app/Contents/Resources/app.asar/dist/renderer/index.html",
+    "buttons": 30,
+    "errorBoundary": false,
+    "gameChannel": "retail"
+  },
+  "workflowUrl": "https://github.com/QuenchingCommunity/Quenching-Client/actions/runs/40490174607",
+  "pullRequest": "https://github.com/QuenchingCommunity/Quenching-Client/pull/9",
+  "candidateArtifactUrl": "https://github.com/QuenchingCommunity/Quenching-Client/actions/runs/40490174607/artifacts/12727642181"
+}

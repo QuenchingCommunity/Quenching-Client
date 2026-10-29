@@ -1,0 +1,13 @@
+{
+  "atUtc": "2026-10-28T16:39:37.677174+00:00",
+  "previous": "/opt/quenching-match-player-301-lab/releases/20261027-cn1-chat-names",
+  "release": "/opt/quenching-match-player-301-lab/releases/20261029-unicode-computers",
+  "instanceBefore": "54489489-101f-4c53-9bb8-49563d1678c3",
+  "copiedFiles": {
+    "remote-duel-node.mjs": "0023152cf7155fb83ea7f6a337b0531d96f5d97cce2ef744001bf5f81a5a6be1",
+    "duel-w3gs.mjs": "3862e5736545cfda1afd0f9ae308cb8ab44b02ef3d67160026c5aa4c44b57a8d",
+    "map-player-layout.mjs": "1ecde96945570928c017169b16d66f203a8ca50a9be1f99949ac9407c35ee8f5"
+  },
+  "instanceAfter": "94793464-fb2f-4c08-b2e9-76049933b591",
+  "computerFill": true
+}

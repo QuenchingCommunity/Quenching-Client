@@ -69,6 +69,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: QMClient-darwin-${{ matrix.arch }}-candidate
-          path: __Bin/QMClient-darwin-${{ matrix.arch }}.zip
+          path: __Bin/QMClient-darwin-${{ matrix.arch }}.tar.7z
           if-no-files-found: error
           retention-days: 14

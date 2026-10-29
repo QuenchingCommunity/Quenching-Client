@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 import { parseSkinSections } from '../src/shared/skin-versions';
 import { resolveBranchModFile, setBranchModEnabledOnDisk } from '../src/Main/services/branch-mod-toggle';
+import { syncUnitSkinBattleMode } from '../src/Main/services/unit-skin-profile';
 
 const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-version-skins-'));
 const retail = path.join(fixture, '_retail_');
@@ -212,6 +213,17 @@ try {
   assert.match(parseSkinSections(await fs.readFile(deTarget, 'utf8')).Obla['portrait:de'], /HeroBladeMaster_portrait/i);
   await custom.remove(samuro.id);
   assert.equal(parseSkinSections(await fs.readFile(deTarget, 'utf8')).Obla['portrait:de'], undefined);
+  // Applying/resetting a skin while battle lighting is active keeps the
+  // selected model's scale as the reversible source, including special units.
+  config.modSettings = { resolvedVersion: 'v301', lighting: 'standard', improveReadability: true };
+  await service.apply('hd', [{ unitId: 'hmtt', skinId: 'fixture-battle', changes: [{ field: 'modelScale', value: '1.2' }] }]);
+  assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).hmtt['modelScale:hd'], '1.12');
+  await syncUnitSkinBattleMode(retail, 'hd', 'v30', { resolvedVersion: 'v301', improveReadability: false });
+  assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).hmtt['modelScale:hd'], '1.2');
+  await service.apply('hd', [{ unitId: 'hmtt', skinId: 'original', changes: [] }]);
+  assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).hmtt['modelScale:hd'], '0.77');
+  await service.apply('hd', [{ unitId: 'Hamg', skinId: 'fixture-hero', changes: [{ field: 'modelScale', value: '1.3' }] }]);
+  assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).Hamg['modelScale:hd'], '1.3');
   const savedAfterDelete = JSON.stringify(config.skinSelections);
   const original30 = await service.panel('hd');
   assert.equal(original30.originals.Hamg.find((field: { field: string }) => field.field === 'modelScale')?.value, '1');

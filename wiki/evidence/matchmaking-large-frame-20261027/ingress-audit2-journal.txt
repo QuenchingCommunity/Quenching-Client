@@ -1,0 +1,11 @@
+2026-10-27T15:12:07+00:00 RainYun-jskHCafV systemd[1]: Started quenching-udp-ingress-audit2.service - /usr/bin/timeout 60 /usr/bin/tcpdump -l -nn -tttt -i ens18 -c 64 "udp and (dst port 443 or dst port 6112) or (tcp dst port 443 and (tcp[tcpflags] & tcp-syn != 0))".
+2026-10-27T15:12:07+00:00 RainYun-jskHCafV timeout[104397]: tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+2026-10-27T15:12:07+00:00 RainYun-jskHCafV timeout[104397]: listening on ens18, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+2026-10-27T15:12:10+00:00 RainYun-jskHCafV timeout[104397]: 2026-10-27 15:12:10.570582 IP 51.79.169.141.36262 > 191.40.41.124.443: Flags [S], seq 2746406258, win 64240, options [mss 1460,sackOK,TS val 2671780154 ecr 0,nop,wscale 10], length 0
+2026-10-27T15:12:10+00:00 RainYun-jskHCafV timeout[104397]: 2026-10-27 15:12:10.573161 IP 216.250.97.31.40838 > 191.40.41.124.443: Flags [S], seq 3546752642, win 64440, options [mss 1432,sackOK,TS val 2757261821 ecr 0,nop,wscale 7], length 0
+2026-10-27T15:12:10+00:00 RainYun-jskHCafV timeout[104397]: 2026-10-27 15:12:10.710018 IP 192.210.169.56.52750 > 191.40.41.124.443: Flags [S], seq 3513905702, win 64240, options [mss 1460,sackOK,TS val 716334466 ecr 0,nop,wscale 8], length 0
+2026-10-27T15:13:07+00:00 RainYun-jskHCafV timeout[104397]: 3 packets captured
+2026-10-27T15:13:07+00:00 RainYun-jskHCafV timeout[104397]: 3 packets received by filter
+2026-10-27T15:13:07+00:00 RainYun-jskHCafV timeout[104397]: 0 packets dropped by kernel
+2026-10-27T15:13:07+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-ingress-audit2.service: Main process exited, code=exited, status=124/n/a
+2026-10-27T15:13:07+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-ingress-audit2.service: Failed with result 'exit-code'.

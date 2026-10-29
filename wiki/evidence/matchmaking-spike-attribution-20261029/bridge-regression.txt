@@ -1,0 +1,14 @@
+✔ QUIC carries native duplex joins, names, ally chat, actions and normal leave (1518.1166ms)
+✔ UDP blocked or TLS untrusted falls back before a one-use WSS ticket is consumed (3411.3315ms)
+✔ variable and maximum W3GS frames survive QUIC copies without duplicates (174.5409ms)
+✔ QUIC delegates invalid and replayed tickets to the original node without stealing the valid join (277.9842ms)
+✔ local game delay is separated from the WAN wait using the existing ping stamp (3.1449ms)
+✔ unrelated stamps and bounded sample retention do not change transport bytes (5.126ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5719.1003

@@ -1,0 +1,85 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "transport": "quic-copies-v2",
+  "tlsVerified": true,
+  "serverSelfAddress": false,
+  "publicQuicVerified": true,
+  "congestion": "bbr-standard",
+  "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+  "tickMs": 30,
+  "gameId": "396b2fea-3be2-4f2e-84c8-3be5172aa5cd",
+  "randomSeedVerified": true,
+  "seed": 2329526628,
+  "nativeComputerSlotsConfirmed": true,
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "controlDurationSeconds": 90,
+  "controlElapsedMs": 90009.0546,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true,
+  "transportEvents": [
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "stats": {
+        "sentFrames": 3119,
+        "duplicateCopies": 1760,
+        "fastCopiesWon": 4,
+        "copyBytes": 79073,
+        "copyBudgetSkips": 2595,
+        "copyCoalesced": 3118,
+        "copyBlockMaxUs": 0,
+        "lockWaitMaxUs": 0,
+        "frameSendMaxUs": 1519
+      }
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "closed"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "stats": {
+        "sentFrames": 3117,
+        "duplicateCopies": 1772,
+        "fastCopiesWon": 4,
+        "copyBytes": 78994,
+        "copyBudgetSkips": 2589,
+        "copyCoalesced": 3116,
+        "copyBlockMaxUs": 0,
+        "lockWaitMaxUs": 0,
+        "frameSendMaxUs": 2459
+      }
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "closed"
+    }
+  ]
+}

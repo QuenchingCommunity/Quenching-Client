@@ -1,0 +1,26 @@
+{
+  "time": "2026-10-28T22:52:46.7034935+08:00",
+  "items": 27,
+  "files": 44550.0,
+  "bytes": 6450584956.0,
+  "GiB": 6.008,
+  "verifiedRecycleRecords": 27,
+  "permanentDeletion": false,
+  "recycleBinEmptied": false,
+  "protected": [
+    "src",
+    "assets",
+    ".git",
+    "node_modules dependency packages",
+    "analysis_outputs/archives",
+    "__Bin",
+    "backup",
+    "_backup",
+    "_irys",
+    "_ref",
+    "experiments source",
+    "r8/r8.1 known-good clients",
+    "r9.2 current client",
+    "retained ZIP/7z distributions"
+  ]
+}

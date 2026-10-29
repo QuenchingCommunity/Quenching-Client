@@ -46,6 +46,7 @@ try {
   module.exports.registerLaunchHandlers();
   await fs.outputFile(source, 'source fixture');
   await fs.ensureDir(retail);
+  await fs.outputFile(path.join(retail, '.build.info'), 'Active!DEC:1|Version!STRING:0\n1|3.0.1.24368\n');
   fixture.install = async (_sources: string[], _target: string, _progress: unknown, beforeInstall: () => Promise<void>) => {
     if (fixture.fail) throw new Error('fixture extraction failed');
     await beforeInstall();
@@ -89,6 +90,19 @@ try {
   assert.equal(fixture.config.channelModEnabled.retail, true);
   assert.equal(await fs.readFile(resource, 'utf8'), 'new package skin');
   assert.equal(fixture.profiles, 2, 'explicitly enabling MOD applies the installed resource settings');
+  // Unsupported builds must be rejected before extraction, journal recovery or enabling.
+  await toggle(false);
+  const offJournal = await fs.readFile(path.join(retail, '.quenching', 'branch-toggle.json'), 'utf8');
+  await fs.outputFile(path.join(retail, '.build.info'), 'Active!DEC:1|Version!STRING:0\n1|2.0.3.23000\n');
+  fixture.install = async () => { throw new Error('unsupported game reached extraction'); };
+  console.error = () => {};
+  try { failed = await install(); } finally { console.error = originalError; }
+  assert.equal(failed.success, false);
+  assert.match(failed.error, /Quenching 3\.7 requires/);
+  await assert.rejects(toggle(true), /Quenching 3\.7 requires/);
+  assert.equal(fixture.config.channelModEnabled.retail, false);
+  assert.equal(await fs.readFile(path.join(retail, '.quenching', 'branch-toggle.json'), 'utf8'), offJournal);
+  assert.equal(await fs.readFile(path.join(retail, 'QMoff', 'units', 'unitskin.txt'), 'utf8'), 'new package skin');
   console.log('PASS: installing retains MOD on/off, off resources stay in QMoff, failed extraction leaves the switch unchanged, explicit enabling applies resources');
 } finally {
   delete (globalThis as any).__packageSwitchFixture;

@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import { getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import path from 'path';
@@ -31,8 +32,8 @@ export function registerGlowHandlers() {
             const glowFile = path.join(baseDir, GLOW_RELATIVE);
 
             if (enabled) {
-                const assetsDir = await AssetSyncService.getAssetsDir();
-                const source = path.join(assetsDir, 'quenching', 'tx', ASSET_GLOW_NAME);
+                const assetsDir = await AssetSyncService.getAssetsDir(["tx"]);
+                const source = resourcePath(path.join(assetsDir, 'quenching'), 'tx', ASSET_GLOW_NAME);
                 if (!(await fs.pathExists(source))) {
                     throw new Error(`光晕资源不存在: ${source}`);
                 }

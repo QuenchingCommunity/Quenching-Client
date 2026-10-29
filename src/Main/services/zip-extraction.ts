@@ -12,6 +12,9 @@ export interface ZipExtractionOptions {
 /** Read only the ZIP directory. A later duplicate replaces the earlier entry
  * and therefore needs space only once in the extraction destination. */
 export async function getZipUncompressedBytes(zipPath: string, stripLeadingDirectory?: string | string[]): Promise<number> {
+  const { resourcePackageBytes } = await import('./bundled-packages');
+  const bundled = await resourcePackageBytes(zipPath);
+  if (bundled !== null) return bundled;
   return new Promise((resolve, reject) => {
     yauzl.open(zipPath, { lazyEntries: true }, (error, zip) => {
       if (error || !zip) return reject(error || new Error('Cannot open ZIP archive'));
@@ -45,6 +48,9 @@ export async function getZipUncompressedBytes(zipPath: string, stripLeadingDirec
 /** Extract one entry at a time. Duplicate archive paths use the last entry,
  * matching ordinary ZIP extraction, while traversal and link entries fail. */
 export async function extractZipArchive(zipPath: string, destination: string, options: ZipExtractionOptions = {}): Promise<number> {
+  const { extractResourcePackage } = await import('./bundled-packages');
+  const bundled = await extractResourcePackage(zipPath, destination, options);
+  if (bundled !== null) return bundled;
   const root = path.resolve(destination);
   await fs.ensureDir(root);
   return new Promise<number>((resolve, reject) => {

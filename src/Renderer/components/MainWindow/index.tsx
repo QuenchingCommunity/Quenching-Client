@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { afterResourceFirstPaint } from '../../../shared/resource-startup';
 import { Button, Layout, Typography, message, Modal, Spin } from 'antd';
 import {
   PlayCircleOutlined,
@@ -15,7 +16,8 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from '../../utils/i18n';
 import { useWar3Detector } from '../../hooks/useWar3Detector';
-import { useWar3Settings } from '../../hooks/useWar3Settings';
+import { useWar3Settings, type ModSettings } from '../../hooks/useWar3Settings';
+import { renderingPresetSettings, matchesRenderingPreset } from '../../../shared/rendering-presets';
 import { useSound } from '../../hooks/useSound';
 import { BackgroundVideo } from './BackgroundVideo';
 import { LanguageSelector } from './LanguageSelector';
@@ -30,9 +32,11 @@ import { FullPackageInstallModal } from './FullPackageInstallModal';
 import { ForumPanel } from './ForumPanel';
 import { useGlobalLoading } from '../GlobalLoadingProvider';
 import { APP_VERSION } from '../../version';
+import { IS_TEST_RELEASE } from '../../../shared/local-release';
 import { isNewerClientVersion } from '../../../shared/client-version';
 import { GameChannel, gameChannelFolder } from '../../../shared/game-channel';
 import { GraphicsSelection, VersionSelection, isVersion30OrLater } from '../../../shared/mod-profile';
+import { supportedWar3Version } from '../../../shared/war3-support';
 import { activeSkinArtSet } from '../../../shared/active-skin-art-set';
 import { buildCombinedUpdatePrompt } from '../../../shared/combined-update-prompt';
 import { reportUpdateFailure } from '../../utils/update-feedback';
@@ -123,6 +127,7 @@ const formatUpdateBytes = (bytes: number) => {
 };
 
 export const MainWindow: React.FC = () => {
+  const [launchingOfflineTest,setLaunchingOfflineTest]=useState(false);
   const { t } = useTranslation();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -144,6 +149,25 @@ export const MainWindow: React.FC = () => {
   const promptedUpdateSignature = useRef('');
   const combinedUpdatePromptOpen = useRef(false);
   const { showLoading, hideLoading, updateLoading } = useGlobalLoading();
+  const [resourcePreparation,setResourcePreparation]=useState<BundledResourceStartupStatus|null>(null);
+
+  useEffect(()=>{
+    const api=window.electronAPI;
+    if(!api?.startBundledResourcePreparation)return;
+    let active=true,lastRevision=-1;
+    const receive=(status:BundledResourceStartupStatus)=>{
+      if(!active || status.revision<lastRevision)return;
+      lastRevision=status.revision;
+      // Warm background checks never change another operation's loading dialog.
+      setResourcePreparation(previous=>status.firstRun && status.phase==='preparing'?status:previous?null:previous);
+    };
+    const unsubscribe=api.onBundledResourceProgress?.(receive);
+    const cancelPaint=afterResourceFirstPaint(window,()=>{
+      if(active)void api.startBundledResourcePreparation().then(receive)
+        .catch(error=>console.warn('[Resources] Startup handshake failed:',error));
+    });
+    return ()=>{active=false;cancelPaint();unsubscribe?.();};
+  },[]);
 
   // War3 检测和MOD安装
   const {
@@ -240,8 +264,9 @@ export const MainWindow: React.FC = () => {
   // 同步全局 Loading 状态
   useEffect(() => {
     const handleProfileProgress = (event: Event) => {
-      const detail = (event as CustomEvent<{ step?: string; percent?: number }>).detail;
-      if (!detail?.step) return;
+      const detail = (event as CustomEvent<{ step?: string; percent?: number; operation?: string }>).detail;
+      // The hook maps request-scoped substeps into the complete preset operation.
+      if (!detail?.step || detail.operation) return;
       setApplyStatus((prev) => prev ? {
         ...prev,
         detail: profileStepText(detail.step, t),
@@ -253,7 +278,9 @@ export const MainWindow: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    if (isModToggling) {
+    if (resourcePreparation) {
+      showLoading(t('resources.startup.title'),resourcePreparation.percent,t('resources.startup.detail'));
+    } else if (isModToggling) {
       showLoading(modToggleStatus?.message || t('msg.settings.updating'), modToggleStatus?.percent);
     } else if (installingFullPackage) {
       showLoading(installProgress?.message || t('msg.install.full_package'), installProgress?.percent);
@@ -284,7 +311,7 @@ export const MainWindow: React.FC = () => {
     } else {
       hideLoading();
     }
-  }, [isModToggling, modToggleStatus, installingFullPackage, installProgress, updatingMod, modUpdateProgress, updatingClient, clientUpdateProgress, switchingGraphics, switchingChannel, applyStatus, showLoading, hideLoading, t]);
+  }, [resourcePreparation, isModToggling, modToggleStatus, installingFullPackage, installProgress, updatingMod, modUpdateProgress, updatingClient, clientUpdateProgress, switchingGraphics, switchingChannel, applyStatus, showLoading, hideLoading, t]);
 
   // 窗口控制
   const handleMinimize = useCallback(() => {
@@ -545,7 +572,8 @@ export const MainWindow: React.FC = () => {
 
   const graphicsMode = activeSkinArtSet(modSettings?.graphicsSelection, war3Settings?.hd, modSettings?.classicMode, war3Settings?.detectedGraphics);
   const selectedGraphics = modSettings.classicMode ? 'sd' : modSettings.graphicsSelection;
-  const handleProfileChange = async (selection: { versionSelection?: VersionSelection; graphicsSelection?: GraphicsSelection }) => {
+  const detectedVersionTier = supportedWar3Version(detectedVersion.split('.').map(Number));
+  const handleProfileChange = async (selection: Partial<ModSettings>) => {
     if (switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod) return;
     const war3Path = currentInstallation?.path || await window.electronAPI?.getConfig?.('war3Path');
     if (!war3Path) {
@@ -555,10 +583,10 @@ export const MainWindow: React.FC = () => {
 
     const nextVersion = selection.versionSelection ?? modSettings.versionSelection;
     const nextGraphics = selection.graphicsSelection ?? selectedGraphics;
-    const deAllowed = isVersion30OrLater(nextVersion) || (nextVersion === 'auto' && /^3\./.test(detectedVersion));
+    const deAllowed = isVersion30OrLater(nextVersion) || (nextVersion === 'auto' && isVersion30OrLater(detectedVersionTier));
     if (selection.graphicsSelection === 'de' && !deAllowed) return;
     // Switching to an older build must also leave DE in the same resource transition.
-    const change: { versionSelection?: VersionSelection; graphicsSelection?: GraphicsSelection; classicMode?: boolean } = nextGraphics === 'de' && !deAllowed
+    const change: Partial<ModSettings> = nextGraphics === 'de' && !deAllowed
       ? { ...selection, graphicsSelection: 'hd' as const }
       : selection;
     // The retired Settings toggle parked whole asset directories. Migrate that
@@ -570,10 +598,9 @@ export const MainWindow: React.FC = () => {
 
     const versionLabel = (value: VersionSelection) => {
       if (value === 'auto') return t('main.home.auto', '自动检测');
-      if (value === 'v1') return t('main.home.v1', '1.36 及以下');
-      if (value === 'v20') return '2.0–2.02';
-      if (value === 'v203') return '2.03–2.04';
-      return value === 'v301' ? t('main.home.v301', '3.0.1 及以上') : t('main.home.v30', '3.0');
+      if (value === 'v204') return '2.04';
+      if (value === 'v30') return '3.0';
+      return t('main.home.v301', '最新（3.01）');
     };
     const graphicsLabel = (value: GraphicsSelection) => {
       if (value === 'sd') return t('main.home.sd', 'SD · 经典');
@@ -1003,7 +1030,7 @@ export const MainWindow: React.FC = () => {
         ? await window.electronAPI.selectDirectory(t('msg.install.select_folder')) : null;
       const zipPaths = source === 'folder' ? (folder ? [folder] : []) : await window.electronAPI.selectFiles({
         title: t('install.fullPackage.selectZip'),
-        filters: [{ name: 'Zip Archive', extensions: ['zip'] }]
+        filters: [{ name: 'ZIP / RAR / 7z', extensions: ['zip', 'rar', '7z'] }]
       });
 
       if (!zipPaths.length) {
@@ -1206,9 +1233,11 @@ export const MainWindow: React.FC = () => {
           <section className="home-hero" aria-label={t('main.title.primary')}>
             <div className="home-hero-top">
               <span className="home-kicker">{t('main.title.secondary')}</span>
-              <span className="home-channel-badge" title={t('main.home.modVersion', 'MOD version')}>
-                {installedModState ? `MOD v${(installedModState.displayVersion || installedModState.version).replace(/^v/i, '')}`
-                  : isFullPackageInstalled ? `MOD ${t('main.home.installed', '已安装')}` : 'MOD —'}
+              <span className="home-channel-badge" title={[
+                `${t('main.home.clientUpdateCurrent', '当前客户端')} ${APP_VERSION}`,
+                installedModState && `${t('main.home.modVersion', 'MOD version')} v${(installedModState.displayVersion || installedModState.version).replace(/^v/i, '')}`,
+              ].filter(Boolean).join(' · ')}>
+                {APP_VERSION}
               </span>
             </div>
             <div className="home-brand">
@@ -1253,6 +1282,14 @@ export const MainWindow: React.FC = () => {
                 </button>
               </div>
               <small className="home-mod-install-hint">{t('main.home.modInstallHint')}</small>
+              {!isFullPackageInstalled && branchModStates?.[gameChannel]?.installed === false && installSpace?.insufficient && (
+                <div className="home-space-warning" role="alert">
+                  {installSpace.estimate ? t('main.space.low') : t('main.space.warning')}:
+                  {' '}{(installSpace.freeBytes / 1024 ** 3).toFixed(1)} GiB {t('main.space.remaining')},
+                  {' '}{t(installSpace.estimate ? 'main.space.reserve' : 'main.space.required')}
+                  {' '}{(installSpace.requiredBytes / 1024 ** 3).toFixed(1)} GiB
+                </div>
+              )}
             </div>
           </section>
 
@@ -1271,7 +1308,7 @@ export const MainWindow: React.FC = () => {
                   <div className="home-update-notice">
                     <div>
                       <strong>{t('main.home.clientUpdateAvailable', '发现新版客户端')} · {clientUpdateVersion}</strong>
-                      <small>{t('main.home.clientUpdateCurrent', '当前客户端')} {clientUpdateStatus?.currentVersion || APP_VERSION}</small>
+                      <small>{t('main.home.clientUpdateCurrent', '当前客户端')} {APP_VERSION}</small>
                     </div>
                     <div className="home-update-actions">
                       {clientUpdateStatus?.decision === 'available' && (
@@ -1330,11 +1367,9 @@ export const MainWindow: React.FC = () => {
               <div className="home-options home-options-version" role="group" aria-label={t('main.home.gameVersion', 'Warcraft III version')}>
                 {([
                   ['auto', t('main.home.auto', 'Auto')],
-                  ['v1', t('main.home.v1', '1.36 or earlier')],
-                  ['v20', '2.0–2.02'],
-                  ['v203', '2.03–2.04'],
-                  ['v30', t('main.home.v30', '3.0')],
-                  ['v301', t('main.home.v301', '3.0.1 or later')],
+                  ['v204', '2.04'],
+                  ['v30', '3.0'],
+                  ['v301', t('main.home.v301', 'Latest (3.01)')],
                 ] as [VersionSelection, string][]).map(([value, label]) => (
                   <button key={value} type="button"
                     className={`home-option ${modSettings.versionSelection === value ? 'is-active' : ''}`}
@@ -1358,30 +1393,38 @@ export const MainWindow: React.FC = () => {
                 ] as [GraphicsSelection, string][]).map(([value, label]) => {
                   const deUnavailable = value === 'de' &&
                     !isVersion30OrLater(modSettings.versionSelection) &&
-                    !(modSettings.versionSelection === 'auto' && /^3\./.test(detectedVersion));
+                    !(modSettings.versionSelection === 'auto' && isVersion30OrLater(detectedVersionTier));
                   return (
                     <button key={value} type="button"
                       className={`home-option ${selectedGraphics === value ? 'is-active' : ''}`}
                       aria-pressed={selectedGraphics === value}
-                      title={deUnavailable ? t('main.home.deRequires30', 'DE requires Warcraft III 3.0 or later') : undefined}
+                      title={deUnavailable ? t('main.home.deRequires30', 'DE requires Latest (3.01)') : undefined}
                       disabled={!currentInstallation || switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod || deUnavailable}
                       onClick={() => void handleProfileChange({ graphicsSelection: value })}>{label}</button>
                   );
                 })}
               </div>
-              <small className="home-profile-note">{selectedGraphics === 'de'
-                ? t('main.home.deNote', 'DE uses the definitive resource set; classic mode is HD-only.')
-                : t('main.home.profileNote', 'Changing this applies the matching MOD resources.')}</small>
+              {selectedGraphics === 'de' && (
+                <small className="home-profile-note">{t('main.home.deNote', 'DE uses the definitive resource set; classic mode is HD-only.')}</small>
+              )}
             </div>
 
-            {installSpace?.insufficient && (
-              <div className="home-space-warning" role="alert">
-                {installSpace.estimate ? t('main.space.low') : t('main.space.warning')}:
-                {' '}{(installSpace.freeBytes / 1024 ** 3).toFixed(1)} GiB {t('main.space.remaining')},
-                {' '}{t(installSpace.estimate ? 'main.space.reserve' : 'main.space.required')}
-                {' '}{(installSpace.requiredBytes / 1024 ** 3).toFixed(1)} GiB
+            <div className="home-control-group">
+              <div className="home-group-heading">
+                <strong>04&nbsp; {t('main.home.preset')}</strong>
               </div>
-            )}
+              <div className="home-options" role="group" aria-label={t('main.home.preset')}>
+                {(['standard', 'battle'] as const).map(preset => (
+                  <button key={preset} type="button"
+                    className={`home-option ${matchesRenderingPreset(modSettings, preset) ? 'is-active' : ''}`}
+                    aria-pressed={matchesRenderingPreset(modSettings, preset)}
+                    disabled={!currentInstallation || selectedGraphics === 'sd' || switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod || updatingClient}
+                    onClick={() => void handleProfileChange(renderingPresetSettings(preset))}>
+                    {t(preset === 'standard' ? 'main.home.preset.standard' : 'main.home.preset.battle')}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="home-launch-row">
               <div className="home-install-actions">
@@ -1397,11 +1440,27 @@ export const MainWindow: React.FC = () => {
                   {checkingFullPackageUpdate ? t('msg.update.checking', '正在检查更新...') : t('main.home.checkFullPackageUpdate', '检查完整版更新')}
                 </button>
               </div>
+              <div className="home-launch-buttons">
+              {IS_TEST_RELEASE && navigator.platform.startsWith('Win') && (
+                <Button className="home-offline-test-button" loading={launchingOfflineTest}
+                  disabled={launchingOfflineTest || !hasWar3Directory || gameChannel!=='retail' || installingFullPackage || switchingGraphics || switchingChannel || isModToggling || updatingMod || updatingClient}
+                  title={t('main.offlineTest.hint')}
+                  onClick={async()=>{
+                    playMain();setLaunchingOfflineTest(true);
+                    try{
+                      if(!window.electronAPI?.launchOfflineStarterMap)throw new Error(t('main.offlineTest.unavailable'));
+                      await window.electronAPI.launchOfflineStarterMap();
+                      message.success(t('msg.game.start.success'));
+                    }catch(error){message.error(`${t('msg.game.start.failed')}: ${error instanceof Error?error.message:String(error)}`);}
+                    finally{setLaunchingOfflineTest(false);}
+                  }}>{t('main.offlineTest.button')}</Button>
+              )}
               <Button type="primary" icon={<PlayCircleOutlined />} className="home-launch-button"
                 onClick={() => void handleStartGame()} onMouseEnter={playHoverSound}
-                disabled={(!!branchModStates && !branchModStates[gameChannel].available) || installingFullPackage || switchingGraphics || switchingChannel || isModToggling || updatingMod}>
+                disabled={launchingOfflineTest || (!!branchModStates && !branchModStates[gameChannel].available) || installingFullPackage || switchingGraphics || switchingChannel || isModToggling || updatingMod}>
                 {t('main.btn.start')}
               </Button>
+              </div>
             </div>
           </section>
         </div>
@@ -1424,10 +1483,20 @@ export const MainWindow: React.FC = () => {
         open={activeModal === 'settings'}
         onClose={closeModal}
         isFullPackageInstalled={isFullPackageInstalled}
-        onModDeleted={() => {
-          setInstalledModState(null);
-          setModUpdateStatus(null);
+        onModDeleteFinished={(deleted) => {
+          if (deleted) {
+            setModEnabledUI(false);
+            setIsFullPackageInstalled(false);
+            setBranchModStates(previous => previous ? {
+              ...previous, [gameChannel]: { ...previous[gameChannel], installed: false, enabled: false },
+            } : previous);
+            setInstalledModState(null);
+            setModUpdateStatus(null);
+            closeModal();
+          }
           void refreshFullPackageStatus();
+          void refreshBranchModStates();
+          if (currentInstallation?.path) void loadModSettings(currentInstallation.path);
         }}
       />
 

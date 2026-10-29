@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 /**
  * Custom campaign (.w3n) unpack + per-map merge.
  * Mirrors legacy Quenching client (MainWindow.xaml.cs w3nloader): each scenario map must
@@ -260,7 +261,7 @@ export async function extractCampaignW3nMerged(
     let workRoot = '';
     report({ phase: 'prepare', percent: 2 });
 
-    const ctempPath = path.join(await AssetSyncService.getAssetsDir(), 'quenching', 'camp', 'ctemp.w3x');
+    const ctempPath = resourcePath(path.join(await AssetSyncService.getAssetsDir(["camp"]), 'quenching'), 'camp', 'ctemp.w3x');
 
     if (!(await fs.pathExists(ctempPath))) {
         throw new Error(`Missing merge template ctemp.w3x at ${ctempPath}`);

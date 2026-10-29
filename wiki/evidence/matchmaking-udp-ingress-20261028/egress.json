@@ -1,0 +1,15 @@
+{
+  "atUtc": "2026-10-27T18:13:47.894665+00:00",
+  "dnsUdpEgress": [
+    {
+      "resolver": "1.1.1.1",
+      "reply": true,
+      "bytes": 61
+    },
+    {
+      "resolver": "8.8.8.8",
+      "reply": true,
+      "bytes": 61
+    }
+  ]
+}

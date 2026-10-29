@@ -18,7 +18,7 @@ try {
   await fs.outputFile(own(target, 'player-extra.bls'), 'player custom shader');
   await fs.outputJson(path.join(target, marker), { schema: 1 });
 
-  // No file contents are read while syncing.
+  // Equality checks must not add a separate streaming/hash pass.
   const readStream = fs.createReadStream;
   (fs as any).createReadStream = () => { throw new Error('Resource sync must not hash files'); };
   try {
@@ -31,8 +31,22 @@ try {
   assert.equal(await fs.readFile(own(target, 'player-extra.bls'), 'utf8'), 'player custom shader');
   assert.equal(await fs.pathExists(path.join(target, marker)), false);
 
+  const unchanged = own(target, 'hd.bls');
+  const timestamp = new Date('2020-01-01T00:00:00Z');
+  await fs.utimes(unchanged, timestamp, timestamp);
+  await syncBundledResourceFiles(target, [{ source: hd }], [{ source: hd }, { source: de }], marker);
+  assert.equal((await fs.stat(unchanged)).mtimeMs, timestamp.getTime(), 'identical resources must not be deleted or rewritten');
+
   // Switching variants deletes known paths the new variant lacks; unknown files stay.
-  await syncBundledResourceFiles(target, [{ source: de }], [{ source: hd }, { source: de }], marker);
+  const progress: number[][]=[];
+  await syncBundledResourceFiles(target, [{ source: de }], [{ source: hd }, { source: de }], marker, {
+    onProgress:(completed,total)=>{
+      progress.push([completed,total]);
+      if(completed>=1)assert(!fs.existsSync(own(target,'fog.bls')),'deletion reported only after completion');
+      if(completed===2)assert.equal(fs.readFileSync(own(target,'hd.bls'),'utf8'),'DE supplied by client','copy reported only after completion');
+    },
+  });
+  assert.deepEqual(progress,[[0,2],[1,2],[2,2]]);
   assert.equal(await fs.readFile(own(target, 'hd.bls'), 'utf8'), 'DE supplied by client');
   assert.equal(await fs.pathExists(own(target, 'fog.bls')), false);
   assert.equal(await fs.readFile(own(target, 'player-extra.bls'), 'utf8'), 'player custom shader');

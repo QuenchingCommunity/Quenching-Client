@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "3.0.1.24371",
+  "sourceLayer": "war3.w3mod:_de.w3mod:",
+  "sources": {
+    "dncashenvale/dncashenvaleunit/dncashenvaleunit.mdl": "a884a3b1f2ca55d692e845bfd14aa78288f2b5c4c0fa7da8d0aa1355aa96237e",
+    "dncdalaran/dncdalaranunit/dncdalaranunit.mdl": "501f25c4d538903dc366e2819a6cd3ee0a951f659fa0da3e4d80627ac1b13262",
+    "dncfelwood/dncfelwoodunit/dncfelwoodunit.mdl": "f7b6a102fb8f71132a381c9c24237689b844e390ad82241d32c6fefcbf480a12",
+    "dnclordaeron/dnclordaeronunit/dnclordaeronunit.mdl": "8c12269e38d8a37d7df9cf0af283575d1d0a0192924d050b8a9f28b303fdbe4e"
+  },
+  "objectId": 0,
+  "interval": [
+    3367,
+    63367
+  ],
+  "keyframes": [
+    {
+      "frame": 3367,
+      "value": [
+        0.2649349272251129,
+        -0.2060609608888626,
+        0,
+        0.9419917464256287
+      ]
+    },
+    {
+      "frame": 14462,
+      "value": [
+        0.2519140839576721,
+        -0.19264008104801178,
+        0,
+        0.9483823776245117
+      ]
+    },
+    {
+      "frame": 18951,
+      "value": [
+        0.3052469491958618,
+        -0.2034979611635208,
+        0,
+        0.9302757382392883
+      ]
+    },
+    {
+      "frame": 33426,
+      "value": [
+        0.21212102472782135,
+        -0.12121201306581497,
+        0,
+        0.969697117805481
+      ]
+    },
+    {
+      "frame": 48888,
+      "value": [
+        0.3033299446105957,
+        -0.23110893368721008,
+        0,
+        0.9244347810745239
+      ]
+    },
+    {
+      "frame": 52980,
+      "value": [
+        0.2519140839576721,
+        -0.19264008104801178,
+        0,
+        0.9483823776245117
+      ]
+    }
+  ]
+}

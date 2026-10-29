@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './BackgroundVideo.module.less';
+import { resolveThemeMedia, reportThemeMediaError } from '../../utils/theme-media';
 
 // 检查 styles 是否存在，避免 undefined 错误
 const safeStyles = styles || {
@@ -19,19 +20,16 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
   opacity = 0.65,
   paused = false
 }) => {
-  const resolveAssetPath = (rel: string) => {
-    const p = rel.startsWith('/') ? rel.slice(1) : rel;
-    if (window.location.protocol === 'file:') {
-      return new URL(p, document.baseURI).href;
-    }
-    return rel.startsWith('/') ? rel : `/${rel}`;
-  };
-  const [currentTheme, setCurrentTheme] = useState('magicstorm');
+  const resolveAssetPath = (source: string) => resolveThemeMedia(source, document.baseURI);
+  const failedSources = useRef(new Set<string>());
   const [videoSources, setVideoSources] = useState({
     active: '',
     next: ''
   });
   const [fadeState, setFadeState] = useState<'idle' | 'fading'>('idle');
+  const latestSources = useRef(videoSources);
+  latestSources.current = videoSources;
+  const sourceRequest = useRef(0);
 
   const videoRef1 = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);
@@ -50,6 +48,8 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
 
   // 初始化加载
   useEffect(() => {
+    let cancelled = false;
+    const request = ++sourceRequest.current;
     const loadTheme = async () => {
       console.log('[BackgroundVideo] Starting to load theme...');
       try {
@@ -60,7 +60,6 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
         }
 
         console.log('[BackgroundVideo] Current theme ID:', themeId);
-        setCurrentTheme(themeId);
 
         let initialSrc = '';
         if (themeId.startsWith('custom-')) {
@@ -72,21 +71,24 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
         }
 
         console.log('[BackgroundVideo] Setting initial video source:', initialSrc);
+        if (cancelled || request !== sourceRequest.current) return;
         setVideoSources({ active: resolveAssetPath(initialSrc), next: '' });
       } catch (error) {
+        if (cancelled || request !== sourceRequest.current) return;
         console.error('[BackgroundVideo] Failed to load theme, falling back to magicstorm:', error);
         setVideoSources({ active: resolveAssetPath(themeVideos['magicstorm']), next: '' });
       }
     };
 
     loadTheme();
+    return () => {cancelled=true;};
   }, []);
 
   // 只给当前视频设置资源；播放由可见性统一控制。
   useEffect(() => {
     const activeRef = activeVideo === 1 ? videoRef1 : videoRef2;
     if (activeRef.current && videoSources.active) {
-      if (!activeRef.current.src.endsWith(videoSources.active)) {
+      if (activeRef.current.src !== videoSources.active) {
         activeRef.current.src = videoSources.active;
         activeRef.current.load();
       }
@@ -117,6 +119,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
   useEffect(() => {
     const handleThemeChange = async (e: any) => {
       if (e.detail) {
+        const request=++sourceRequest.current;
         const newThemeId = e.detail;
         let newSrc = '';
 
@@ -128,14 +131,14 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
           newSrc = themeVideos[newThemeId] || themeVideos['magicstorm'];
         }
 
-        setVideoSources(prev => {
-          if (newSrc !== prev.active) {
-            setFadeState('fading');
-            setCurrentTheme(newThemeId);
-            return { ...prev, next: (window.location.protocol === 'file:' ? new URL(newSrc.startsWith('/') ? newSrc.slice(1) : newSrc, document.baseURI).href : (newSrc.startsWith('/') ? newSrc : `/${newSrc}`)) };
-          }
-          return prev;
-        });
+        if(request!==sourceRequest.current)return;
+        const resolved=resolveAssetPath(newSrc),previous=latestSources.current;
+        if(resolved===previous.next)return;
+        if(resolved===previous.active){
+          if(previous.next){setVideoSources({...previous,next:''});setFadeState('idle');}
+          return;
+        }
+        setFadeState('fading');setVideoSources({...previous,next:resolved});
       }
     };
 
@@ -150,26 +153,54 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
       const currentVideo = activeVideo === 1 ? videoRef1.current : videoRef2.current;
 
       if (nextVideo && currentVideo) {
-        nextVideo.src = videoSources.next;
-        nextVideo.load();
-
+        let cancelled = false;
         const onCanPlay = () => {
           nextVideo.play().then(() => {
+            if (cancelled) return;
             // 切换激活视频
             currentVideo.pause();
             setActiveVideo(activeVideo === 1 ? 2 : 1);
             setVideoSources({ active: videoSources.next, next: '' });
-            setTimeout(() => {
-              setFadeState('idle');
-            }, 1000); // 1s 渐变时间
-          }).catch(console.error);
+          }).catch(error => {
+            if (!cancelled && error.name !== 'AbortError') {
+              console.warn('[BackgroundVideo] Theme switch playback failed:', error);
+              setVideoSources(previous => ({...previous,next:''}));setFadeState('idle');
+            }
+          });
         };
-
+        const onError = () => {
+          reportThemeMediaError(nextVideo);
+          setVideoSources(previous => ({...previous,next:''}));setFadeState('idle');
+        };
         nextVideo.addEventListener('canplay', onCanPlay, { once: true });
-        return () => nextVideo.removeEventListener('canplay', onCanPlay);
+        nextVideo.addEventListener('error', onError, { once: true });
+        nextVideo.src = videoSources.next;
+        return () => {cancelled=true;nextVideo.removeEventListener('canplay',onCanPlay);nextVideo.removeEventListener('error',onError);};
       }
     }
   }, [fadeState, videoSources.next, paused]);
+
+  useEffect(() => {
+    if (fadeState !== 'fading' || videoSources.next) return;
+    const timer = setTimeout(() => setFadeState('idle'), 1000);
+    return () => clearTimeout(timer);
+  }, [fadeState, videoSources.next]);
+
+  useEffect(() => {
+    if (fadeState !== 'idle') return;
+    const inactive = activeVideo === 1 ? videoRef2.current : videoRef1.current;
+    if (inactive?.hasAttribute('src')) {inactive.pause();inactive.removeAttribute('src');inactive.load();}
+  }, [fadeState, activeVideo]);
+
+  const handleActiveError = (video:HTMLVideoElement, slot:1|2) => {
+    if(slot!==activeVideo)return; // The pending-switch listener preserves the current theme.
+    reportThemeMediaError(video);
+    failedSources.current.add(video.currentSrc||video.src);
+    const fallback=resolveAssetPath(themeVideos.magicstorm);
+    video.pause();video.removeAttribute('src');video.load();
+    setVideoSources({active:failedSources.current.has(fallback)?'':fallback,next:''});
+    setFadeState('idle');
+  };
 
   return (
     <div
@@ -206,7 +237,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
         playsInline
         preload="auto"
         onLoadedData={() => console.log('[BackgroundVideo] Video 1 loaded data')}
-        onError={(e) => console.error('[BackgroundVideo] Video 1 error:', e)}
+        onError={(e) => handleActiveError(e.currentTarget,1)}
       />
 
       {/* 视频层 2 */}
@@ -230,7 +261,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = ({
         playsInline
         preload="auto"
         onLoadedData={() => console.log('[BackgroundVideo] Video 2 loaded data')}
-        onError={(e) => console.error('[BackgroundVideo] Video 2 error:', e)}
+        onError={(e) => handleActiveError(e.currentTarget,2)}
       />
 
       {/* 遮罩层 */}

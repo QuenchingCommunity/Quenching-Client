@@ -13,6 +13,7 @@ import { repairImportedModelTextures } from './custom-model-textures';
 import { isBranchModDisabled, prepareBranchModFileWrite, resolveBranchModFile } from './branch-mod-toggle';
 import { ModelResourceService, resourceCandidates } from './model-resource-service';
 import { associatePortrait } from './skin-portrait';
+import { applyBattleUnitScales, battleUnitScalesEnabled } from '../../shared/battle-unit-scale';
 
 class VersionSkinService {
   private queue: Promise<unknown> = Promise.resolve();
@@ -33,7 +34,7 @@ class VersionSkinService {
       const file = storage.openFile('war3.w3mod:units\\unitskin.txt');
       try { text = file.readAll().toString('utf8'); fromCasc = true; } finally { file.close(); }
     } catch {
-      const assets = await AssetSyncService.getAssetsDir();
+      const assets = await AssetSyncService.getAssetsDir(["skin"]);
       if (!assets) throw new Error('无法读取游戏原版皮肤配置');
       text = await fs.readFile(unitSkinTemplate(path.join(assets, 'quenching'), artSet, era), 'utf8');
     } finally { try { storage.close(); } catch {} releasePath?.(); }
@@ -166,7 +167,7 @@ class VersionSkinService {
           target = await prepareBranchModFileWrite(retail,
             !(await fs.pathExists(active)) && await fs.pathExists(disabled) ? 'units/unitskin-dis.txt' : 'units/unitskin.txt');
           if (!(await fs.pathExists(target))) {
-            const assets = await AssetSyncService.getAssetsDir();
+            const assets = await AssetSyncService.getAssetsDir(["skin"]);
             await fs.ensureDir(path.dirname(target));
             await fs.copy(unitSkinTemplate(path.join(assets, 'quenching'), targetProfile, era), target);
           }
@@ -180,13 +181,14 @@ class VersionSkinService {
         target = await fs.pathExists(parked) ? parked
           : await fs.pathExists(parkedDisabled) ? parkedDisabled : parked;
         if (!(await fs.pathExists(target))) {
-          const assets = await AssetSyncService.getAssetsDir();
+          const assets = await AssetSyncService.getAssetsDir(["skin"]);
           await fs.ensureDir(path.dirname(target));
           await fs.copy(unitSkinTemplate(path.join(assets, 'quenching'), targetProfile, era), target);
         }
       }
       const before = await fs.readFile(target, 'utf8');
-      const after = writeVersionSkins(before, baseline, artSet, choices);
+      const after = applyBattleUnitScales(writeVersionSkins(before, baseline, artSet, choices),
+        battleUnitScalesEnabled(targetProfile, era, configManager.get('modSettings')));
       await fs.writeFile(target, after, 'utf8');
       const all = configManager.get('skinSelections') || {};
       const current = all[this.key(root)] || {};

@@ -1,6 +1,9 @@
 import fs from 'fs-extra';
 import path from 'node:path';
 import yauzl from 'yauzl';
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
+import { resourcePackageNames } from './bundled-packages';
+import { readResourceManifest, hasResourceContext } from './bundled-assets';
 
 // These are paths the basic client installs or rewrites independently of the full MOD ZIP.
 const BASIC_FILES = [
@@ -31,6 +34,8 @@ async function listFiles(root: string): Promise<string[]> {
 
 const zipCache = new Map<string, { stamp: string; names: string[] }>();
 async function zipFiles(file: string): Promise<string[]> {
+  const expanded = await resourcePackageNames(file);
+  if (expanded) return expanded;
   const stat = await fs.stat(file).catch(() => null);
   if (!stat?.isFile()) return [];
   const stamp = `${stat.size}:${stat.mtimeMs}`;
@@ -57,10 +62,8 @@ async function zipFiles(file: string): Promise<string[]> {
 }
 
 async function defaultAssets(): Promise<string | undefined> {
-  const resources = (process as any).resourcesPath;
-  for (const candidate of [resources && path.join(resources, 'assets', 'quenching'), path.join(process.cwd(), 'assets', 'quenching')]) {
-    if (candidate && (await fs.stat(candidate).catch(() => null))?.isDirectory()) return candidate;
-  }
+  const { AssetSyncService } = await import('./asset-sync');
+  return path.join(await AssetSyncService.getAssetsDir(), 'quenching');
 }
 
 /** File-level ownership from all bundled variants, plus namespaces owned exclusively by the client. */
@@ -70,22 +73,22 @@ export async function enumerateClientModFiles(buildDir: string, parked = false, 
   const add = (file: string) => { const key = safeKey(file); if (key) files.set(key.toLowerCase(), key); };
   const assets = quenchingDir || await defaultAssets();
   if (assets) {
+    // A partially expanded cache is not a complete ownership inventory.
+    const manifest = hasResourceContext(assets) || !await fs.pathExists(path.join(path.dirname(assets), 'unpacked'))
+      ? await readResourceManifest(path.dirname(assets)) : null;
     const addTree = async (source: string, target: string) => {
-      for (const file of await listFiles(path.join(assets, source))) add(`${target}/${file}`);
+      const root = resourcePath(assets, source);
+      if (manifest) {
+        const prefix = source.replace(/\/$/, '') + '/';
+        for (const file of Object.keys(manifest?.files || {})) if (file.startsWith(prefix)) add(`${target}/${file.slice(prefix.length)}`);
+      } else for (const file of await listFiles(root)) add(`${target}/${file}`);
     };
     for (const pack of ['dnc20', 'dnc30-hd', 'dnc30-de', 'dnc30-de-rpg']) await addTree(`dnc/${pack}`, 'environment/dnc');
-    for (const pack of ['shaders136', 'shaders200', 'shaders203', 'shaders-300-de', 'shaders-ptr-de'])
+    for (const pack of ['shaders203', 'shaders-300-de', 'shaders-ptr-de', 'shaders-300-legacy-de'])
       await addTree(`shaders/${pack}`, 'shaders');
-    for (const pack of ['shaders-300-hd', 'shaders-ptr-hd']) {
+    for (const pack of ['shaders-300-hd', 'shaders-ptr-hd', 'shaders-300-legacy-hd']) {
       await addTree(`shaders/${pack}/vs`, 'shaders/vs');
       for (const mode of ['standard', 'melee', 'rpg']) await addTree(`shaders/${pack}/ps/${mode}`, 'shaders/ps');
-    }
-    // ZIP directory metadata is enough to establish shader ownership; do not expand every pack.
-    for (const archive of ['shaders.zip', 'shaders-300-legacy.zip']) {
-      for (const file of await zipFiles(path.join(assets, archive))) {
-        const match = /^shaders\/[^/]+\/(ps|vs)\/(?:standard\/|melee\/|rpg\/)?([^/]+\.bls)$/i.exec(file);
-        if (match) add(`shaders/${match[1]}/${match[2]}`);
-      }
     }
     for (const mode of ['water-trans', 'water-rel']) await addTree(`water/${mode}`, 'replaceabletextures/water');
     await addTree('scripts', 'scripts');
@@ -93,7 +96,7 @@ export async function enumerateClientModFiles(buildDir: string, parked = false, 
       ['env-20-30-public.zip', 'environment'], ['zip-foliage-que.zip', 'environment'], ['zip-foliage-other.zip', 'environment'],
       ['zip-blight-que.zip', 'terrainart'], ['zip-blight-retro.zip', 'terrainart'], ['lordaerontree.zip', 'doodads'],
     ]) for (const file of await zipFiles(path.join(assets, archive))) add(`${target}/${file}`);
-    for (const archive of ['zip-ui-20.zip', 'zip-ui-30.zip']) {
+    for (const archive of ['zip-ui-pub.zip', 'zip-ui-20.zip', 'zip-ui-30.zip']) {
       for (const file of await zipFiles(path.join(assets, archive))) {
         add(`ui/${file}`);
         // UIService copies each selected ui-org/que/blz component to the UI root.

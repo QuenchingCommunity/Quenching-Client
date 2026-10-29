@@ -1,0 +1,4 @@
+{"namespaceTcpCC": {"qm29spike-s": "bbr", "qm29spike-c": "bbr"}}
+{"mode": "quic-baseline", "profile": "bulk", "samples": 500, "variableW3GSFrames": true, "maxFrameBytes": 65535, "orderedIntegrity": true, "certificateVerified": true, "rttP50Ms": 101.9, "rttP95Ms": 221.6, "rttP99Ms": 346.6, "maxMs": 662.1, "over200Ms": 52, "lossPercentEachDirection": 5, "injectedOneWayDelayMs": 50, "realWarcraftTested": false, "quicGsoDisabled": true, "vethOffloadsDisabled": true}
+{"mode": "quic-repair-first", "profile": "bulk", "samples": 500, "variableW3GSFrames": true, "maxFrameBytes": 65535, "orderedIntegrity": true, "certificateVerified": true, "rttP50Ms": 101.5, "rttP95Ms": 233.5, "rttP99Ms": 415.5, "maxMs": 510.6, "over200Ms": 60, "lossPercentEachDirection": 5, "injectedOneWayDelayMs": 50, "realWarcraftTested": false, "quicGsoDisabled": true, "vethOffloadsDisabled": true}
+{"labNamespacesRemoved": true, "onlineServiceRestarted": false}

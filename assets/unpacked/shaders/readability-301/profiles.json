@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "version": "3.0.1",
+  "profiles": {
+    "ao_080": {
+      "mode": "standard",
+      "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
+      "files": {
+        "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
+        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
+        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+      }
+    },
+    "ao_066": {
+      "mode": "melee",
+      "baseHdSha256": "08764aa535221c293cb094c11cd5d6d139f36d8009dd2e65995585e039240595",
+      "files": {
+        "ps/hd.bls": "479322caac7b1ddafec28b416cfe51a3846931ac67fd78ac1d1baf71b58e231e",
+        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
+        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+      }
+    },
+    "ao_080_outline": {
+      "mode": "standard",
+      "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
+      "files": {
+        "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
+        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
+        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+      }
+    },
+    "ao_066_outline": {
+      "mode": "melee",
+      "baseHdSha256": "08764aa535221c293cb094c11cd5d6d139f36d8009dd2e65995585e039240595",
+      "files": {
+        "ps/hd.bls": "479322caac7b1ddafec28b416cfe51a3846931ac67fd78ac1d1baf71b58e231e",
+        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
+        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+      }
+    },
+    "de_ao_080": {
+      "mode": "melee",
+      "baseHdSha256": "df22326794d29342e9b7897f3bbaea55ec8690385021912207978304570febc5",
+      "files": {
+        "ps/hd.bls": "2b3df0370d959a4264d46b7fd50563fbedfbecb6b02f6965c16ff89d6ed439cf",
+        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
+        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+      }
+    },
+    "de_ao_080_outline": {
+      "mode": "melee",
+      "baseHdSha256": "df22326794d29342e9b7897f3bbaea55ec8690385021912207978304570febc5",
+      "files": {
+        "ps/hd.bls": "2b3df0370d959a4264d46b7fd50563fbedfbecb6b02f6965c16ff89d6ed439cf",
+        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
+        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+      }
+    },
+    "rpg_ao_080": {
+      "mode": "rpg",
+      "baseHdSha256": "92a1e6a6ab9130d28055847f47c06590e28e5e0d9964279c0bdf69711a483ea5",
+      "files": {
+        "ps/hd.bls": "9e4cda3610279a73b909c0f8dbc7137d52293bc1d4cd098a0b32f31f5c52664c",
+        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
+        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+      }
+    },
+    "rpg_ao_080_outline": {
+      "mode": "rpg",
+      "baseHdSha256": "92a1e6a6ab9130d28055847f47c06590e28e5e0d9964279c0bdf69711a483ea5",
+      "files": {
+        "ps/hd.bls": "9e4cda3610279a73b909c0f8dbc7137d52293bc1d4cd098a0b32f31f5c52664c",
+        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
+        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+      }
+    },
+    "de_ao_066": {
+      "mode": "melee",
+      "baseHdSha256": "a8a11debfd79c52dfa96f5246caab6b9034b4144d8a8aad6d7e28d388d8a1353",
+      "files": {
+        "ps/hd.bls": "043a9fcdc4b0784d772fb49b0a9759b9a35d83096ee586afde21ca308cb6d5a4",
+        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
+        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+      }
+    },
+    "de_ao_066_outline": {
+      "mode": "melee",
+      "baseHdSha256": "a8a11debfd79c52dfa96f5246caab6b9034b4144d8a8aad6d7e28d388d8a1353",
+      "files": {
+        "ps/hd.bls": "043a9fcdc4b0784d772fb49b0a9759b9a35d83096ee586afde21ca308cb6d5a4",
+        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
+        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+      }
+    }
+  },
+  "team_color_parameters": {
+    "emissive_strength": 0.33,
+    "outline_width_pixels": 2,
+    "outline_strength": 0.16,
+    "protect_subviews": true
+  },
+  "outline_mask_filter": "raw ORM.A or nonzero alpha of complete 1x1 ORM mip; no object-ID claim",
+  "native_light": {
+    "enabled": true,
+    "source": "b1 shadow cascades",
+    "fallback": "legacy direction"
+  },
+  "fog_visibility": {
+    "protocol": "native_fow_depth10_visibility4_signature6_v1",
+    "paired_files": [
+      "ps/hd.bls",
+      "ps/sd_on_hd.bls",
+      "ps/foliage.bls",
+      "ps/fog.bls",
+      "ps/volumetricfog.bls"
+    ],
+    "distance_fog_composite": "preserve_fog_colour_and_fade_outline_with_transmission_squared"
+  },
+  "team_outline_writer_repair": "restore_missing_team_before_native_fow_20261028_v1",
+  "team_outline_depth_coordinates": "native_texcoord0_times_depth_dimensions_20261029",
+  "team_fow_priority_repair": "preserve_nonhidden_team_carrier_20261029",
+  "team_fog_input_repair": "declare_existing_uv_and_cover_no_distance_fog_pass_20261029"
+}

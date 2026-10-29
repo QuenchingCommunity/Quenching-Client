@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder, hasGameChannelDirectory } from './game-channel';
 import { spawn, type SpawnOptions } from 'child_process';
 import path from 'path';
@@ -7,6 +8,7 @@ import { AssetSyncService } from './asset-sync';
 import { syncBundledResourceFiles } from './managed-resource-files';
 import { isFullPackageInstalled } from './full-package-service';
 import { resolveModProfile } from './mod-profile';
+import { assertShaderProfileSupported } from '../../shared/mod-profile';
 import { detectWar3Version, readShaderPackMarker } from './war3-version';
 import { UIService } from './ui-service';
 import { setBranchModEnabledOnDisk } from './branch-mod-toggle';
@@ -18,6 +20,7 @@ async function assertSelectedGameBuild(gamePath: string): Promise<void> {
     if (!(await hasGameChannelDirectory(gamePath, getSelectedGameChannel()))) {
         throw new Error(`${getSelectedGameFolder()} is not installed in the selected Warcraft III folder`);
     }
+    await resolveModProfile(gamePath, configManager.get('modSettings') || {});
 }
 
 function spawnGameProcess(command: string, args: string[], options: SpawnOptions): Promise<void> {
@@ -41,15 +44,17 @@ export class GameLauncher {
         return detected.source !== 'unknown' && (detected.parts[0] || 0) >= 3;
     }
 
-    private static async syncDetectedVersionBeforeLaunch(gamePath: string): Promise<void> {
+    static async prepareLaunchAssets(gamePath: string): Promise<void> {
         if (!getChannelModEnabled(getSelectedGameChannel())) {
             await setBranchModEnabledOnDisk(path.join(gamePath, getSelectedGameFolder()), false, {
-                quenchingDir: path.join(await AssetSyncService.getAssetsDir(), 'quenching'),
+                quenchingDir: path.join(await AssetSyncService.getAssetsDir(["camp","skin","dnc"]), 'quenching'),
             });
             return;
         }
         const settings = configManager.get('modSettings') || {};
         const profile = await resolveModProfile(gamePath, settings);
+        // Validate even when an old PTR marker happens to name the same pack.
+        assertShaderProfileSupported(profile);
         const shadersDir = path.join(gamePath, getSelectedGameFolder(), 'shaders');
         if (await readShaderPackMarker(shadersDir) !== profile.shaderPack) {
             if (!(await isFullPackageInstalled(gamePath))) return;
@@ -136,7 +141,7 @@ export class GameLauncher {
             throw new Error(`Could not find Warcraft III executable at: ${exePath || 'configured path'}`);
         }
 
-        await this.syncDetectedVersionBeforeLaunch(gamePath);
+        await this.prepareLaunchAssets(gamePath);
 
         // Resource settings must be applied before either Battle.net or direct launch.
         if (!executablePath && await this.supportsBattleNetLaunch(gamePath) && await launchViaBattleNet(gamePath, getSelectedGameChannel())) {
@@ -211,7 +216,7 @@ export class GameLauncher {
             throw new Error(`Could not find Warcraft III executable in: ${gamePath}`);
         }
 
-        await this.syncDetectedVersionBeforeLaunch(gamePath);
+        await this.prepareLaunchAssets(gamePath);
 
         console.log(`Launching map from: ${exePath} with map: ${mapPath}`);
 
@@ -301,10 +306,10 @@ export class GameLauncher {
             throw new Error(`Could not find Warcraft III executable in: ${gamePath}`);
         }
 
-        await this.syncDetectedVersionBeforeLaunch(gamePath);
+        await this.prepareLaunchAssets(gamePath);
 
-        const assetsDir = await AssetSyncService.getAssetsDir();
-        const sourceMap = path.join(assetsDir, 'quenching', 'camp', 'cfix.w3x');
+        const assetsDir = await AssetSyncService.getAssetsDir(["camp","skin","dnc"]);
+        const sourceMap = resourcePath(path.join(assetsDir, 'quenching'), 'camp', 'cfix.w3x');
         if (!(await fs.pathExists(sourceMap))) {
             throw new Error(`Campaign unlock map not found: ${sourceMap}`);
         }

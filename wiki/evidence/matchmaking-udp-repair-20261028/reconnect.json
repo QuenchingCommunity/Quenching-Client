@@ -1,0 +1,20 @@
+{
+  "atUtc": "2026-10-27T19:36:49.896188+00:00",
+  "dns": [
+    "191.40.41.124"
+  ],
+  "tcp": [
+    {
+      "port": 22,
+      "error": "timed out"
+    },
+    {
+      "port": 80,
+      "error": "timed out"
+    },
+    {
+      "port": 443,
+      "error": "timed out"
+    }
+  ]
+}

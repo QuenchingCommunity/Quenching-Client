@@ -1,5 +1,7 @@
 # 官网控制更新与独立内测
 
+2026-10-18：元数据完整超时／备用站、旧文本门禁处理及 schema 1/2/3 统一发布源策略见 [通用更新网络修复](update-network-fix-20261018.md)。后续版本（含 3.7）沿用同一策略；该记录明确区分源码、签名候选与未部署的官网备用路径，不能把源码通过当成线上已切换。
+
 2026-10-09：本次为源码、私有发布器和隔离回归修改；没有重打便携包、上传新版本、替换正式 manifest 或部署测试接口。3.6 已分发客户端不会自动获得未发布的代码。以下区分已实现行为与网站待部署事项。
 
 ## 1. 谁决定更新内容
@@ -73,11 +75,14 @@
 
 ## 3. 独立测试 flag
 
-运行时设置 `QUENCHING_UPDATE_TEST=1`，不修改源码版本、正式门禁、注册表或玩家设置。默认只用以下测试端点：
+2026-10-24 起发布顺序固定为：带持久标记的本地 TEST 包 → 用户人工通过 → 独立测试自动更新 → 用户再次通过 → 正式大包及验证。资源位置、Git 历史与两次人工验收记录见 [测试优先发布流程](../.agents/skills/quenching-release/references/test-first-workflow.md)。
+
+交付的 Windows TEST 包必须在 EXE 同级带 `quenching-update-test.json`（schema 1、enabled true、本次 baseUrl），首次直接双击及更新后重启均自动设置 `QUENCHING_UPDATE_TEST=1`。配置和 Chromium 数据分别隔离到 `.test-config`／`.test-user-data`；不依赖用户配置 CMD／环境变量。只用终端设置变量属于开发／自动化入口，不能代替首次本地包中的持久标记。默认只用以下测试端点：
 
 ```text
 https://qm.txzy.net/quenching/update-test/version.que
 https://qm.txzy.net/quenching/update-test/client-manifests/latest.json
+https://qm.txzy.net/quenching/update-test/mod-zip-manifest.json
 https://qm.txzy.net/quenching/update-test/mod-sync-manifest.json
 ```
 
@@ -107,11 +112,11 @@ Remove-Item Env:QUENCHING_UPDATE_TEST_BASE -ErrorAction SilentlyContinue
 
 ## 4. 测试候选转正式要改什么
 
-客户端运行侧：退出重启，去掉 `QUENCHING_UPDATE_TEST`，恢复正式入口即可；不要求再编译一个“去 flag”版本，flag 不写入 ZIP。
+只有本地包和测试自动更新两次人工验收通过后才进入正式阶段。测试 ZIP 中必须有持久标记，正式 ZIP 中必须没有。正式导出使用未启动过的构建输出，明确移除／过滤专用标记，并排除测试配置、缓存和启动脚本；不修改用户已验收的测试安装。运行正式候选时清除测试／预览／URL 覆盖变量，再验证正式入口。测试／正式二进制相同时可复用冻结构建，不要求仅为了去标记重新编译。
 
 发布侧仍有必要步骤，不能只关 flag 就把测试资源公开：
 
-1. 测试使用正式候选的最终内部版本和冻结二进制，确认源资源、ZIP、官方快照和运行版本一致。不要把版本标成 3.6.99，再期望关 flag 后自动降到正式 3.6.1。
+1. 首次本地测试使用真实 I0，人工通过后制作真实更高 I1 的测试自动更新；第二次人工通过后，正式候选使用已验收的最终 I1 和冻结二进制。确认源资源、ZIP、官方快照和运行版本一致。不要把版本标成 3.6.99，再期望关 flag 后自动降到正式 3.6.1。
 2. 将已验证对象上传到正式、不可变 URL；测试资源不写入正式对象的已有 URL。资源哈希不变时可复用同一对象，不必重传。
 3. 把元数据、对象源和候选目录引用改成正式 URL，明确镜像策略；若签名清单字段有变化，发布方重签。若字节 / 内部版本变化，则重建快照及对应对象后重测受影响部分。
 4. 网站部署正式签名 manifest 和 gzip 原件，再按授权发布窗口开放正式 `version.que`；保留旧迁移桥。用户测试不授权替换正式 endpoint。

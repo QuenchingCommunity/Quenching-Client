@@ -1,0 +1,13 @@
+{
+  "atUtc": "2026-10-28T19:04:34.946671+00:00",
+  "archive": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\archives\\Quenching-Matchmaking-20261029-spike-investigation.zip",
+  "bytes": 8489069,
+  "sha256": "d2f9511aed2b19a0d7b2882660b93a1fbd75ab915f246f1c24391086bdb95eba",
+  "onlineDeploymentChanged": false,
+  "playerPackageReleased": false,
+  "candidateTailLatencyImproved": false,
+  "candidateBinaries": {
+    "candidate-repair-first.exe": "767e5903fa5bd3f37d8f3b4f151a86c35e27c217201505775f11fdfbb6bf5fef",
+    "candidate-repair-first-linux": "70e04257aba06a3ee64a4d00c22fdc7aef164c8587f0b8d709817255fe445865"
+  }
+}

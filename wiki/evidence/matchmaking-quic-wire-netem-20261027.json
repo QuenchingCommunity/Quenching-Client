@@ -1,0 +1,170 @@
+[
+  {
+    "mode": "wss",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101,
+    "rttP95Ms": 101.4,
+    "rttP99Ms": 128.4,
+    "maxMs": 428.1,
+    "over200Ms": 1,
+    "transportEvents": [],
+    "lossPercentEachDirection": 0,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  },
+  {
+    "mode": "quic",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101.6,
+    "rttP95Ms": 102,
+    "rttP99Ms": 110,
+    "maxMs": 336.4,
+    "over200Ms": 2,
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 400,
+          "duplicateCopies": 600,
+          "fastCopiesWon": 18
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ],
+    "lossPercentEachDirection": 0,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  },
+  {
+    "mode": "wss",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101,
+    "rttP95Ms": 170.7,
+    "rttP99Ms": 231.7,
+    "maxMs": 526.6,
+    "over200Ms": 15,
+    "transportEvents": [],
+    "lossPercentEachDirection": 1,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  },
+  {
+    "mode": "quic",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101.6,
+    "rttP95Ms": 171.6,
+    "rttP99Ms": 237.1,
+    "maxMs": 921.4,
+    "over200Ms": 16,
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 400,
+          "duplicateCopies": 614,
+          "fastCopiesWon": 44
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ],
+    "lossPercentEachDirection": 1,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  },
+  {
+    "mode": "wss",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 110.6,
+    "rttP95Ms": 324,
+    "rttP99Ms": 547.2,
+    "maxMs": 670.5,
+    "over200Ms": 107,
+    "transportEvents": [],
+    "lossPercentEachDirection": 5,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  },
+  {
+    "mode": "quic",
+    "samples": 400,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101.8,
+    "rttP95Ms": 293.2,
+    "rttP99Ms": 361.6,
+    "maxMs": 1714,
+    "over200Ms": 79,
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 400,
+          "duplicateCopies": 720,
+          "fastCopiesWon": 139
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ],
+    "lossPercentEachDirection": 5,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false
+  }
+]

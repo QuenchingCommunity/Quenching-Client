@@ -58,7 +58,7 @@ assert.equal(skinTargets('neutral', 'unit').length, 0);
 
 // 3.0 has mode-specific fields and some sections intentionally omit fields.
 // A skin choice must not add empty overrides or discard original qualifiers.
-const text30 = fs.readFileSync(path.join('assets', 'quenching', 'skin', 'unitskin-new.txt'), 'utf8');
+const text30 = fs.readFileSync(path.join('assets', 'unpacked', 'skin', 'unitskin-new.txt'), 'utf8');
 const baseline30 = parseSkinSections(text30);
 const noSound = writeVersionSkins(text30, baseline30, 'hd', [
   { unitId: 'osp1', skinId: 'custom', changes: [{ field: 'file', value: 'cos/custom/model' }] },

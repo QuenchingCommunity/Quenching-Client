@@ -1,40 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import { readI18nCatalogs } from './lib/read-i18n-catalogs.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 const translationsPath = path.join(projectRoot, 'src/Renderer/utils/i18n.ts');
-const source = ts.createSourceFile(translationsPath, fs.readFileSync(translationsPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const nameOf = (node) => node && (ts.isStringLiteral(node) || ts.isIdentifier(node)) ? node.text : null;
 const literalOf = (node) => node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) ? node.text : null;
-
-let translationObject;
-for (const statement of source.statements) {
-  if (!ts.isVariableStatement(statement)) continue;
-  for (const declaration of statement.declarationList.declarations) {
-    if (nameOf(declaration.name) === 'translations' && declaration.initializer && ts.isObjectLiteralExpression(declaration.initializer)) {
-      translationObject = declaration.initializer;
-    }
-  }
-}
-if (!translationObject) throw new Error('translations object not found');
-
-const languages = new Map();
-const duplicates = [];
-for (const locale of translationObject.properties) {
-  if (!ts.isPropertyAssignment(locale) || !ts.isObjectLiteralExpression(locale.initializer)) continue;
-  const language = nameOf(locale.name);
-  const entries = new Map();
-  for (const item of locale.initializer.properties) {
-    if (!ts.isPropertyAssignment(item)) continue;
-    const key = nameOf(item.name);
-    const value = literalOf(item.initializer);
-    if (key === null || value === null) continue;
-    if (entries.has(key)) duplicates.push(`${language}: ${key}`);
-    entries.set(key, value);
-  }
-  languages.set(language, entries);
-}
+const { languages, duplicates } = readI18nCatalogs(projectRoot);
 
 const used = new Set();
 const walkFiles = (folder) => {

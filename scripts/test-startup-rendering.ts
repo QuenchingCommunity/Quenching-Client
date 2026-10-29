@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 import { StartupResourceBarrier, guardStartupResourceHandlers, isStartupResourceOperation } from '../src/Main/services/startup-resource-barrier';
 
@@ -33,8 +32,8 @@ assert.equal(fakeIpc.handle, original);
 
 const fixture = {
   enabled: true, thirdParty: false, running: false, legacy: false, branch: true, fail: false,
-  path: 'D:/test/Warcraft III', channel: 'retail', settings: { graphicsSelection: 'hd', versionSelection: 'v203', lighting: 'rpg' } as any,
-  calls: [] as any[],
+  path: 'D:/test/Warcraft III', channel: 'retail', settings: { graphicsSelection: 'hd', versionSelection: 'v204', lighting: 'rpg' } as any,
+  calls: [] as any[], uiSyncs: 0,
 };
 (globalThis as any).__startupRenderingFixture = fixture;
 const mocks: Record<string, string> = {
@@ -42,14 +41,15 @@ const mocks: Record<string, string> = {
   'game-channel': 'export const getSelectedGameChannel=()=>f.channel; export const getChannelModEnabled=()=>f.enabled; export const hasGameChannelDirectory=async()=>f.branch;',
   'third-party-resources': 'export const isThirdPartyQuenchingPaused=async()=>f.thirdParty;',
   'mod-integrity-service': 'export const readCurrentModVersion=async()=>f.legacy?null:"3.5";',
-  'mod-update-service': 'export const getInstalledModState=async()=>({sequence:f.legacy?34:35});export const assertWarcraftNotRunning=async()=>{if(f.running)throw Error("Warcraft III is running");};',
+  'mod-update-service': 'export const getInstalledModState=async()=>({sequence:f.legacy?34:35});export const assertWarcraftNotRunning=async()=>{throw Error("Unexpected process query for local assets");};',
   'asset-sync': 'export const AssetSyncService={getAssetsDir:async()=>"assets"};export const syncLightingResources=async(...args)=>{if(f.fail)throw Error("missing shader");f.calls.push(args);};',
+  'ui-service': 'export const UIService={syncConfiguredUI:async()=>{f.uiSyncs++;return true;}};',
 };
 const bundled = await build({
   stdin: { contents: 'export * from "./src/Main/services/startup-rendering";', resolveDir: process.cwd(), loader: 'ts' },
   platform: 'node', format: 'cjs', packages: 'external', bundle: true, write: false,
   plugins: [{ name: 'startup-fixture', setup(plugin) {
-    plugin.onResolve({ filter: /(?:config-manager|game-channel|third-party-resources|mod-integrity-service|mod-update-service|asset-sync)$/ }, args => ({ path: args.path.split('/').at(-1)!, namespace: 'fixture' }));
+    plugin.onResolve({ filter: /(?:config-manager|game-channel|third-party-resources|mod-integrity-service|mod-update-service|asset-sync|ui-service)$/ }, args => ({ path: args.path.split('/').at(-1)!, namespace: 'fixture' }));
     plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: 'const f=globalThis.__startupRenderingFixture;' + mocks[args.path] }));
   } }],
 });
@@ -57,11 +57,15 @@ const module = { exports: {} as any };
 new Function('require', 'module', 'exports', bundled.outputFiles[0].text)(createRequire(import.meta.url), module, module.exports);
 const { applyStartupRendering, scheduleStartupRendering } = module.exports;
 assert.equal((await applyStartupRendering()).status, 'applied');
+assert.equal(fixture.uiSyncs, 1, 'startup owns the UI refresh removed from settings reads');
 assert.equal(fixture.calls[0][4].forceEnvironment, true);
-assert.equal(fixture.calls[0][2].versionSelection, 'v203');
+assert.equal(fixture.calls[0][2].versionSelection, 'v204');
 fixture.channel = 'ptr'; fixture.settings = { graphicsSelection: 'de', lighting: 'battle' };
 assert.equal((await applyStartupRendering()).status, 'applied');
-for (const [key, value, reason] of [['enabled', false, 'mod-disabled-or-no-directory'], ['thirdParty', true, 'third-party-paused'], ['running', true, 'game-running'], ['legacy', true, 'legacy-package'], ['branch', false, 'branch-missing']] as const) {
+fixture.running=true;
+assert.equal((await applyStartupRendering()).status,'applied','local deployment does not inspect the running game');
+fixture.running=false;
+for (const [key, value, reason] of [['enabled', false, 'mod-disabled-or-no-directory'], ['thirdParty', true, 'third-party-paused'], ['legacy', true, 'legacy-package'], ['branch', false, 'branch-missing']] as const) {
   const old = fixture[key]; (fixture as any)[key] = value;
   assert.equal((await applyStartupRendering()).reason, reason);
   (fixture as any)[key] = old;
@@ -81,6 +85,4 @@ assert.equal(fixture.calls.length, count, 'Scheduling must return without starti
 await new Promise(resolve => setTimeout(resolve, 20));
 assert.equal(fixture.calls.length, count + 1);
 assert.equal(delivered[0].status, 'applied');
-const source = await readFile('src/Main/initialize-main-window.ts', 'utf8');
-assert(source.indexOf('scheduleStartupRendering(mainWindow)') > source.indexOf('await mainWindow.loadFile'));
 console.log('PASS: post-window scheduling, enabled-only rendering without full-package gate, skip guards, error isolation, once-per-process and foreground/startup exclusion');

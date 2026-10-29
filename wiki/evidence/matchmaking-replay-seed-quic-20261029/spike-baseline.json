@@ -1,0 +1,107 @@
+{
+  "gameId": "ba87ce2e-54d7-494c-99b3-9c12387a8f33",
+  "states": [
+    {
+      "at": "2026-10-28T17:03:49.625Z",
+      "state": "lobby"
+    },
+    {
+      "at": "2026-10-28T17:03:51.861Z",
+      "state": "lobby"
+    },
+    {
+      "at": "2026-10-28T17:03:52.014Z",
+      "state": "countdown"
+    },
+    {
+      "at": "2026-10-28T17:03:53.014Z",
+      "state": "loading"
+    },
+    {
+      "at": "2026-10-28T17:04:22.621Z",
+      "state": "running"
+    },
+    {
+      "at": "2026-10-28T17:16:26.960Z",
+      "state": "closed",
+      "reason": "players-left"
+    }
+  ],
+  "wireRttMs": {
+    "1": {
+      "count": 150,
+      "windowSamples": 150,
+      "p50Ms": 64.6,
+      "p95Ms": 152.7,
+      "p99Ms": 231.4,
+      "maxMs": 685.5,
+      "lastMs": 64.2
+    },
+    "2": {
+      "count": 151,
+      "windowSamples": 151,
+      "p50Ms": 41.3,
+      "p95Ms": 67.9,
+      "p99Ms": 171.1,
+      "maxMs": 334.2,
+      "lastMs": 41.1
+    }
+  },
+  "lastTiming": {
+    "at": "2026-10-28T17:16:26.960Z",
+    "tickMs": 30,
+    "maxAheadFrames": 67,
+    "frameCount": 23846,
+    "actionQueueMs": {
+      "count": 16108,
+      "windowSamples": 256,
+      "p50Ms": 14.2,
+      "p95Ms": 29.1,
+      "p99Ms": 30.2,
+      "maxMs": 770,
+      "lastMs": 26.4
+    },
+    "timerDelayMs": {
+      "count": 23871,
+      "windowSamples": 256,
+      "p50Ms": 0.3,
+      "p95Ms": 1.1,
+      "p99Ms": 1.2,
+      "maxMs": 9,
+      "lastMs": 0
+    },
+    "syncWaitTicks": 25,
+    "peers": [
+      {
+        "playerId": 2,
+        "nativeRttMs": {
+          "count": 757,
+          "windowSamples": 256,
+          "p50Ms": 41.3,
+          "p95Ms": 53.4,
+          "p99Ms": 112.3,
+          "maxMs": 863.7,
+          "lastMs": 83.6
+        },
+        "leadFrames": 3,
+        "pendingPingAgeMs": null
+      },
+      {
+        "playerId": 1,
+        "nativeRttMs": {
+          "count": 749,
+          "windowSamples": 256,
+          "p50Ms": 63,
+          "p95Ms": 70.8,
+          "p99Ms": 197,
+          "maxMs": 2233.1,
+          "lastMs": 64.7
+        },
+        "leadFrames": 109,
+        "pendingPingAgeMs": null
+      }
+    ]
+  },
+  "timerLifetimeMaxMs": 9,
+  "errors": []
+}

@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-10-28T17:50:33.606904+00:00",
+  "previous": "/opt/quenching-match-player-301-lab/releases/20261029-unicode-computers",
+  "release": "/opt/quenching-match-player-301-lab/releases/20261029-replay-quic-seed",
+  "instanceBefore": "94793464-fb2f-4c08-b2e9-76049933b591",
+  "copiedFiles": {
+    "remote-duel-node.mjs": "93bc37d956538f4b7697f32eed54db8fae7160e175c365f6c70c9dd12ac3f14f",
+    "duel-w3gs.mjs": "b837ea49fd7383f3b3109e5ae534ae93a1dc3c5aef04229f67f2d8d87199eea1",
+    "map-player-layout.mjs": "1ecde96945570928c017169b16d66f203a8ca50a9be1f99949ac9407c35ee8f5",
+    "solo-w3gs.mjs": "1b373b7a5883ffeed19ecd2770067d1f9f6d93b97749d2322515e5cc05e7c88e"
+  },
+  "instanceAfter": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+  "computerFill": true
+}

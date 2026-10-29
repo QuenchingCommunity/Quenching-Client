@@ -2,7 +2,7 @@ import { ipcMain, shell } from 'electron';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
-import { extractZipArchive } from '../services/zip-extraction';
+import { extractArchive } from '../services/archive-extraction';
 
 // 游戏启动API
 export class GameLauncherAPI {
@@ -100,12 +100,8 @@ export class GameLauncherAPI {
     // 解压文件
     ipcMain.handle('file:extractArchive', async (event, archivePath: string, targetPath: string) => {
       try {
-        const ext = path.extname(archivePath).toLowerCase();
-        if (ext === '.zip') {
-          await extractZipArchive(archivePath, targetPath);
-          return true;
-        }
-        throw new Error(`不支持的文件格式: ${ext}`);
+        await extractArchive(archivePath, targetPath);
+        return true;
       } catch (error) {
         console.error('Failed to extract archive:', error);
         throw error;

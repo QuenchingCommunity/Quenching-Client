@@ -39,6 +39,7 @@ const api: Record<string, any> = {
   getBranchModStates: async () => ({ retail: { enabled: fixture.enabled }, ptr: { enabled: fixture.enabled } }),
   getInstalledModState: async () => null,
   getFullPackageStatus: async () => true,
+  getAppPath: async () => root,
   pathExists: async () => false,
   detectWar3Version: async () => ({ source: 'local', useLegacyShaders: false }),
 };
@@ -68,6 +69,12 @@ try {
   assert.equal(saved.ui, 'quenching');
   assert.equal(saved.lighting, 'rpg');
   assert.deepEqual(writes, [], 'off preferences must not call resource writers');
+
+  fixture.enabled = true;
+  await settings.loadSettings(root);
+  assert.equal(settings.store.isLoading, false, 'reading settings must release the button loading state');
+  assert.deepEqual(writes, [], 'reading settings with MOD enabled must not sync shaders or UI either');
+  fixture.enabled = false;
 
   const branch = path.join(root, '_retail_');
   const blight = path.join(branch, 'terrainart', 'blight', 'test.dds');

@@ -1,0 +1,19 @@
+{
+  "domainIPv4": [
+    "191.40.41.124"
+  ],
+  "newIpTcp": [
+    {
+      "port": 22,
+      "connected": true
+    },
+    {
+      "port": 80,
+      "connected": true
+    },
+    {
+      "port": 443,
+      "response": "HTTP/1.1 200 OK"
+    }
+  ]
+}

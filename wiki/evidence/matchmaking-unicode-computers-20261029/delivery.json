@@ -1,0 +1,25 @@
+{
+  "atUtc": "2026-10-28T16:48:14.137160+00:00",
+  "fileManifestVerified": true,
+  "zipCrcVerified": true,
+  "updateOverlayVerified": true,
+  "sourceSecretScanPassed": true,
+  "nativeAiGameTested": false,
+  "artifacts": [
+    {
+      "path": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\Quenching-Matchmaking-Lite-GUI-20261029-r9.4-unicode-computers.zip",
+      "bytes": 35307476,
+      "sha256": "a0e0b5d576115b45d24d960bfa273d0bacf9083910ac05747f318424b3c738bf"
+    },
+    {
+      "path": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\Quenching-Matchmaking-Lite-GUI-20261029-r9.4-unicode-computers-update.zip",
+      "bytes": 177195,
+      "sha256": "365d096dd4e6e03b4f44a949c6fbc7fb41165aa063a016739133266edd54c947"
+    },
+    {
+      "path": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\archives\\Quenching-Matchmaking-r9.4-20261029-source.zip",
+      "bytes": 50822,
+      "sha256": "f3efaf9e118408929dc410b6b7edce76b24663d9698117954d584fa7e3f4e5d7"
+    }
+  ]
+}

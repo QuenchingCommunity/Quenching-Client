@@ -1,0 +1,32 @@
+[
+  {
+    "file": "8ce6bef13b01e62b9a6276c330_client.sqlog",
+    "sent1RttPackets": 3209,
+    "declaredLost1RttPackets": 928,
+    "laterAcknowledged": 0,
+    "declaredLostContainingFrameTypes": {
+      "datagram": 94,
+      "stream": 1067,
+      "ping": 1,
+      "ack": 584
+    },
+    "congestionWindowMinBytes": 5740,
+    "congestionWindowMaxBytes": 86247,
+    "note": "QUIC loss declarations include delayed/reordered ACK effects; not an independent physical-link loss measurement."
+  },
+  {
+    "file": "b34f69db078fcecd041409_client.sqlog",
+    "sent1RttPackets": 3185,
+    "declaredLost1RttPackets": 894,
+    "laterAcknowledged": 0,
+    "declaredLostContainingFrameTypes": {
+      "ping": 1,
+      "stream": 989,
+      "ack": 555,
+      "datagram": 99
+    },
+    "congestionWindowMinBytes": 5740,
+    "congestionWindowMaxBytes": 86267,
+    "note": "QUIC loss declarations include delayed/reordered ACK effects; not an independent physical-link loss measurement."
+  }
+]

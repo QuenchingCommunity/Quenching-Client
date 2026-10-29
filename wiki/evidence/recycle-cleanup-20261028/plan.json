@@ -1,0 +1,164 @@
+[
+  {
+    "path": "_tmp/w3c-latest-20261027/go-cache",
+    "reason": "regenerable Go compiler cache",
+    "bytes": 818525893,
+    "files": 8524
+  },
+  {
+    "path": "_tmp/w3c-latest-20261027/go-mod-cache",
+    "reason": "regenerable verified Go module cache",
+    "bytes": 750536032,
+    "files": 29776
+  },
+  {
+    "path": "experiments/war3-core-launch/transport-lab/_tmp/w3c-latest-20261027/go-cache",
+    "reason": "accidental nested Go compiler cache",
+    "bytes": 864523,
+    "files": 525
+  },
+  {
+    "path": "_tmp/win-package-filter-20261028/package",
+    "reason": "obsolete packaging test copy; current __Bin retained",
+    "bytes": 670076712,
+    "files": 473
+  },
+  {
+    "path": "_tmp/battle-terrain-package-20261028/builder-hdr",
+    "reason": "packaging staging copy; final portable retained",
+    "bytes": 441378139,
+    "files": 155
+  },
+  {
+    "path": "_tmp/preset-timeout/foliage-repro",
+    "reason": "generated reproduction fixture",
+    "bytes": 181330472,
+    "files": 176
+  },
+  {
+    "path": "_tmp/preset-timeout/native-foliage",
+    "reason": "generated native reproduction fixture",
+    "bytes": 181330472,
+    "files": 176
+  },
+  {
+    "path": "analysis_outputs/GUI-Unpacked-Smoke-r2",
+    "reason": "obsolete unpacked smoke-test copy",
+    "bytes": 281160488,
+    "files": 84
+  },
+  {
+    "path": "analysis_outputs/archive-rebuild-verification-20261006",
+    "reason": "old archive verification extraction",
+    "bytes": 164769566,
+    "files": 955
+  },
+  {
+    "path": "analysis_outputs/Quenching-Match-GUI-20261004",
+    "reason": "superseded early Electron prototype; source baselines retained in archives",
+    "bytes": 281160480,
+    "files": 84
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-GUI-20261004",
+    "reason": "superseded early Electron prototype; source baselines retained in archives",
+    "bytes": 281168632,
+    "files": 84
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Internet-GUI-20261005",
+    "reason": "superseded early Electron prototype; source baselines retained in archives",
+    "bytes": 562528644,
+    "files": 174
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Internet-GUI-20261005-r5",
+    "reason": "superseded early Electron prototype; source baselines retained in archives",
+    "bytes": 281266966,
+    "files": 88
+  },
+  {
+    "path": ".playwright-cli",
+    "reason": "old browser console logs",
+    "bytes": 7556626,
+    "files": 234
+  },
+  {
+    "path": "NVIDIA Corporation",
+    "reason": "old driver runtime logs",
+    "bytes": 0,
+    "files": 0
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261006",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90545640,
+    "files": 15
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261006-online",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 591989,
+    "files": 13
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261006-r2",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90565702,
+    "files": 15
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261006-r2-online",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 611943,
+    "files": 13
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261007-r3",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90568968,
+    "files": 15
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261013-r5",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90579686,
+    "files": 16
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261013-r6-own-node-spike",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90576626,
+    "files": 16
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261014-r7-own-server",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 90851352,
+    "files": 17
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261023-r9-map-rooms",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 183734850,
+    "files": 146
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261025-r9.1-map-rooms",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 92338139,
+    "files": 74
+  },
+  {
+    "path": "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261025-r9.1-r2-map-rooms",
+    "reason": "superseded unpacked test client; exact-named ZIP retained",
+    "bytes": 92339920,
+    "files": 74
+  },
+  {
+    "path": "node_modules/.cache",
+    "reason": "regenerable webpack/babel build cache; dependency packages retained",
+    "bytes": 633626496,
+    "files": 2628
+  }
+]

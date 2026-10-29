@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import { withResourceDirectory } from './resource-directory-queue';
 
 const HD_PUBLIC_ROOTS = ['environmentmap', 'foliage', 'sky'] as const;
 
@@ -55,14 +56,14 @@ async function moveEnvironmentRoots(sourceBase: string, targetBase: string): Pro
 
 /** DE parks the active HD public environment. */
 export async function parkHdPublicEnvironment(retailDir: string): Promise<boolean> {
-  return moveEnvironmentRoots(
+  return withResourceDirectory(path.join(retailDir, 'environment', 'foliage'), () => moveEnvironmentRoots(
     path.join(retailDir, 'environment'),
-    path.join(retailDir, 'QMoff', 'hd-environment'));
+    path.join(retailDir, 'QMoff', 'hd-environment')));
 }
 
 /** Restore HD environment; same-name active files take precedence. */
 export async function restoreHdPublicEnvironment(retailDir: string): Promise<boolean> {
-  return moveEnvironmentRoots(
+  return withResourceDirectory(path.join(retailDir, 'environment', 'foliage'), () => moveEnvironmentRoots(
     path.join(retailDir, 'QMoff', 'hd-environment'),
-    path.join(retailDir, 'environment'));
+    path.join(retailDir, 'environment')));
 }

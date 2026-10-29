@@ -1,0 +1,69 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "server": "191.40.41.124",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "routes": [
+    {
+      "name": "direct-origin",
+      "address": "191.40.41.124",
+      "tlsCertificateVerified": true,
+      "gameId": "36bf664e-9682-47b6-83d1-9eea746d6520",
+      "remoteAddress": "191.40.41.124",
+      "applicationEcho": {
+        "samples": 15,
+        "minMs": 61.3,
+        "medianMs": 66.2,
+        "maxMs": 74.8
+      },
+      "applicationEchoSamplesMs": [
+        69.5,
+        61.3,
+        67.9,
+        61.8,
+        68,
+        69.7,
+        74.8,
+        62.9,
+        67.7,
+        67.3,
+        63.1,
+        62.2,
+        65.2,
+        66.2,
+        62.1
+      ]
+    },
+    {
+      "name": "previous-cloudflare-edge",
+      "address": "172.67.149.76",
+      "tlsCertificateVerified": true,
+      "gameId": "77c91eea-65b8-49eb-b51c-eec76ad8393c",
+      "remoteAddress": "172.67.149.76",
+      "applicationEcho": {
+        "samples": 15,
+        "minMs": 382.3,
+        "medianMs": 389.1,
+        "maxMs": 2497.8
+      },
+      "applicationEchoSamplesMs": [
+        387.8,
+        388.1,
+        389.1,
+        386.3,
+        1351.4,
+        385.1,
+        406.1,
+        852.9,
+        382.3,
+        385.7,
+        386.9,
+        1623,
+        2497.8,
+        397.7,
+        401.4
+      ]
+    }
+  ],
+  "instanceId": "229682f2-f167-4429-ad68-b5c931e7d13d"
+}

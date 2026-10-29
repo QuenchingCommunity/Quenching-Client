@@ -1,0 +1,376 @@
+[
+  {
+    "mode": "wss",
+    "profile": "bulk",
+    "samples": 500,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 109.8,
+    "rttP95Ms": 239.8,
+    "rttP99Ms": 393.9,
+    "maxMs": 656.4,
+    "over200Ms": 102,
+    "bySize": {
+      "16": {
+        "count": 122,
+        "p50Ms": 109.6,
+        "p95Ms": 232,
+        "maxMs": 363.7
+      },
+      "32": {
+        "count": 122,
+        "p50Ms": 109.6,
+        "p95Ms": 231.8,
+        "maxMs": 333.3
+      },
+      "64": {
+        "count": 122,
+        "p50Ms": 109.7,
+        "p95Ms": 231.8,
+        "maxMs": 332.6
+      },
+      "128": {
+        "count": 122,
+        "p50Ms": 110,
+        "p95Ms": 232.4,
+        "maxMs": 393.9
+      },
+      "8192": {
+        "count": 4,
+        "p50Ms": 135.6,
+        "p95Ms": 214.2,
+        "maxMs": 214.2
+      },
+      "49152": {
+        "count": 4,
+        "p50Ms": 427.8,
+        "p95Ms": 656.4,
+        "maxMs": 656.4
+      },
+      "65535": {
+        "count": 4,
+        "p50Ms": 365.2,
+        "p95Ms": 503.6,
+        "maxMs": 503.6
+      }
+    },
+    "slowest": [
+      {
+        "index": 249,
+        "bytes": 49152,
+        "rttMs": 656.4
+      },
+      {
+        "index": 474,
+        "bytes": 49152,
+        "rttMs": 528.3
+      },
+      {
+        "index": 424,
+        "bytes": 65535,
+        "rttMs": 503.6
+      },
+      {
+        "index": 499,
+        "bytes": 65535,
+        "rttMs": 480.2
+      },
+      {
+        "index": 399,
+        "bytes": 49152,
+        "rttMs": 427.8
+      },
+      {
+        "index": 244,
+        "bytes": 128,
+        "rttMs": 393.9
+      },
+      {
+        "index": 349,
+        "bytes": 65535,
+        "rttMs": 365.2
+      },
+      {
+        "index": 245,
+        "bytes": 16,
+        "rttMs": 363.7
+      }
+    ],
+    "transportEvents": [],
+    "lossPercentEachDirection": 5,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false,
+    "quicGsoDisabled": true,
+    "vethOffloadsDisabled": true
+  },
+  {
+    "mode": "quic-fork-default",
+    "profile": "bulk",
+    "samples": 500,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101.7,
+    "rttP95Ms": 237.8,
+    "rttP99Ms": 1319.2,
+    "maxMs": 2136.2,
+    "over200Ms": 40,
+    "bySize": {
+      "16": {
+        "count": 122,
+        "p50Ms": 101.6,
+        "p95Ms": 202.3,
+        "maxMs": 317.3
+      },
+      "32": {
+        "count": 122,
+        "p50Ms": 101.7,
+        "p95Ms": 189.2,
+        "maxMs": 382.1
+      },
+      "64": {
+        "count": 122,
+        "p50Ms": 101.6,
+        "p95Ms": 195.3,
+        "maxMs": 352
+      },
+      "128": {
+        "count": 122,
+        "p50Ms": 101.7,
+        "p95Ms": 232.7,
+        "maxMs": 320.3
+      },
+      "8192": {
+        "count": 4,
+        "p50Ms": 243.4,
+        "p95Ms": 432.3,
+        "maxMs": 432.3
+      },
+      "49152": {
+        "count": 4,
+        "p50Ms": 1322.9,
+        "p95Ms": 1910.9,
+        "maxMs": 1910.9
+      },
+      "65535": {
+        "count": 4,
+        "p50Ms": 1319.2,
+        "p95Ms": 2136.2,
+        "maxMs": 2136.2
+      }
+    },
+    "slowest": [
+      {
+        "index": 499,
+        "bytes": 65535,
+        "rttMs": 2136.2
+      },
+      {
+        "index": 474,
+        "bytes": 49152,
+        "rttMs": 1910.9
+      },
+      {
+        "index": 424,
+        "bytes": 65535,
+        "rttMs": 1502.2
+      },
+      {
+        "index": 249,
+        "bytes": 49152,
+        "rttMs": 1466.2
+      },
+      {
+        "index": 399,
+        "bytes": 49152,
+        "rttMs": 1322.9
+      },
+      {
+        "index": 274,
+        "bytes": 65535,
+        "rttMs": 1319.2
+      },
+      {
+        "index": 349,
+        "bytes": 65535,
+        "rttMs": 1109.6
+      },
+      {
+        "index": 324,
+        "bytes": 49152,
+        "rttMs": 1008.5
+      }
+    ],
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 500,
+          "duplicateCopies": 496,
+          "fastCopiesWon": 36,
+          "copyBytes": 47647,
+          "copyBudgetSkips": 377,
+          "copyCoalesced": 476,
+          "copyBlockMaxUs": 101,
+          "lockWaitMaxUs": 24,
+          "frameSendMaxUs": 804100
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ],
+    "lossPercentEachDirection": 5,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false,
+    "quicGsoDisabled": true,
+    "vethOffloadsDisabled": true
+  },
+  {
+    "mode": "quic-bbr",
+    "profile": "bulk",
+    "samples": 500,
+    "variableW3GSFrames": true,
+    "maxFrameBytes": 65535,
+    "orderedIntegrity": true,
+    "certificateVerified": true,
+    "rttP50Ms": 101.7,
+    "rttP95Ms": 208.7,
+    "rttP99Ms": 361.3,
+    "maxMs": 579.5,
+    "over200Ms": 39,
+    "bySize": {
+      "16": {
+        "count": 122,
+        "p50Ms": 101.7,
+        "p95Ms": 202.1,
+        "maxMs": 330.9
+      },
+      "32": {
+        "count": 122,
+        "p50Ms": 101.8,
+        "p95Ms": 198.4,
+        "maxMs": 300.4
+      },
+      "64": {
+        "count": 122,
+        "p50Ms": 101.7,
+        "p95Ms": 175.9,
+        "maxMs": 270
+      },
+      "128": {
+        "count": 122,
+        "p50Ms": 101.7,
+        "p95Ms": 200.8,
+        "maxMs": 239
+      },
+      "8192": {
+        "count": 4,
+        "p50Ms": 203.1,
+        "p95Ms": 230.4,
+        "maxMs": 230.4
+      },
+      "49152": {
+        "count": 4,
+        "p50Ms": 361.3,
+        "p95Ms": 467.6,
+        "maxMs": 467.6
+      },
+      "65535": {
+        "count": 4,
+        "p50Ms": 448.1,
+        "p95Ms": 579.5,
+        "maxMs": 579.5
+      }
+    },
+    "slowest": [
+      {
+        "index": 349,
+        "bytes": 65535,
+        "rttMs": 579.5
+      },
+      {
+        "index": 474,
+        "bytes": 49152,
+        "rttMs": 467.6
+      },
+      {
+        "index": 274,
+        "bytes": 65535,
+        "rttMs": 461.7
+      },
+      {
+        "index": 499,
+        "bytes": 65535,
+        "rttMs": 448.1
+      },
+      {
+        "index": 249,
+        "bytes": 49152,
+        "rttMs": 400.1
+      },
+      {
+        "index": 399,
+        "bytes": 49152,
+        "rttMs": 361.3
+      },
+      {
+        "index": 412,
+        "bytes": 16,
+        "rttMs": 330.9
+      },
+      {
+        "index": 324,
+        "bytes": 49152,
+        "rttMs": 321
+      }
+    ],
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 500,
+          "duplicateCopies": 478,
+          "fastCopiesWon": 58,
+          "copyBytes": 47418,
+          "copyBudgetSkips": 355,
+          "copyCoalesced": 476,
+          "copyBlockMaxUs": 54,
+          "lockWaitMaxUs": 1,
+          "frameSendMaxUs": 85940
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ],
+    "lossPercentEachDirection": 5,
+    "injectedOneWayDelayMs": 50,
+    "realWarcraftTested": false,
+    "quicGsoDisabled": true,
+    "vethOffloadsDisabled": true
+  }
+]

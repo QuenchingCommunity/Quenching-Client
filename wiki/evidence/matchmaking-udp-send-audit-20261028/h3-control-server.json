@@ -1,0 +1,1 @@
+{"address":"1.1.1.1:443","alpn":"h3","elapsedMs":5002,"error":"timeout: no recent network activity","serverName":"cloudflare-dns.com","tlsVerified":false}

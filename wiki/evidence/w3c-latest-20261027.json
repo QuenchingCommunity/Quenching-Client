@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-27",
+  "release": {
+    "tag": "1.6.25",
+    "publishedAt": "2026-10-21T05:39:36Z",
+    "url": "https://github.com/w3champions/launcher-e-release/releases/tag/1.6.25"
+  },
+  "asset": {
+    "name": "W3Champions_1.6.25_x64-setup.exe",
+    "bytes": 33684784,
+    "url": "https://github.com/w3champions/launcher-e-release/releases/download/1.6.25/W3Champions_1.6.25_x64-setup.exe",
+    "digest": "sha256:9c7bec6bd1d898fc9df94c4f16918de6ce71fba4d7651982065ffeaed007f224"
+  },
+  "extractedExecutable": {
+    "sha256": "f27ed845db2e9921190abbd3f5a05f7b4100fad85233a43d5e93274cb97f2c53",
+    "bytes": 90304824
+  },
+  "oldReference": {
+    "repository": "https://github.com/niceqwer55555/flo",
+    "head": "98c2a3b",
+    "date": "2022-02-05"
+  },
+  "coreSourceAccess": "w3champions/flo returned 404 for public web, connected GitHub API and git",
+  "observedBinaryCodePaths": [
+    "crates/client/src/node/transport/quic.rs",
+    "crates/client/src/node/transport/standby.rs",
+    "crates/client/src/node/transport/socks_udp.rs",
+    "crates/client/src/healthcheck/quic_probe.rs",
+    "quinn-0.11.9",
+    "embedded source revision ee7d88b"
+  ],
+  "observedStrings": [
+    {
+      "offset": 71499038,
+      "text": "bad W3GS copies datagram"
+    },
+    {
+      "offset": 71499539,
+      "text": "W3GS frames came first in datagram copies"
+    },
+    {
+      "offset": 71598589,
+      "text": "node certificate fingerprint mismatch; alpn protocol mismatch; quic handshake timeout"
+    },
+    {
+      "offset": 71823690,
+      "text": "QUIC connect to ... failed (...), falling back to TCP; TCP fallback to ... established"
+    }
+  ],
+  "limits": [
+    "Static binary evidence; not a source-code audit",
+    "Not verified whether every W3C match uses this path",
+    "Exact copy counts, wire layout and recovery algorithm are not known",
+    "Do not describe own prototype as the FLO implementation"
+  ],
+  "announcement": "https://www.reddit.com/r/warcraft3/comments/1xa0nsh/smoother_games_packet_loss_no_longer_means_lag/"
+}

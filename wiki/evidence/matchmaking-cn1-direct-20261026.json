@@ -1,0 +1,19 @@
+{
+  "server": "191.40.41.124",
+  "transport": "public-https-wss",
+  "publicHttpsVerified": true,
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "instanceId": "229682f2-f167-4429-ad68-b5c931e7d13d",
+  "mapUpload": true,
+  "roomListing": true,
+  "mapDownload": true,
+  "gameId": "a0545d85-5970-4c21-acf7-36e669be6d35",
+  "wireRemoteAddresses": [
+    "191.40.41.124",
+    "191.40.41.124"
+  ],
+  "twoSyntheticPeersStarted": true,
+  "actionForwarded": true,
+  "leaveObserved": true
+}

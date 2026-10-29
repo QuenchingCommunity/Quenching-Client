@@ -10,7 +10,7 @@ const gameRoot = process.argv[2];
 const fullRoot = process.argv[3];
 const backup = process.argv[4];
 assert.ok(gameRoot, 'Pass a read-only Warcraft CASC installation');
-const assets = path.resolve('assets/quenching/tile');
+const assets = path.resolve('assets/unpacked/tile');
 const native = {};
 const storage = new Storage();
 try {

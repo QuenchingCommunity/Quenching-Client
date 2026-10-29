@@ -1,0 +1,70 @@
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"start","Package":"quenching/match-wire/cmd/match-wire"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/cmd/match-wire","Output":"?   \tquenching/match-wire/cmd/match-wire\t[no test files]\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"start","Package":"quenching/match-wire/internal/cc/bbr"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeRescalesPacketSizedWindows"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeRescalesPacketSizedWindows","Output":"=== RUN   TestSetMaxDatagramSizeRescalesPacketSizedWindows\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeRescalesPacketSizedWindows","Output":"--- PASS: TestSetMaxDatagramSizeRescalesPacketSizedWindows (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeRescalesPacketSizedWindows","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeClampsCongestionWindow"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeClampsCongestionWindow","Output":"=== RUN   TestSetMaxDatagramSizeClampsCongestionWindow\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeClampsCongestionWindow","Output":"--- PASS: TestSetMaxDatagramSizeClampsCongestionWindow (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestSetMaxDatagramSizeClampsCongestionWindow","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles","Output":"=== RUN   TestNewBbrSenderAppliesProfiles\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/standard"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/standard","Output":"=== RUN   TestNewBbrSenderAppliesProfiles/standard\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/standard","Output":"--- PASS: TestNewBbrSenderAppliesProfiles/standard (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/standard","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/conservative"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/conservative","Output":"=== RUN   TestNewBbrSenderAppliesProfiles/conservative\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/conservative","Output":"--- PASS: TestNewBbrSenderAppliesProfiles/conservative (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/conservative","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/aggressive"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/aggressive","Output":"=== RUN   TestNewBbrSenderAppliesProfiles/aggressive\n"}
+{"Time":"2026-10-27T23:30:53.8777575+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/aggressive","Output":"--- PASS: TestNewBbrSenderAppliesProfiles/aggressive (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8777575+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles/aggressive","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8777575+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles","Output":"--- PASS: TestNewBbrSenderAppliesProfiles (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8777575+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestNewBbrSenderAppliesProfiles","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8777575+08:00","Action":"run","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestParseProfile"}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"skip","Package":"quenching/match-wire/cmd/match-wire","Elapsed":0.001}
+{"Time":"2026-10-27T23:30:53.8762182+08:00","Action":"start","Package":"quenching/match-wire/internal/cc/common"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/common","Output":"?   \tquenching/match-wire/internal/cc/common\t[no test files]\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"skip","Package":"quenching/match-wire/internal/cc/common","Elapsed":0.004}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"start","Package":"quenching/match-wire/internal/gamewire"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates","Output":"=== RUN   TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates","Output":"--- PASS: TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates (0.03s)\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestBlockedOptionalCopyDoesNotBlockNewReliableCandidates","Elapsed":0.03}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst","Output":"=== RUN   TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst","Output":"--- PASS: TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst (0.18s)\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestCopiesCannotSpendMoreThanPrimaryTrafficAndOneBurst","Elapsed":0.18}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestFragmentAssemblyAndTruncatedTail"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestFragmentAssemblyAndTruncatedTail","Output":"=== RUN   TestFragmentAssemblyAndTruncatedTail\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestFragmentAssemblyAndTruncatedTail","Output":"--- PASS: TestFragmentAssemblyAndTruncatedTail (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8805756+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestFragmentAssemblyAndTruncatedTail","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestVariableFramesAndReliableTail"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestVariableFramesAndReliableTail","Output":"=== RUN   TestVariableFramesAndReliableTail\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestVariableFramesAndReliableTail","Output":"--- PASS: TestVariableFramesAndReliableTail (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestVariableFramesAndReliableTail","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestOrderedDedupWithLostCopies"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestOrderedDedupWithLostCopies","Output":"=== RUN   TestOrderedDedupWithLostCopies\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestOrderedDedupWithLostCopies","Output":"--- PASS: TestOrderedDedupWithLostCopies (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestOrderedDedupWithLostCopies","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestDatagramBoundsAndConflict"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestDatagramBoundsAndConflict","Output":"=== RUN   TestDatagramBoundsAndConflict\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestDatagramBoundsAndConflict","Output":"--- PASS: TestDatagramBoundsAndConflict (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestDatagramBoundsAndConflict","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"run","Package":"quenching/match-wire/internal/gamewire","Test":"TestFinWaitsForMissingReliableFrame"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestFinWaitsForMissingReliableFrame","Output":"=== RUN   TestFinWaitsForMissingReliableFrame\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Test":"TestFinWaitsForMissingReliableFrame","Output":"--- PASS: TestFinWaitsForMissingReliableFrame (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Test":"TestFinWaitsForMissingReliableFrame","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Output":"PASS\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/gamewire","Output":"ok  \tquenching/match-wire/internal/gamewire\t(cached)\n"}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"pass","Package":"quenching/match-wire/internal/gamewire","Elapsed":0.002}
+{"Time":"2026-10-27T23:30:53.8821465+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestParseProfile","Output":"=== RUN   TestParseProfile\n"}
+{"Time":"2026-10-27T23:30:53.8899987+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestParseProfile","Output":"--- PASS: TestParseProfile (0.00s)\n"}
+{"Time":"2026-10-27T23:30:53.8899987+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Test":"TestParseProfile","Elapsed":0}
+{"Time":"2026-10-27T23:30:53.8899987+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Output":"PASS\n"}
+{"Time":"2026-10-27T23:30:53.8899987+08:00","Action":"output","Package":"quenching/match-wire/internal/cc/bbr","Output":"ok  \tquenching/match-wire/internal/cc/bbr\t(cached)\n"}
+{"Time":"2026-10-27T23:30:53.8899987+08:00","Action":"pass","Package":"quenching/match-wire/internal/cc/bbr","Elapsed":0.014}

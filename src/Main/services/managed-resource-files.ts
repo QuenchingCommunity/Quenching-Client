@@ -36,7 +36,13 @@ async function listFiles(root: string): Promise<string[]> {
   return results;
 }
 
-async function copyResource(source: string, target: string): Promise<void> {
+export async function copyBundledResourceIfChanged(source: string, target: string): Promise<void> {
+  const current = await fs.lstat(target).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  if (current?.isFile() && current.size === (await fs.stat(source)).size &&
+      (await fs.readFile(source)).equals(await fs.readFile(target))) return;
   await fs.remove(target);
   await fs.ensureDir(path.dirname(target));
   await fs.copy(source, target);
@@ -47,7 +53,7 @@ async function removeLegacyMarker(targetDir: string, markerName: string): Promis
 }
 
 /**
- * Delete every path any known variant uses, then copy the desired variant in.
+ * Remove obsolete known paths, then copy only changed files of the desired variant.
  * Paths no bundled variant knows about are left alone.
  */
 export async function syncBundledResourceFiles(
@@ -55,7 +61,7 @@ export async function syncBundledResourceFiles(
   desiredRoots: BundledResourceRoot[],
   knownRoots: BundledResourceRoot[],
   markerName: string,
-  options: { removeAbsent?: boolean; dryRun?: boolean; sourceCache?: ResourceSourceCache } = {},
+  options: { removeAbsent?: boolean; dryRun?: boolean; sourceCache?: ResourceSourceCache; onProgress?: (completed: number, total: number) => void } = {},
 ): Promise<void> {
   if (options.dryRun) return;
   for (const root of desiredRoots) {
@@ -72,16 +78,27 @@ export async function syncBundledResourceFiles(
       file: path.join(root.source, relative),
     }));
 
+  const desiredFiles = (await Promise.all(desiredRoots.map(keysOf))).flat();
+  const obsolete: string[] = [];
   if (options.removeAbsent !== false) {
+    const desired = new Set<string>();
+    for (const { key } of desiredFiles) desired.add(key.toLowerCase());
     const known = new Map<string, string>();
     for (const root of knownRoots) {
       for (const { key } of await keysOf(root)) known.set(key.toLowerCase(), key);
     }
-    for (const key of known.values()) await fs.remove(path.join(targetDir, key));
+    for (const key of known.values()) if (!desired.has(key.toLowerCase())) obsolete.push(key);
   }
-
-  for (const root of desiredRoots) {
-    for (const { key, file } of await keysOf(root)) await copyResource(file, path.join(targetDir, key));
+  const total = obsolete.length + desiredFiles.length;
+  let completed = 0;
+  options.onProgress?.(0, total);
+  for (const key of obsolete) {
+    await fs.remove(path.join(targetDir, key));
+    options.onProgress?.(++completed, total);
+  }
+  for (const { key, file } of desiredFiles) {
+    await copyBundledResourceIfChanged(file, path.join(targetDir, key));
+    options.onProgress?.(++completed, total);
   }
   await removeLegacyMarker(targetDir, markerName);
 }
@@ -108,7 +125,7 @@ export async function installBundledResourceFile(
   markerName: string,
   _options: { ifCustom?: 'skip' | 'error' } = {},
 ): Promise<boolean> {
-  await copyResource(source, path.join(targetDir, relativeKey(relative)));
+  await copyBundledResourceIfChanged(source, path.join(targetDir, relativeKey(relative)));
   await removeLegacyMarker(targetDir, markerName);
   return true;
 }

@@ -6,19 +6,13 @@ import { createRequire } from 'node:module';
 import { SKIN_CONFIG } from '../src/Renderer/assets/data/skin-config';
 import { builtInSkins, skinTargets } from '../src/Renderer/assets/data/skin-panel-catalog';
 import { builtInSkinLabel, targetLabel } from '../src/Renderer/utils/skin-labels';
+import { readI18nCatalogs } from './lib/read-i18n-catalogs.mjs';
 
-const source = ts.createSourceFile('i18n.ts', fs.readFileSync('src/Renderer/utils/i18n.ts', 'utf8'), ts.ScriptTarget.Latest, true);
-const nameOf = (node: ts.Node) => ts.isStringLiteral(node) || ts.isIdentifier(node) ? node.text : '';
-const declaration = source.statements.filter(ts.isVariableStatement).flatMap(s => [...s.declarationList.declarations]).find(d => nameOf(d.name) === 'translations');
-assert.ok(declaration?.initializer && ts.isObjectLiteralExpression(declaration.initializer));
-const catalogs: Record<string, Record<string, string>> = {};
-for (const locale of declaration.initializer.properties) {
-  assert.ok(ts.isPropertyAssignment(locale) && ts.isObjectLiteralExpression(locale.initializer));
-  catalogs[nameOf(locale.name)] = Object.fromEntries(locale.initializer.properties.map(entry => {
-    assert.ok(ts.isPropertyAssignment(entry) && ts.isStringLiteral(entry.initializer));
-    return [nameOf(entry.name), entry.initializer.text];
-  }));
-}
+const { languages, duplicates } = readI18nCatalogs(process.cwd());
+assert.deepEqual(duplicates, []);
+const catalogs: Record<string, Record<string, string>> = Object.fromEntries(
+  [...languages].map(([locale, entries]) => [locale, Object.fromEntries(entries)])
+);
 let checked = 0;
 for (const [locale, catalog] of Object.entries(catalogs)) {
   const strictTranslate = (key: string) => {

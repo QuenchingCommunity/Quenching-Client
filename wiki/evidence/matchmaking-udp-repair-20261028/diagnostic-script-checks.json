@@ -1,0 +1,12 @@
+{
+  "syntaxErrors": 0,
+  "normal": {
+    "ExitCode": 0,
+    "TimedOut": false
+  },
+  "timeout": {
+    "ExitCode": -1,
+    "TimedOut": true
+  },
+  "timeoutElapsedMs": 1032
+}

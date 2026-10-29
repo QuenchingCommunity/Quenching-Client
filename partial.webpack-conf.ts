@@ -1,3 +1,5 @@
+import { LOCAL_APP_TITLE } from './src/shared/local-release';
+import releaseVersion from './release-version.json';
 const { ProvidePlugin } = webpack;
 
 export const main = (
@@ -23,6 +25,7 @@ export const main = (
 			}
 		},
 		plugins: [
+			...(releaseVersion.channel === 'test' ? [] : [new webpack.NormalModuleReplacementPlugin(/offline-test-launcher$/, path.join(subProjectRootPath,'src/Main/services/offline-test-disabled.ts'))]),
 			new CopyPlugin({
 				patterns: [
 					{
@@ -71,7 +74,7 @@ export const renderer = (repoRootPath: string, subProjectRootPath: string): Webp
 						from: path.join(subProjectRootPath, 'public'),
 						to: path.join(subProjectRootPath, 'dist/renderer'),
 						globOptions: {
-							ignore: ['**/index.html'], // 忽略public中的index.html，使用template
+							ignore: ['**/index.html','**/[oO][fF][fF][lL][iI][nN][eE].[eE][xX][eE]'], // Never bundle the external offline tool.
 						},
 					},
 				],
@@ -82,6 +85,7 @@ export const renderer = (repoRootPath: string, subProjectRootPath: string): Webp
 				],
 			}),
 			new HtmlWebpackPlugin({
+				title: LOCAL_APP_TITLE,
 				template: path.join(subProjectRootPath, "index.template.html"),
 				filename: 'index.html',
 				minify: false,

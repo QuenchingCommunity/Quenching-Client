@@ -1,0 +1,13 @@
+{
+  "deployedAt": "2026-10-27T15:44:47.500531+00:00",
+  "release": "/opt/quenching-match-wire/releases/20261027-bbr-fixed",
+  "binarySha256": "65270889e59a79f5efd5b6ec1bc8c39b42e62840e654bbc7fa07bd35491c3fc2",
+  "previousBinary": "/opt/quenching-match-wire/releases/20261027-quic-wire-v2/match-wire",
+  "matchingInstanceBefore": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "congestion": "bbr-standard",
+  "publicUdpReachable": false,
+  "guiDefault": "wss",
+  "rollbackUnit": "/root/_tmp/qm-wire-latency-fix-20261027/quenching-match-wire.service.before-bbr",
+  "matchingInstanceAfter": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "active": true
+}

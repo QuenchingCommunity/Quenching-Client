@@ -5,7 +5,8 @@ import fs from 'fs-extra';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-terrain-profile-'));
+await fs.ensureDir(path.resolve('_tmp/preset-timeout'));
+const root = await fs.mkdtemp(path.join(path.resolve('_tmp/preset-timeout'), 'terrain-profile-'));
 const fixture: any = { handlers: new Map(), assets: path.join(root, 'assets'), settings: {
   graphicsSelection: 'hd', versionSelection: 'v30', resolvedGraphics: 'de',
 } };
@@ -59,7 +60,7 @@ try {
     assert.equal(await fs.pathExists(water), false, `original terrain with ${mode}: stale water table must be removed`);
   }
   // A DE selection on a 2.x version resolves to HD: use that actual profile.
-  fixture.settings = { graphicsSelection: 'de', versionSelection: 'v203', resolvedGraphics: 'de' };
+  fixture.settings = { graphicsSelection: 'de', versionSelection: 'v204', resolvedGraphics: 'de' };
   await update(null, root, 'latest', 'transparent');
   assert.equal(await fs.readFile(water, 'utf8'), 'transparent-water');
   fixture.settings = { graphicsSelection: 'de', versionSelection: 'v30', resolvedGraphics: 'hd' };

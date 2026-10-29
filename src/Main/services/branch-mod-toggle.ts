@@ -19,6 +19,10 @@ type Phase = 'disabling' | 'disabled' | 'enabling' | 'enabled';
 interface Move { active: string; parked: string }
 interface State { schema: 1; phase: Phase; moves: Move[]; previousMoves?: Move[]; pendingMoves?: Move[] }
 interface ToggleOptions { quenchingDir?: string }
+interface RecoveryOptions extends ToggleOptions {
+  /** Uninstall removes all copies itself; only interrupted moves need recovery. */
+  reconcileDisabled?: boolean;
+}
 
 function allowedPath(relative: string): boolean {
   return relative.toLowerCase() === 'postprocessingconfig.txt' ||
@@ -194,7 +198,7 @@ async function rollBack(buildDir: string, state: State, moves: Move[] = state.mo
 }
 
 /** Called before synchronization/IPC. Recover only this new, exact file-level transaction. */
-export async function recoverBranchModToggle(buildDir: string, options: ToggleOptions = {}): Promise<boolean | null> {
+export async function recoverBranchModToggle(buildDir: string, options: RecoveryOptions = {}): Promise<boolean | null> {
   const state = await readState(buildDir);
   if (!state) return null;
   if (state.phase === 'disabling' || state.phase === 'enabling') {
@@ -212,7 +216,7 @@ export async function recoverBranchModToggle(buildDir: string, options: ToggleOp
     return true;
   }
   // Older clients left basic UI/lighting files active even with a disabled journal.
-  await setBranchModEnabledOnDisk(buildDir, false, options);
+  if (options.reconcileDisabled !== false) await setBranchModEnabledOnDisk(buildDir, false, options);
   return false;
 }
 
@@ -220,6 +224,14 @@ export async function isBranchModDisabled(buildDir: string): Promise<boolean> {
   const state = await readState(buildDir);
   if (state && state.phase !== 'disabled') throw new Error('Branch toggle is incomplete; recover it before continuing');
   return state?.phase === 'disabled';
+}
+
+/** After uninstall removes all owned copies, retain the off state without
+ * probing the removed package or keeping moves that could restore old files. */
+export async function markBranchModUninstalled(buildDir: string): Promise<void> {
+  const state = await readState(buildDir);
+  if (state && state.phase !== 'disabled') throw new Error('Branch toggle is incomplete');
+  await writeState(buildDir, { schema: 1, phase: 'disabled', moves: [] });
 }
 
 /** Resolve an owned file in its parked location while the branch switch is off. */

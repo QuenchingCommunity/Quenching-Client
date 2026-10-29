@@ -106,7 +106,7 @@ export async function applyTreeSettings(
             }
 
             // 找到基准原版文件
-            const skinAssetsDir = quenchingDir ?? path.join(await AssetSyncService.getAssetsDir(), 'quenching');
+            const skinAssetsDir = quenchingDir ?? path.join(await AssetSyncService.getAssetsDir(["skin"]), 'quenching');
             const modSettings = (await import('../services/config-manager')).configManager.get('modSettings') || {};
             const profile = resolvedProfile ?? await resolveModProfile(war3Path, {
                 versionSelection: modSettings.versionSelection,

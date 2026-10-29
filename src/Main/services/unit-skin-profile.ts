@@ -1,6 +1,9 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import fs from 'fs-extra';
 import path from 'node:path';
 import type { EffectiveGraphics } from '../../shared/mod-profile';
+import { preserveVersionSkins, type SkinSelections } from '../../shared/skin-versions';
+import { applyBattleUnitScales, battleUnitScalesEnabled } from '../../shared/battle-unit-scale';
 
 export type UnitSkinProfile = 'sd' | 'hd' | 'hd-retro' | 'de';
 /** 3.0 and the 2.x/1.x clients read different unitskin baselines, so their copies are kept apart. */
@@ -28,8 +31,8 @@ export function skinEraForVersion(version: string | undefined): UnitSkinEra {
 
 export function unitSkinTemplate(quenchingDir: string, profile: UnitSkinProfile, era: UnitSkinEra): string {
   return era === 'v20' && profile !== 'hd-retro'
-    ? path.join(quenchingDir, 'skin', 'legacy', TEMPLATE[profile])
-    : path.join(quenchingDir, 'skin', TEMPLATE[profile]);
+    ? resourcePath(quenchingDir, 'skin', 'legacy', TEMPLATE[profile])
+    : resourcePath(quenchingDir, 'skin', TEMPLATE[profile]);
 }
 
 export function storedSkinPath(retailDir: string, profile: UnitSkinProfile, disabled: boolean, era: UnitSkinEra): string {
@@ -37,7 +40,19 @@ export function storedSkinPath(retailDir: string, profile: UnitSkinProfile, disa
 }
 
 /** Bump when the bundled baselines change; copies built from an older baseline are replaced once. */
-export const UNIT_SKIN_BASELINE = 2;
+export const UNIT_SKIN_BASELINE = 5;
+
+/** Readability changes reuse the same skin table, including disabled skin copies. */
+export async function syncUnitSkinBattleMode(retailDir: string, profile: UnitSkinProfile, era: UnitSkinEra, settings: unknown): Promise<void> {
+  const enabled = battleUnitScalesEnabled(profile, era, settings);
+  for (const file of [path.join(retailDir, 'units', 'unitskin.txt'), path.join(retailDir, 'units', 'unitskin-dis.txt'),
+    storedSkinPath(retailDir, profile, false, era), storedSkinPath(retailDir, profile, true, era)]) {
+    if (!(await fs.pathExists(file))) continue;
+    const before = await fs.readFile(file, 'utf8');
+    const after = applyBattleUnitScales(before, enabled);
+    if (before !== after) await fs.writeFile(file, after, 'utf8');
+  }
+}
 
 async function readMarker(retailDir: string): Promise<{ profile: UnitSkinProfile | null; era: UnitSkinEra | null; baseline: number | null }> {
   const state = await fs.readJson(marker(retailDir)).catch((error: NodeJS.ErrnoException) => {
@@ -88,7 +103,7 @@ export async function refreshUnitSkinBaseline(
   quenchingDir: string,
   fallbackProfile: UnitSkinProfile,
   fallbackEra: UnitSkinEra,
-  options: { force?: boolean } = {},
+  options: { force?: boolean; selections?: SkinSelections } = {},
 ): Promise<{ refreshed: boolean; profile: UnitSkinProfile; era: UnitSkinEra }> {
   const state = await readMarker(retailDir);
   const profile = state.profile ?? fallbackProfile;
@@ -128,13 +143,26 @@ export async function refreshUnitSkinBaseline(
     }
   }
 
+  const previous = !preSplit && current ? await fs.readFile(current, 'utf8')
+    : !preSplit && await fs.pathExists(storedSkinPath(retailDir, profile, true, era))
+      ? await fs.readFile(storedSkinPath(retailDir, profile, true, era), 'utf8') : '';
+  const rebuild = async (source: string, previousText: string) => preserveVersionSkins(
+    await fs.readFile(source, 'utf8'), previousText, options.selections || {});
+  // Already parked profiles must receive the new baseline as well.
+  for (const parkedProfile of ['sd', 'hd', 'de'] as const) for (const disabledCopy of [false, true]) {
+    const parked = storedSkinPath(retailDir, parkedProfile, disabledCopy, 'v30');
+    if (!(await fs.pathExists(parked))) continue;
+    const source = unitSkinTemplate(quenchingDir, parkedProfile, 'v30');
+    await fs.writeFile(parked, await rebuild(source, await fs.readFile(parked, 'utf8')), 'utf8');
+  }
+
   await fs.remove(active);
   await fs.remove(disabled);
   await fs.remove(storedSkinPath(retailDir, profile, false, era));
   await fs.remove(storedSkinPath(retailDir, profile, true, era));
   const destination = wasDisabled ? storedSkinPath(retailDir, profile, true, era) : active;
   await fs.ensureDir(path.dirname(destination));
-  await fs.copy(template, destination, { overwrite: true });
+  await fs.writeFile(destination, await rebuild(template, previous), 'utf8');
   await writeMarker();
   console.log(`[UnitSkin] Rebuilt ${era} ${profile} unitskin from baseline ${UNIT_SKIN_BASELINE}${wasDisabled ? ' (disabled)' : ''}`);
   return { refreshed: true, profile, era };
@@ -146,11 +174,12 @@ export async function switchUnitSkinProfile(
   quenchingDir: string,
   desired: UnitSkinProfile,
   desiredEra: UnitSkinEra,
+  options: { selections?: SkinSelections } = {},
 ): Promise<{ created: boolean; switched: boolean }> {
   const units = path.join(retailDir, 'units');
   const active = path.join(units, 'unitskin.txt');
   const disabled = path.join(units, 'unitskin-dis.txt');
-  const outdated = await refreshUnitSkinBaseline(retailDir, quenchingDir, desired, desiredEra);
+  const outdated = await refreshUnitSkinBaseline(retailDir, quenchingDir, desired, desiredEra, options);
   const state = await readMarker(retailDir);
   const oldProfile = state.profile || 'hd';
   const oldEra = state.era || desiredEra;

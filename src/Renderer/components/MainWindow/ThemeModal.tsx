@@ -3,6 +3,7 @@ import { Typography, Button, Checkbox, Row, Col, message } from 'antd';
 import { useTranslation } from '../../utils/i18n';
 import { OverlayModal } from './OverlayModal';
 import { useSound } from '../../hooks/useSound';
+import { resolveThemeMedia, reportThemeMediaError } from '../../utils/theme-media';
 
 const { Text } = Typography;
 
@@ -76,14 +77,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ open, onClose }) => {
   const { playSmall, playHover } = useSound();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const resolveVideo = (src: string) => {
-    if (!src) return src;
-    const isAssets = src.includes('assets/');
-    if (window.location.protocol === 'file:') {
-      return isAssets ? new URL(src.startsWith('/') ? src.slice(1) : src, document.baseURI).href : src;
-    }
-    return isAssets ? (src.startsWith('/') ? src : `/${src}`) : src;
-  };
+  const resolveVideo = (src: string) => src ? resolveThemeMedia(src,document.baseURI) : '';
   const [selectedTheme, setSelectedTheme] = useState('magicstorm');
   const [hoveredTheme, setHoveredTheme] = useState<Theme | null>(null);
   const [customThemes, setCustomThemes] = useState<Theme[]>([]);
@@ -193,6 +187,8 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ open, onClose }) => {
   // 这里的 backgroundTheme 仅用于背景，不随 hover 改变
   const backgroundTheme = allThemes.find(t => t.id === selectedTheme) || themes[0];
 
+  if (!open) return null;
+
   return (
     <OverlayModal
       title={t('main.btn.theme')}
@@ -211,6 +207,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ open, onClose }) => {
         {/* 背景预览图 - 仅随选中的主题改变 */}
         <video
           key={backgroundTheme.id}
+          onError={event => reportThemeMediaError(event.currentTarget)}
           autoPlay
           muted
           loop
@@ -274,7 +271,8 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ open, onClose }) => {
                         src={resolveVideo(theme.video)}
                         muted
                         loop
-                        preload="auto"
+                        preload="none"
+                        onError={event => reportThemeMediaError(event.currentTarget)}
                         onMouseEnter={(e) => {
                           const video = e.currentTarget;
                           video.play().catch(err => {

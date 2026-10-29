@@ -2,8 +2,6 @@ import crypto from 'crypto';
 import childProcess from 'child_process';
 import fs from 'fs-extra';
 import { statfs } from 'node:fs/promises';
-import http from 'http';
-import https from 'https';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
@@ -17,6 +15,8 @@ import { ModZipPatch, ModZipPolicy, planModZipChain, validateModZipPolicy } from
 import { decodeSnapshot, encodeSnapshot } from './file-sync-snapshot';
 import { downloadUpdateFile, rememberUpdateDownloadSource, SlowUpdateDownloadError, updateDownloadSources } from './update-download';
 import { updateTestUrls } from './update-channel';
+import { fetchUpdateMetadata, requestUpdateMetadata } from './update-metadata';
+import { updateMetadataUrls } from './update-metadata-urls';
 import {
   loadIntegrityManifest,
   MOD_INTEGRITY_PATHS,
@@ -32,7 +32,6 @@ import {
 const PRODUCT = 'quenching-mod';
 const MIN_MANAGED_SEQUENCE = 35;
 const MAX_MANIFEST_BYTES = 4 * 1024 * 1024;
-const MAX_REDIRECTS = 5;
 const execFile = promisify(childProcess.execFile);
 
 export interface ModUpdatePart {
@@ -132,14 +131,7 @@ export interface ModUpdateResult {
   appliedPatches?: number;
 }
 
-const DEFAULT_MANIFEST_URLS = [
-  'https://qm.txzy.net/api/quenching/mod-zip-manifest.json',
-  'https://qm.txzy.net/quenching/mod-zip-manifest.json',
-  'https://qm.txzy.net/api/quenching/mod-sync-manifest.json',
-  'https://qm.txzy.net/quenching/mod-sync-manifest.json',
-  'https://qm.txzy.net/api/quenching/manifest.json',
-  'https://qm.txzy.net/quenching/manifest.json',
-];
+const DEFAULT_MANIFEST_URLS = updateMetadataUrls(['mod-zip-manifest.json', 'mod-sync-manifest.json', 'manifest.json']);
 
 function manifestUrls(options?: ModUpdateOptions): string[] {
   const testUrls = updateTestUrls('mod-zip-manifest.json');
@@ -274,53 +266,23 @@ function validateManifest(value: any): ModUpdateManifest {
   return manifest;
 }
 
-async function requestText(url: string, redirects = 0): Promise<string> {
+async function requestText(url: string, timeoutMs: number): Promise<string> {
   if (url.startsWith('file://')) return fs.readFile(new URL(url), 'utf8');
-  // Node's HTTP stack connects directly; Electron's net.fetch inherits the system proxy.
-  return new Promise((resolve, reject) => {
-    const client = url.startsWith('https://') ? https : http;
-    const request = client.get(url, { headers: { Accept: 'application/json' } }, (response) => {
-      if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        response.resume();
-        if (redirects >= MAX_REDIRECTS) return reject(new Error('too many redirects'));
-        return requestText(new URL(response.headers.location, url).toString(), redirects + 1).then(resolve, reject);
-      }
-      if (response.statusCode !== 200) {
-        response.resume();
-        return reject(new Error(`HTTP ${response.statusCode || 0}`));
-      }
-      let size = 0;
-      const chunks: Buffer[] = [];
-      response.on('data', (chunk: Buffer) => {
-        size += chunk.length;
-        if (size > MAX_MANIFEST_BYTES) {
-          request.destroy(new Error('manifest too large'));
-          return;
-        }
-        chunks.push(chunk);
-      });
-      response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-      response.on('error', reject);
-    });
-    request.setTimeout(20_000, () => request.destroy(new Error('request timeout')));
-    request.on('error', reject);
-  });
+  return (await requestUpdateMetadata(url, { limit: MAX_MANIFEST_BYTES, timeoutMs, allowHttpLoopback: true })).toString('utf8');
 }
 
 export async function fetchModManifest(options?: ModUpdateOptions): Promise<{ manifest: ModUpdateManifest; source: string }> {
   const publicKey = await updatePublicKey(options?.publicKeyPem);
-  const errors: string[] = [];
-  for (const url of manifestUrls(options)) {
-    try {
-      const value = parseJsonObject(await requestText(url), 'manifest');
+  try {
+    return await fetchUpdateMetadata(manifestUrls(options), async (url, timeoutMs) => {
+      const value = parseJsonObject(await requestText(url, timeoutMs), 'manifest');
       verifyManifestSignature(value, publicKey);
       const manifest = validateManifest(value);
       return { manifest, source: url };
-    } catch (error: any) {
-      errors.push(`${url}: ${error?.message || String(error)}`);
-    }
+    });
+  } catch (error: any) {
+    throw new Error(`all manifest sources failed: ${error?.message || String(error)}`);
   }
-  throw new Error(`all manifest sources failed: ${errors.join('; ')}`);
 }
 
 function lightweightState(sequence: number, version: string, displayVersion = version): InstalledModState {

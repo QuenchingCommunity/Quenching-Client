@@ -1,0 +1,14 @@
+{
+  "manifestFilesVerified": 81,
+  "workerBundledRuntime": true,
+  "guiProtocolRoomsAndExport": true,
+  "reportNoPlayerToken": true,
+  "requiresStartupDownload": false,
+  "quicDefault": "probe-only-then-wss",
+  "nativeWarcraftStarted": false,
+  "realWarcraftQuicTested": false,
+  "publicQuicVerified": false,
+  "zipBytes": 38816263,
+  "updateZipBytes": 4333953,
+  "helperSha256": "bc74a463de5815f5572d3767f074807445bb7a3d7bb48a77dcb711366b12637f"
+}

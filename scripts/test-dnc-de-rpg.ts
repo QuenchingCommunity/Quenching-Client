@@ -35,16 +35,8 @@ function intensities(content: string): number[] {
   return values;
 }
 
-const hdFiles = await listMdl(hd);
-assert.deepEqual(await listMdl(deRpg), hdFiles, 'dnc30-de-rpg must mirror dnc30-hd');
-for (const rel of hdFiles) {
-  const base = intensities(await fs.readFile(path.join(hd, rel), 'utf8'));
-  const scaled = intensities(await fs.readFile(path.join(deRpg, rel), 'utf8'));
-  assert.ok(base.length > 0, `${rel} has intensity values`);
-  assert.equal(scaled.length, base.length, rel);
-  base.forEach((value, i) => assert.ok(Math.abs(scaled[i] - value * 1.15) < 0.006, `${rel}[${i}] ${scaled[i]} != ${value}×1.15`));
-}
-
+// The retired archive is historical and must not be compared with the newly finalized HD baseline.
+const hdFiles = await listMdl(deRpg);
 // In game DE RPG runs as standard on 3.0: only Intensity changes, never Amb/Shadow.
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'dnc-de-rpg-'));
 try {
@@ -63,3 +55,18 @@ try {
 }
 
 console.log(`dnc30-de-rpg OK (${hdFiles.length} files)`);
+
+// Retired selections must produce exactly Standard output, for both HD and DE.
+const retiredRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'dnc-retired-rpg-'));
+try {
+  for (const deMode of [false, true]) {
+    const source = path.join(dncRoot, deMode ? 'dnc30-de' : 'dnc30-hd');
+    const standard = path.join(retiredRoot, String(deMode), 'standard');
+    const retired = path.join(retiredRoot, String(deMode), 'rpg');
+    await fs.copy(source, standard); await fs.copy(source, retired);
+    await applyDncLighting(standard, 'standard', 3, { deMode, isVersion30: true });
+    await applyDncLighting(retired, 'rpg', 3, { deMode, isVersion30: true });
+    for (const rel of await listMdl(source)) assert.equal(await fs.readFile(path.join(retired, rel), 'utf8'), await fs.readFile(path.join(standard, rel), 'utf8'), 'retired RPG must match Standard: ' + rel);
+  }
+} finally { await fs.remove(retiredRoot); }
+console.log('Retired RPG falls back to Standard for HD and DE');

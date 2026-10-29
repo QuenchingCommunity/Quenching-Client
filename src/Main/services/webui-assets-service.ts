@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import fs from 'fs-extra';
 import path from 'node:path';
 import { installBundledResourceFile } from './managed-resource-files';
@@ -15,7 +16,7 @@ export async function syncClientWebUIFiles(
   language: string,
 ): Promise<void> {
   const imageName = language === 'zh-CN' ? 'QuenchingOnCN.png' : 'QuenchingOnEN.png';
-  const imageSource = path.join(quenchingDir, 'tx', imageName);
+  const imageSource = resourcePath(quenchingDir, 'tx', imageName);
   const indexSource = path.join(quenchingDir, 'index.html');
 
   for (const source of [imageSource, indexSource]) {
@@ -27,7 +28,7 @@ export async function syncClientWebUIFiles(
     targetWebUIDir,
     'QuenchingOn.png',
     imageSource,
-    ['QuenchingOnCN.png', 'QuenchingOnEN.png'].map(name => path.join(quenchingDir, 'tx', name)),
+    ['QuenchingOnCN.png', 'QuenchingOnEN.png'].map(name => resourcePath(quenchingDir, 'tx', name)),
     WEBUI_MARKER,
   );
   await installBundledResourceFile(

@@ -11,7 +11,8 @@ import { isFullPackageInstalled, isFullPackageInstalledInChannel } from '../serv
 import { normalizeWar3RootPath } from '../services/war3-path';
 import { getSelectedGameFolder, getChannelModEnabled, setChannelModEnabled, hasGameChannelDirectory } from '../services/game-channel';
 import { switchGameChannel } from '../services/game-channel-switch';
-import { getInstallSpaceStatus, getZipUncompressedBytes } from '../services/install-space';
+import { getInstallSpaceStatus } from '../services/install-space';
+import { getArchiveUncompressedBytes } from '../services/archive-extraction';
 import { GameChannel } from '../../shared/game-channel';
 import { registerLocalFilesInBackground } from '../services/local-files-service';
 import { getSelectedGameChannel } from '../services/game-channel';
@@ -21,6 +22,11 @@ import { assertNoPendingBranchCopy } from '../services/branch-package-copy';
 import { installPackageSources } from '../services/full-package-install';
 import { assertWarcraftNotRunning } from '../services/mod-update-service';
 import { applyInstalledProfile } from '../services/post-install-profile';
+import { resolveModProfile } from '../services/mod-profile';
+import { detectWar3Version } from '../services/war3-version';
+import { assertWar3VersionSupported } from '../../shared/war3-support';
+import { assertShaderProfileSupported } from '../../shared/mod-profile';
+import { registerOfflineTestLauncher } from '../services/offline-test-launcher';
 
 function slugFromW3nBasename(w3nPath: string): string {
     const ext = path.extname(w3nPath);
@@ -57,6 +63,7 @@ async function branchStates(root: string): Promise<Record<GameChannel, { availab
 }
 
 export function registerLaunchHandlers() {
+    registerOfflineTestLauncher();
     ipcMain.handle('game:launch', async (event, executablePath?: string) => {
         try {
             return await GameLauncher.launchGame(executablePath);
@@ -241,6 +248,13 @@ export function registerLaunchHandlers() {
         await assertWarcraftNotRunning();
         const build = path.join(root, gameChannelFolder(channel));
         if (!(await hasGameChannelDirectory(root, channel))) throw new Error('The selected game branch is not installed');
+        if (enabled) {
+            if (channel === getSelectedGameChannel()) {
+                assertShaderProfileSupported(await resolveModProfile(root, configManager.get('modSettings') || {}));
+            } else {
+                assertWar3VersionSupported(await detectWar3Version(root, channel));
+            }
+        }
         await assertNoPendingBranchCopy(build);
         await recoverBranchModToggle(build);
         await applyBranchModFilesForSwitch(build, enabled, {
@@ -264,7 +278,7 @@ export function registerLaunchHandlers() {
     ipcMain.handle('mod:install-space-status', async (_event, zipPath?: string) => {
         const root = configManager.get('war3Path');
         if (!root) return null;
-        const bytes = zipPath ? await getZipUncompressedBytes(zipPath) : undefined;
+        const bytes = zipPath ? await getArchiveUncompressedBytes(zipPath) : undefined;
         if (bytes !== undefined) configManager.set('lastFullPackageBytes', bytes);
         return getInstallSpaceStatus(root, bytes);
     });
@@ -297,6 +311,7 @@ export function registerLaunchHandlers() {
 
         try {
             await assertWarcraftNotRunning();
+            assertShaderProfileSupported(await resolveModProfile(war3Path, configManager.get('modSettings') || {}));
             const normalizedWar3Path = normalizeWar3RootPath(war3Path);
             if (normalizedWar3Path !== war3Path) {
                 configManager.set('war3Path', normalizedWar3Path);

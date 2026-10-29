@@ -3,7 +3,20 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'fs-extra';
 import { applyDncLighting, getBrightnessMultiplier } from '../src/Main/services/dnc-lighting';
-import { getShaderResourcePath } from '../src/Main/services/mod-profile';
+import { build } from 'esbuild';
+import { createRequire } from 'node:module';
+// Shader path checks are pure; isolate unrelated Electron/channel detection.
+const bundled = await build({
+  stdin: { contents: "export { getShaderResourcePath } from './src/Main/services/mod-profile';", resolveDir: process.cwd(), loader: 'ts' },
+  bundle: true, platform: 'node', format: 'cjs', write: false, packages: 'external',
+  plugins: [{ name: 'isolated-detection', setup(api) {
+    api.onResolve({ filter: /\/(?:war3-version|game-channel)$/ }, () => ({ path: 'detection', namespace: 'test' }));
+    api.onLoad({ filter: /.*/, namespace: 'test' }, () => ({ contents: "export const detectWar3Version=async()=>({parts:[3,0,1,24368],source:'fixture'});export const getSelectedGameChannel=()=> 'retail';" }));
+  } }],
+});
+const isolatedModule = { exports: {} as any };
+new Function('require','module','exports',bundled.outputFiles[0].text)(createRequire(import.meta.url),isolatedModule,isolatedModule.exports);
+const { getShaderResourcePath } = isolatedModule.exports;
 import type { ModProfile } from '../src/shared/mod-profile';
 
 const hd = path.join(process.cwd(), 'assets', 'quenching', 'dnc', 'dnc30-hd');
@@ -36,54 +49,10 @@ async function list(dir: string): Promise<string[]> {
   return files.sort();
 }
 
-// Apply to fresh copies: unit/terrain/underground ambient and day/night curves
-// change only in 3.0 HD battle. Standard, RPG and DE retain their old rules.
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'dnc-hd-battle-'));
+// Current DNC behavior is verified against all finalized HD/DE level-3 files.
+await import('./test-dnc-level3');
+const root = await fs.mkdtemp(path.join(os.tmpdir(), 'dnc-shader-routing-'));
 try {
-  const originals = new Map<string, string>();
-  for (const file of await list(hd)) originals.set(path.relative(hd, file), await fs.readFile(file, 'utf8'));
-  let checked = 0;
-  for (const [level, multiplier] of [[3, 1.05], [4, 1.2], [5, 1.35]]) {
-    const target = path.join(root, 'battle-' + level, 'environment', 'dnc');
-    await fs.copy(hd, target);
-    await applyDncLighting(target, 'battle', level, { deMode: false, isVersion30: true });
-    assert.equal(getBrightnessMultiplier(level, 'battle', { isVersion30: true, deMode: false }), multiplier);
-    for (const [rel, before] of originals) {
-      const after = await fs.readFile(path.join(target, rel), 'utf8');
-      const underground = /dncdungeon|dncunderground/i.test(rel);
-      assert.deepEqual(statics(after, 'AmbIntensity'), [underground ? -0.1 : /terrain/i.test(rel) ? 0.15 : 0.12]);
-      assert.deepEqual(statics(after, 'ShadowIntensity'), statics(before, 'ShadowIntensity'), 'shadow unchanged: ' + rel);
-      const sourceValues = intensityValues(before), actual = intensityValues(after);
-      const peak = Math.max(...sourceValues);
-      const expected = sourceValues.map(value => round((sourceValues.length > 1 ? peak - (peak - value) * 0.5 : value) * multiplier));
-      assert.deepEqual(actual, expected, 'battle brightness/night fill: ' + rel);
-      assert.equal(Math.max(...actual), round(peak * multiplier), 'daytime peak: ' + rel);
-      assert.equal(withoutChangedFields(after), withoutChangedFields(before), 'colors/rotation/key times unchanged: ' + rel);
-      checked++;
-    }
-    for (const mode of ['standard', 'rpg', 'battle']) {
-      for (const deMode of [false, true]) {
-        if (mode === 'battle' && !deMode) continue;
-        const unaffected = path.join(root, `${mode}-${deMode}-${level}`, 'environment', 'dnc');
-        await fs.copy(hd, unaffected);
-        await applyDncLighting(unaffected, mode, level, { deMode, isVersion30: true });
-        const baselineMultiplier = [1.1, 1.3, 1.5][level - 3];
-        assert.equal(getBrightnessMultiplier(level, mode, { deMode, isVersion30: true }), baselineMultiplier);
-        for (const [rel, before] of originals) {
-          const after = await fs.readFile(path.join(unaffected, rel), 'utf8');
-          assert.deepEqual(intensityValues(after), intensityValues(before).map(value => round(value * baselineMultiplier)), 'other profile curve: ' + rel);
-          assert.deepEqual(statics(after, 'AmbIntensity'), statics(before, 'AmbIntensity').map(value => round(value + (mode === 'battle' ? 0.03 : mode === 'rpg' ? 0.01 : 0))), 'other profile ambient: ' + rel);
-        }
-      }
-    }
-  }
-  assert.ok(checked > 0);
-  for (const [rel, before] of originals) assert.equal(await fs.readFile(path.join(hd, rel), 'utf8'), before, 'bundled baseline unchanged');
-  for (const level of [3, 4, 5]) {
-    assert.equal(getBrightnessMultiplier(level, 'battle', { isVersion30: false }), [1.1, 1.3, 1.5][level - 3]);
-    assert.equal(getBrightnessMultiplier(level), [1.1, 1.3, 1.5][level - 3]);
-  }
-
   for (const shaderPack of ['shaders-300-hd', 'shaders-ptr-hd'] as const) {
     const profile = { graphics: 'hd', shaderPack, dncPack: 'dnc30-hd' } as ModProfile;
     for (const [lighting, folder] of [['standard', 'standard'], ['battle', 'melee'], ['rpg', 'rpg']]) {
@@ -95,10 +64,10 @@ try {
   for (const shaderPack of ['shaders-300-de', 'shaders-ptr-de'] as const) {
     const profile = { graphics: 'de', shaderPack, dncPack: 'dnc30-de' } as ModProfile;
     for (const lighting of ['standard', 'battle', 'rpg']) {
-      assert.equal(getShaderResourcePath('Q', profile, lighting), path.join('Q', 'shaders', shaderPack));
+      assert.equal(getShaderResourcePath('Q', profile, lighting), path.join('Q', 'shaders', shaderPack, ...(lighting === 'battle' ? ['battle'] : [])));
     }
   }
-  console.log(`PASS: HD 3.0 battle brightness/ambient/night fill (${checked} files); other profiles and shader routing unchanged`);
+  console.log('PASS: current HD/DE shader routing');
 } finally {
   await fs.remove(root);
 }

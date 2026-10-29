@@ -97,7 +97,7 @@ try {
     // ReplaceableTextures\Cliff entries without package artwork must stay native.
     for (const era of ['00', '16', '18', '20']) {
         for (const type of ['terrain', 'clifftypes']) {
-            const target = path.resolve('assets/quenching/tile', `${type}${era}.slk`);
+            const target = path.resolve('assets/unpacked/tile', `${type}${era}.slk`);
             const content = await fs.readFile(target, 'latin1');
             const original = readSlkTable(native[type]);
             const updates = new Map();
@@ -168,7 +168,7 @@ const report = {
 if (args.includes('--write')) {
     for (const item of extracted) await fs.outputFile(item.fullRelative ? path.join(fullRoot, item.fullRelative) : path.join(t30, item.relative), item.bytes);
     for (const { type, bytes } of tables) {
-        await fs.outputFile(path.resolve('assets/quenching/tile', `${type}30.slk`), bytes);
+        await fs.outputFile(path.resolve('assets/unpacked/tile', `${type}30.slk`), bytes);
         await fs.outputFile(path.join(t30, `${type}.slk`), bytes);
     }
     for (const { era, type, target, bytes } of otherTables) {

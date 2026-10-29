@@ -1,0 +1,165 @@
+{
+  "atUtc": "2026-10-27T19:33:31.188271+00:00",
+  "control": {
+    "error": "timed out"
+  },
+  "global": {
+    "created": {
+      "id": "22lQmMJNgJtuOoDZz00021Oa5",
+      "probesCount": 3
+    },
+    "result": {
+      "id": "22lQmMJNgJtuOoDZz00021Oa5",
+      "type": "http",
+      "status": "finished",
+      "createdAt": "2026-10-27T19:33:32.506Z",
+      "updatedAt": "2026-10-27T19:33:47.739Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "request": {
+          "method": "GET",
+          "path": "/match-player-301-lab/health"
+        }
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 43969,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Prinode",
+            "tags": [
+              "datacenter-network",
+              "u-k1pfel"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "target",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {},
+            "rawHeaders": null,
+            "rawBody": null,
+            "rawOutput": "Request timed out while establishing the TCP connection.",
+            "truncated": false,
+            "statusCode": null,
+            "statusCodeName": null,
+            "timings": {
+              "total": 15001,
+              "dns": 4,
+              "tcp": null,
+              "tls": null,
+              "firstByte": null,
+              "download": null
+            },
+            "tls": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 59253,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-Popsicle7791"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "target",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {},
+            "rawHeaders": null,
+            "rawBody": null,
+            "rawOutput": "Request timed out while establishing the TCP connection.",
+            "truncated": false,
+            "statusCode": null,
+            "statusCodeName": null,
+            "timings": {
+              "total": 15001,
+              "dns": 11,
+              "tcp": null,
+              "tls": null,
+              "firstByte": null,
+              "download": null
+            },
+            "tls": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-zachsills"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "target",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {},
+            "rawHeaders": null,
+            "rawBody": null,
+            "rawOutput": "Request timed out while establishing the TCP connection.",
+            "truncated": false,
+            "statusCode": null,
+            "statusCodeName": null,
+            "timings": {
+              "total": 15002,
+              "dns": 77,
+              "tcp": null,
+              "tls": null,
+              "firstByte": null,
+              "download": null
+            },
+            "tls": null
+          }
+        }
+      ]
+    }
+  }
+}

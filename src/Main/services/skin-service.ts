@@ -8,6 +8,8 @@ import { installBundledResourceFile } from './managed-resource-files';
 import { activeSkinEra, activeSkinProfile, skinProfileForGraphics, storedSkinPath, unitSkinTemplate } from './unit-skin-profile';
 import type { EffectiveGraphics } from '../../shared/mod-profile';
 import { isBranchModDisabled } from './branch-mod-toggle';
+import { applyBattleUnitScales, battleUnitScalesEnabled, restoreBattleUnitScales } from '../../shared/battle-unit-scale';
+import { preserveVersionSkins } from '../../shared/skin-versions';
 
 export interface SkinChange {
   field: string;
@@ -125,9 +127,10 @@ export class SkinService {
     if (!exists && currentProfile && await fs.pathExists(storedSkinPath(baseDir, currentProfile, true, era))) return;
 
     if (!exists || forceRefresh) {
+      const previous = exists ? await fs.readFile(unitskinPath, 'utf8') : '';
       await fs.ensureDir(unitsDir);
 
-      const assetsDir = await AssetSyncService.getAssetsDir();
+      const assetsDir = await AssetSyncService.getAssetsDir(["skin"]);
       if (!assetsDir) throw new Error('Assets directory not found');
 
       const settings = configManager.get('modSettings') || {};
@@ -139,6 +142,10 @@ export class SkinService {
       if (await fs.pathExists(sourceFile)) {
         console.log(`[SkinService] Initializing unitskin.txt with quenching template from ${sourceFile}`);
         await installBundledResourceFile(unitsDir, 'unitskin.txt', sourceFile, [sourceFile], '.quenching-skin-template');
+        const selections = (configManager.get('skinSelections') || {})[path.resolve(configManager.get('war3Path')).toLowerCase()] || {};
+        const text = preserveVersionSkins(await fs.readFile(unitskinPath, 'utf8'), previous, selections);
+        await fs.writeFile(unitskinPath, applyBattleUnitScales(text,
+          battleUnitScalesEnabled(profile, era, settings)), 'utf8');
       } else {
         console.warn(`[SkinService] Quenching template missing: ${sourceFile}`);
       }
@@ -180,7 +187,7 @@ export class SkinService {
       throw new Error(`unitskin.txt not found at ${unitskinPath}`);
     }
 
-    let content = await fs.readFile(unitskinPath, 'utf-8');
+    let content = restoreBattleUnitScales(await fs.readFile(unitskinPath, 'utf-8'));
     let lines = content.split(/\r?\n/);
 
     for (const item of batchChanges) {
@@ -250,7 +257,9 @@ export class SkinService {
       }
     }
 
-    await fs.writeFile(unitskinPath, lines.join('\r\n'), 'utf-8');
+    const profile = await activeSkinProfile(baseDir) || 'hd';
+    await fs.writeFile(unitskinPath, applyBattleUnitScales(lines.join('\r\n'),
+      battleUnitScalesEnabled(profile, await this.skinEra(baseDir), configManager.get('modSettings'))), 'utf-8');
     return true;
   }
 }

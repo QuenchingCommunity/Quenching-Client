@@ -1,0 +1,94 @@
+[
+  {
+    "name": "udp443",
+    "request": {
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "type": "dns",
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 443,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "response": {
+      "id": "2QQ68zrI5Qk3Qn4Fg00021OVs",
+      "probesCount": 3
+    }
+  },
+  {
+    "name": "udp6112",
+    "request": {
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "type": "dns",
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 6112,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "response": {
+      "id": "2vqzCW8ZvedWY0veF00021OVs",
+      "probesCount": 3
+    }
+  },
+  {
+    "name": "https443",
+    "request": {
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "type": "http",
+      "measurementOptions": {
+        "protocol": "HTTPS",
+        "request": {
+          "path": "/match-player-301-lab/health",
+          "method": "GET"
+        }
+      }
+    },
+    "response": {
+      "id": "2sqk1sNDs5DfUojMI00021OVs",
+      "probesCount": 3
+    }
+  }
+]

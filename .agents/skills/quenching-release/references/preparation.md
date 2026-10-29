@@ -1,8 +1,10 @@
 # 每次版本更新的准备与验收
 
+先执行 [测试优先流程](test-first-workflow.md)：A 带标记本地包交用户人工验收；通过后才做 B 独立测试自动更新，再交用户验收；两次通过后才做 C 正式大包及验证。以下构建／签名／上传动作只能在其所属阶段执行，不能合并提前完成。历史资源以 Git 追溯，不常驻复制每版旧树。
+
 ## 目录
 
-1. 确定版本、范围和真实基线
+1. 确定阶段、版本、范围和 Git 版本映射
 2. 完整包变化／不变化的处理
 3. 构建客户端便携 ZIP
 4. Windows 自动更新与旧版兼容
@@ -11,30 +13,30 @@
 7. 网站交接、上线与回退
 8. 归档和清理
 
-## 1. 确定版本、范围和真实基线
+## 1. 确定阶段、版本、范围和 Git 版本映射
 
 在 `_irys/releases/本次唯一标识/` 保存本次记录；这是私有工作目录，不提交。开始前填写：
 
 | 字段 | 必须记录的内容 |
 | --- | --- |
-| 用户授权范围 | 准备／候选上传／正式发布；是否允许网站切换与旧资产替换 |
+| 阶段及授权 | A 本地测试／B 测试自动更新／C 正式准备；A、B 两次用户验收的消息与候选哈希；本次上传／部署范围 |
 | 客户端版本 | 已分发内部版本列表；本次内部版本；公开显示版本／tag／ZIP 名称 |
-| 客户端构建 | 源码 Git commit；包含的未提交修改；平台／架构；实际 Electron 版本 |
+| 客户端构建 | 当前仓库的源码及 assets Git commit；包含的未提交修改；A 的 I0、B/C 的真实 I1；平台／架构；实际 Electron 版本 |
 | MOD 版本 | 当前内部 version、displayVersion、sequence；是否变更；目标三项 |
-| 旧客户端输入 | 真正分发 ZIP 的路径、大小、SHA-256；原样解压路径；EXE／ASAR 哈希 |
-| MOD 输入 | 旧官方资源清单；唯一当前资源源目录 `D:/Quenching/QM/Latest`；本次生成的候选清单 |
+| 历史客户端输入 | 前版源码 commit；正式产物 URL／大小／SHA-256、EXE／ASAR 哈希；需验证时按需取得，临时副本不要求常驻 |
+| MOD 输入 | Latest 仓库前版／目标 commit 或已知映射缺口；前版小型官方资源清单；当前 Latest 资源及候选清单 |
 | 资源归属 | 哪些由客户端 assets 负责，哪些由 MOD 更新负责，哪些影响独立完整包 |
-| 下载源 | 两产品各自 GitLawb 仓库、GitHub 仓库／tag／下载根；本次是否提供 R2 |
-| 持久资料 | 产品各自 `--store`、旧快照、旧清单及私钥位置，只记路径不记内容 |
+| 下载源／通道 | 两产品 GitHub 仓库／不可变 tag；本次测试 base 与正式索引地址；测试／正式 store 分开；按需启用的镜像 |
+| 小型持久资料 | Git commit/tag、官方快照、签名索引、历史哈希账本、产物 URL；私钥只记路径；可重取的大对象仅按需缓存 |
 | 用户验收 | 候选交付方式、预览环境、上线确认人、尚未解决的问题 |
 
 “3.5”公开名不等于字节基线。“3.51”内部用 `3.5.1`，不是 `3.51.0`。下一次客户端更新需要比已分发的 `3.5.1` 更高的内部版本，例如 `3.5.2`；这是示例，不擅自替用户决定版本。
 
-- 保存公开 GitHub ZIP 被替换前的原件，包括经其他渠道真正分发的变体。不要用新编译的同版本 EXE 代替旧基线。
-- 同一旧版本存在不同字节时分别记录。schema 1 二进制差分只能应用到匹配的旧哈希；新 schema 2 的变化单文件回退不能补救尚未获得新代码的旧客户端。
+- 历史 MOD 资源从对应 Git commit 按需读取，不 checkout/reset 当前 Latest，不构建每版常驻旧树。正式下载入口可能变化时记录不可变 URL、资产标识和哈希，不默认另存完整 ZIP。旧 EXE／ASAR 不能用同版本重编译结果冒充；本次确需验证时按已记录哈希取回。
+- 同一旧版本存在不同字节时分别记录哈希／获取位置。需要 schema 1 兼容验证时按需取回其实际二进制；新协议源码支持不代表已分发旧程序支持。无法取得可选差分基线时不制作该差分，仍保留目标整文件方案及兼容限制。
 - MOD 旧基线不能用玩家已经切换 SD／DE、放在 `QMoff` 或加入自定义资源的游戏目录。
 - 核对 `git status`，保留用户改动。用户要 commit 才提交，禁止为了“干净基线”回退其着色器等变更。
-- 先检查构建、ZIP、缓存和隔离测试需要的磁盘空间。不要以省空间为理由删除唯一旧正式包或 schema 2 历史缓存。
+- 先检查构建、ZIP、缓存和隔离测试空间。优先复用当前构建、Git 历史和内容寻址对象；保留小型清单／历史账本，可重取的大对象和用完的隔离副本可回收。现存唯一且无法重取的文件先报告映射缺口，不盲删；本次流程调整不自动清理旧目录。
 
 ## 2. 完整包变化／不变化的处理
 
@@ -47,20 +49,26 @@
 
 ### MOD 资源有变更
 
-1. 保留旧官方快照和必要正式归档，直接从 `D:/Quenching/QM/Latest` 生成本次候选清单。不得另建完整冻结资源树或从旧树补齐被 Latest 删除的文件；操作入口见 `latest-source.md`。
+1. 从前版 Git commit 或已验签的小型官方快照取得旧元数据，直接从 `D:/Quenching/QM/Latest` 生成本次候选清单。不得另建完整冻结资源树或从旧树补齐被 Latest 删除的文件；操作入口见 `latest-source.md`。
 2. 审核默认 HD 3.0 独立可用布局：`environment`、`shaders`、Cliff／Terrain SLK、单位及建筑模型、Units／TFT／Skin／Destructible Skin、foliage 两种用途、Blight、WebUI。只测试本次受影响部分和相关组合，不机械改写全部文件。
 3. 发布输入始终为 Latest。如用户明确要求与客户端着色器对齐，客户端 `assets/quenching/shaders` 只作为此次编辑的参考输入：先复制到 Latest 并核对，不能在打包时临时替换 Latest 的内容。HD、DE、游戏版本的具体布局按本次实际逻辑审查，不修改源 assets；默认水和客户端回退副本维持用户约定。
 4. 核对资源职责：将来 Full Patch 可不重复携带已由客户端稳定覆盖的文件，但这必须由对应客户端版本验收。不能因为“客户端有”就删除首装 QMF 中独立运行必需的文件；完整包与更新 patch 不是同一个产品。
 5. 检查删掉／改名的 `unitskin.txt` 等最新用户改动确实进入候选，而不是复用旧候选。foliage 的 HD 淬火／HD 普通地形版本不能混用。Blight 独立开关不能受地形选项意外覆盖。
 6. 确定目标内部 MOD version、递增 sequence、displayVersion，生成匹配 Latest 的清单和 `_patch/keep.que`，并同步生成的发布元数据到 Latest。准备后 Latest 再变化就重新准备候选；已发布的内部版本不能用不同内容复用。
 7. 按 `wiki/mod-zip-updates.md`，使用 `_irys/build-mod-zip.ts` 比较前一官方资源快照和目标快照，生成一份普通版本间 ZIP 与签名 schema 3 连续索引；后续发布只追加新的一步。目标完整性快照放在 ZIP 内，不再上传数百个散资源对象。旧 schema 1/2 端点与产物保持兼容；首次 3.4→3.5 是特殊迁移，不能把硬编码脚本当一般发布器。
-8. 首装包是否重传按用户需求决定。如提供 A／B ZIP，两份各自合法可解压、目录不重叠或冲突已明确、合并后等于官方目标；不生成分卷 ZIP。验证客户端“同时选两份 ZIP”和“选已解压文件夹”入口，不把 A 或 B 单独缺另一半误写为完整安装。
+8. A 阶段只制作人工安装测试实际需要的本地包，B 阶段只做独立测试更新；C 阶段才制作正式首装大包，是否重传按用户需求决定。如提供 A／B ZIP，两份各自合法可解压、目录不重叠或冲突已明确、合并后等于官方目标；不生成分卷 ZIP。验证客户端“同时选两份 ZIP”和“选已解压文件夹”入口，不把 A 或 B 单独缺另一半误写为完整安装。
 
 哈希完整性核对针对发布输入、下载产物和隔离测试副本，不对玩家目录强制全量匹配。未经授权，不在真实魔兽目录重建、修复或切换资源。
 
 ## 3. 构建客户端便携 ZIP
 
-先冻结本次客户端内部版本及源码。核对 `package.json.version`、renderer 对外版本、ASAR 内 package.json 和 Mac Info.plist 一致表达内部／公开版本。保持 appId、配置存储位置和读写兼容；不为隐藏版本换配置命名空间。
+**当前资源布局以 [统一资源流程](resource-bundle.md) 为准。** 使用 `prepare-client-assets.mjs` 准备展开源和单个 7z，不分发原始 `unpacked` 或 shader／UI 独立 ZIP；下文历史 ZIP 名对应其逻辑组。新源保留旧 3.0 ABI 原字节。首次整体压缩较慢，后续未变内容复用；不要为缩短一次构建时间跳过摘要／完整性检查。
+
+先按 `version-assets.md` 设置根 `release-version.json` 的对外版本，执行 `node scripts/prepare-release-assets.mjs` 和 `--check`。客户端显示、WebUI HTML、UIQUE 两份 ZIP 的八处 `QuenchingVersionText` 必须一致；同时验证 `MasterFont` 和父级 `DecorateFileNames`，游戏内确认 UI-que 命令面板实际显示版本，不能只查文本。测试包带 TEST，正式包去除 TEST。同版本 FDF 布局修复须提高 UI 缓存修订并验证刷新一次。PNG 使用无版本底图，不因升版重画。同步 Latest 的 WebUI／本地身份资源必须显式 `--sync-latest`，不修改 MOD 标记／sequence。A、B、C 的实际产物均复核这些版本文字及显示条件。
+
+本节首次导出属于 A 阶段，必须带持久测试标记；正式大包只在 C 阶段制作。先冻结本次客户端内部版本及源码和 assets。核对 `package.json.version`、renderer 对外版本、ASAR 内 package.json 和 Mac Info.plist 一致表达内部／公开版本。保持 appId、配置存储位置和读写兼容；不为隐藏版本换配置命名空间。
+
+UI 分发必须同时携带 `zip-ui-pub.zip`、`zip-ui-20.zip`、`zip-ui-30.zip`。前者保存贴图／模型，后两者只保存 FDF；运行 `npm run test:ui-split` 和 `tsx scripts/test-ui-default.ts`，验收先公共包后版本包、三种样式、经典反馈和旧样式标记迁移。版本文字仍为后两包的八处字段，公共包不因版本文字更新而改写。
 
 Windows 示例，在仓库根执行；新目录应不存在或已经明确可重建：
 
@@ -68,14 +76,18 @@ Windows 示例，在仓库根执行；新目录应不存在或已经明确可重
 node scripts/ensure-stormlib-thirdparty.cjs
 npm run build
 npx electron-builder --win --x64 --dir --publish never --config.directories.output=__Bin/client-CANDIDATE
-node _irys/export-win-test.mjs __Bin/client-CANDIDATE/win-unpacked __Bin/QMC-Win-CANDIDATE.zip QMC3.5-Win
+node _irys/export-win-test.mjs __Bin/client-CANDIDATE/win-unpacked __Bin/QMC-CANDIDATE-TEST-Win.zip QMC-CANDIDATE-TEST-Win --channel test --test-base https://qm.txzy.net/quenching/update-test/CANDIDATE/
 ```
 
-`CANDIDATE`、外层目录名及公开 ZIP 名均需替换为本次约定。`export-win-test.mjs` 已能参数化，但默认是旧测试目录；显式传参数，输出已有时它拒绝覆盖。`npm run dist:win` 也是目录打包，ZIP 要单独生成；`yarn build electron` 或开发模式启动不等于正式便携包验收。
+`CANDIDATE`、外层目录名和本次独立测试 base 均替换为本次约定。`export-win-test.mjs` 默认 test 通道，缺少 `--test-base` 会拒绝；它写入 EXE 同级 `quenching-update-test.json` 并核对 ZIP 内确实有标记，不能只靠 ZIP 名称判断。显式传源／输出参数，输出已有时拒绝覆盖。C 阶段使用无标记的构建输出并显式 `--channel production`；不能对着用户测试安装删除标记来充当正式包。`npm run dist:win` 也是目录打包，ZIP 要单独生成；`yarn build electron` 或开发模式启动不等于正式便携包验收。
 
 Windows 主程序、ASAR、unpacked 原生模块、statics、assets 来自同一冻结构建。增量对比的 `--new`／`--root` 必须就是这个最终 win-unpacked，不要中途重新编译 EXE 后继续用旧 manifest。
 
-在 Windows 上制作 Mac 包：
+Windows 打包前运行 `npm run test:win-package-files`，核对 electron-builder 实际归一化后的文件过滤器。`win.files` 不能只有排除项，否则会另建默认包含 `**/*` 的匹配器，绕过根级运行时白名单，把 `_tmp`、源码及私有工具纳入包；保留其中的 `package.json` 正向规则。打包后复查 ASAR 根目录只含运行时文件及生产依赖。
+
+构建性能排查按资源准备、webpack、electron-builder 分段计时，不把命令总时间归因于末尾签名日志。着色器 ZIP 在实际源字节、文件集合及 ZIP CRC 校验均通过时复用，不因无改动构建重复全量压缩；文件变化或 ZIP 损坏仍重建。修改此流程后运行 `npm run test:shader-bundle-reuse` 并核对真实 ZIP 摘要；webpack 构建日志会逐项输出 main／preload／renderer 耗时。
+
+两次人工验收通过后，在具备目标架构原生依赖、签名及打包条件的 Mac 构建环境制作正式 Mac 包（以当前脚本的平台要求为准）：
 
 ```powershell
 npm run dist:mac:app
@@ -83,20 +95,24 @@ npm run dist:mac:app
 npm run dist:mac:app:x64
 ```
 
-默认输出 `__Bin/QMClient-darwin-arm64.zip`；x64 输出 `__Bin/QMClient-darwin-x64.zip`。选用户需要的架构，不承诺一个 arm64 ZIP 同时支持 Intel。该脚本会重建其固定输出，先保留旧正式包，再调用。重命名／复制成公开 `QMC3.5-Mac.zip` 时保存源对应关系。
+默认输出 `__Bin/QMClient-darwin-arm64.zip`；x64 输出 `__Bin/QMClient-darwin-x64.zip`。选用户需要的架构，不承诺一个 arm64 ZIP 同时支持 Intel。该脚本会重建其固定输出，先记录旧产物的不可变 URL／哈希并确认可按需取回，不默认复制一整份旧包。重命名／复制成公开 `QMC3.5-Mac.zip` 时保存源对应关系。
 
-Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。Windows 上能制作和校验它，不等于 Mac 上签名、公证、系统拦截、原生模块和实际启动通过；记录 Mac 实机结果或明确待测。此项目不以 DMG／安装向导代替便携 ZIP。
+Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。必须在对应架构 macOS 上原生编译 StormLib／CascLib、打包和 ad-hoc 签名；Windows 仅可跑下载器及结构回归，不能制作可用 Mac 包或代替启动验收。固定现有 node-gyp 工具链时使用 Python 3.11（它依赖 distutils）；保留当前 Electron，不因这个下载问题升级内核或改为正式签名。
+
+`.github/workflows/build-mac.yml` 可选 arm64／x64／all，默认 arm64。打包步骤设置全新 `QUENCHING_ELECTRON_CACHE`，强制覆盖没有 Electron 缓存的首次下载路径；Unix 调用原生 curl，HTTP／超时／损坏 ZIP 失败不得当缓存成功。生成后运行 `node scripts/smoke-mac-archive.mjs arm64`（或 x64），实际解压交付 ZIP，检查权限、framework 符号链接、签名和架构，使用解压包内的 Electron 加载 ASAR 原生模块，再启动真实页面并验证 preload／IPC。保存启动报告、截图和 ZIP SHA-256；不以源码通过、.app 已生成或原生模块单独加载通过代替整个 ZIP 启动验证。CI 验证仍不代表普通用户下载后的 Gatekeeper 或实机交互验收，也不替代发布阶段的人工确认。此项目不以 DMG／安装向导代替便携 ZIP。
 
 打包检查：
 
 - ASAR 中主程序与冻结 dist 相同，内部版本正确；Win／Mac assets 与本次源 assets 对齐。
 - Windows 原生 CASC／StormLib 加载；Mac 所选架构的模块可用。
 - 更新助手在 `resources/assets/updater/client-update-helper.cjs`。如候选或旧代码需要 zstd，核对 `resources/assets/updater/zstd.exe`，不是便携根目录的 `zstd.exe`。schema 2 无 zstd 可走整文件；schema 1 差分引导不能假设缺工具也能成功。
-- `.env`、`_irys`、`.git`、上传密钥、签名私钥、测试配置不在便携树、ASAR 或 ZIP；公钥存在且匹配发布签名。
+- 所有包均不得携带 `.env`、`_irys`、`.git`、上传密钥、签名私钥或真实测试者配置；公钥匹配签名。A 测试 ZIP 必须含根级测试标记，且首次直接双击后配置／缓存独立；C 正式 ZIP 必须没有标记、测试配置／缓存／启动脚本。
 - 核对旧配置：重启仍保留魔兽目录、语言、皮肤及画质设置；没有设置的用户才按系统语言选七语，识别失败中文。
 - ZIP 实际解压测试通过，记录大小与 SHA-256。不用本地 ZIP 的名字代替平台／内容判断。
 
 ## 4. Windows 自动更新与旧版兼容
+
+本节只在 A 人工通过后准备 B 测试更新；B 再次人工通过后，才生成／交接 C 正式清单。测试与正式的 store、索引及部署目录分开，不能先部署正式 latest 再靠测试 flag 隔离。
 
 ### 已具备 schema 2 的客户端
 
@@ -112,7 +128,7 @@ Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。Windows 上能制作�
 
 先通过其旧接口发布一个能读 schema 2 的新客户端；或者经用户确认要求手动换包。不能把 `latest.json` 放上去就宣称旧用户会自动更新。
 
-1. 从真实原 ZIP 解压旧版，核对内部版本与 EXE／ASAR 哈希、Electron 和旧自更新工具。不要把修过源码的开发运行当旧版本。
+1. 本次需要旧协议兼容测试时，从已记录的原发布 URL 按需下载并临时解压，核对内部版本与 EXE／ASAR 哈希、Electron 和旧自更新工具；不要求常驻保留旧 ZIP／解压树。不要把修过源码的开发运行当旧版本。
 2. `_irys/build-client-update.mjs` 按这个真实旧树生成 schema 1 引导，目标内部版本必须更高。每个需要支持的旧内部版本在其 `<旧版本>.json` 地址有匹配方案，不覆盖成 schema 2。
 3. 该旧发布器要求 EXE／ASAR 均改变且一起发布；核心文件变化及删除也会拒绝。遇到不兼容时记录原因，必要时调整发布工具并测试，不伪造文件改变或忽略基线验证。
 4. 有同版本不同 EXE 的用户，先判定原代码能否使用整文件 `replace`。当前旧发布器默认强制 EXE／ASAR 差分，没有自动为变体产生整文件引导的功能；需要另行实现／验证，不能在文档中当成已支持。
@@ -123,7 +139,7 @@ Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。Windows 上能制作�
 
 ## 5. 上传、签名和源验收
 
-产物上传仅在本次用户授权范围内做。GitLawb 与 GitHub 分别提供同一逻辑产物；R2 可用时追加在最后。客户端和 MOD 各走自己的仓库。
+A 只交付本地测试包，不提前上传本次自动更新。A 人工通过后，B 仅在已授权的独立测试链路上传／部署，正式接口和门禁不动；B 人工通过后，C 才准备正式上传。GitHub 为主，GitLawb 停用，R2 实测可用后才追加。客户端和 MOD 各走自己的仓库。
 
 1. 给更新对象／清单安排版本化、不可变的 URL。公开便携 ZIP 可以按约定替换 tag `3.5` 的资产，但不得让旧签名清单的 URL 悄悄变成另一份字节。不要使用 GitHub Raw Content 或按创建时间猜“最新”。
 2. 生成签名候选。schema 2 发布器自动签名；schema 1 客户端发布器也自动签名；旧 MOD 需 unsigned manifest 再签名。源 URL、文件、大小、哈希有变就重新生成和签名。
@@ -138,7 +154,7 @@ Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。Windows 上能制作�
 
 ## 6. 客户端与游戏验收
 
-测试命令和代码定位见 `contracts-and-code.md`。每轮记录本次真实命令、输入哈希、结果和失败，不复制历史 PASS。构建成功、单元测试成功、真实便携更新成功、用户实机成功是不同层级。
+测试命令和代码定位见 `contracts-and-code.md`；A 本地包、B 测试自动更新各需要用户实际人工验收，两次结论记录具体候选及用户消息。每轮记录本次真实命令、输入哈希、结果和失败，不复制历史 PASS。构建成功、单元测试成功、真实便携更新成功、用户实机成功是不同层级。
 
 最低场景：
 
@@ -152,11 +168,11 @@ Mac ZIP 要保留 Unix 可执行权限及 `.app` 结构。Windows 上能制作�
 - 当前客户自定义皮肤依赖自动关联、CASC 游戏贴图、SD 预览、建筑动画、删除皮肤、系统／手动语言、非中文英文新闻。更新后旧配置保持。
 - 无客户端的完整包独立游戏效果（MOD 包变化时）；Win 游戏实机；Mac ZIP 实机手动替换、启动及配置保留。
 
-没有现场堆栈的“100% 后意外错误”须取得错误详情；未复现时标明，不直接宣称解决。用于测试的正式旧客户端必须是隔离副本；不借验收修改真实玩家／用户游戏目录。
+没有现场堆栈的“100% 后意外错误”须取得错误详情；未复现时标明，不直接宣称解决。旧客户端验证需要时按原发布字节取得隔离临时副本，测试后可释放；不借验收修改真实玩家／用户游戏目录。
 
 ## 7. 网站交接、上线与回退
 
-网站维护者不编译、重算签名或编辑 manifest 内字段，只部署发布方验收后的原字节文件。`version.que` 是发布门禁，不是签名清单，二者职责不同。
+本节正式交接只在 A、B 两次人工通过并完成 C 验证后执行；B 的交接只指向本次测试 base。网站维护者不编译、重算签名或编辑 manifest 内字段，只部署发布方验收后的原字节文件。`version.que` 是发布门禁，不是签名清单，二者职责不同。
 
 交接单写清：
 
@@ -178,7 +194,7 @@ MOD A／B ZIP（如本次变更首装包）：同上：
 
 发布顺序：
 
-1. 保存旧线上清单／门禁原件和对应可用产物。候选上传并验证，用户实际游戏测试完成。
+1. 记录旧线上签名清单／门禁原字节及其不可变产物 URL／哈希，不要求复制全量旧包。确认两次人工验收对应本次候选；正式候选上传及下载验收完成。
 2. 若当前已 `allowed:1`，替换正式 endpoint 就会影响现有玩家；“只准备清单”不授权此操作。先确定安全发布窗口或预览地址，不自行把所有用户 gate 改成 0。
 3. 获准后部署需要变化的原签名文件。客户端-only 发布不替换 MOD 清单；保留所有仍需兼容的旧端点。不以 schema 2 覆盖 schema 1。
 4. 网站正确提供 JSON／Markdown／QUE，不返回 SPA 首页 HTML。API／备用路径部署同一 manifest 字节；明确 404／503 代表未部署，空 `{}` 不是有效清单。
@@ -193,12 +209,12 @@ MOD A／B ZIP（如本次变更首装包）：同上：
 
 内部客户端目标版本在签名清单中。当前客户端服务只用 gate.allowed 控制可用性；MOD 服务另核对 gate.modVersion 与 manifest 的公开资源版本。不要假称 gate.version 会逐一匹配客户端内部 targetVersion。
 
-若上线失败，先报告影响范围，再按已授权回退方案处理：可阻断新下载或恢复旧索引，但不能简单降序号后宣称已升级客户端／资源已回退。已提交更新的用户需要更高版本的修复或单独恢复方案。保留旧包和错误日志，不擅自销毁现场。
+若上线失败，先报告影响范围，再按已授权回退方案处理：可阻断新下载或恢复旧索引，但不能简单降序号后宣称已升级客户端／资源已回退。已提交更新的用户需要更高版本的修复或单独恢复方案。保留本次故障现场及日志、旧清单／产物获取位置，不因回退默认额外备份所有旧包。
 
 ## 8. 归档和清理
 
-保留真实分发基线、各版官方快照、schema 2 持久 store、签名 manifest、下载 URL／哈希、构建记录、验收记录和必要回退产物。对外 ZIP 可覆盖公开旧入口，但历史字节要私下留存。
+以两个仓库的 commit/tag 保存资源历史；保留小型官方快照、schema 2 历史账本、签名 manifest、下载 URL／哈希、构建与两次人工验收记录。旧 ZIP、完整解压树、对象缓存仅在需要时取得；远程可重取且本轮已用完即可回收，不要求每版私下保留一整份。仍被旧签名索引引用的远程资产保持兼容。
 
-可清理的是已成功完成且不再作为基线的独立测试副本、可再生成的中间包、废弃上传实验仓库；先核对 junction／symlink 指向，不能递归删到源 `assets/` 或 `node_modules`。用户未授权清理时只列路径和占用，不删除。
+可清理的是已完成且可重建／重取的旧完整 ZIP、旧解压树、隔离测试副本、中间包和大对象缓存；不要整删含小型账本／快照的 store，也不要在人工验收期间清理其测试安装。先核对 junction／symlink 指向，不能递归删到源 `assets/` 或 `node_modules`。用户未授权清理时只列路径和占用，不删除。
 
 `_irys/README.md` 含多份过期 3.5 候选和 URL，只当历史，不直接当最新版操作手册；本次记录与签名产物是本次事实依据。

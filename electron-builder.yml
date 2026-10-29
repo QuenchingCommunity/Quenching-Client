@@ -9,17 +9,35 @@ files:
   - "!dist/statics/**/*"
   - "!dist/**/*.map"
   - package.json
+  - release-version.json
+  - "!**/[oO][fF][fF][lL][iI][nN][eE].[eE][xX][eE]"
 
 extraResources:
   - from: dist/statics
     to: statics
+    filter:
+      - "**/*"
+      - "!**/[oO][fF][fF][lL][iI][nN][eE].[eE][xX][eE]"
   - from: assets
     to: assets
     filter:
       - "**/*"
-      - "!quenching/shaders/**/*"
+      - "!**/[oO][fF][fF][lL][iI][nN][eE].[eE][xX][eE]"
+      - "!quenching{,/**/*}"
+      - "quenching/{ui-misc.txt,1.ico,logo.png,update-public-key.pem,index.html,local-release.json,PostProcessingConfig.txt,resources-core.7z,resources-ui.7z,resources-terrain.7z,resources-foliage-color.7z,resources-foliage-detail.7z,resources.manifest.json}"
+      - "quenching/update-baselines{,/**/*}"
+      - "!backup{,/**/*}"
+      - "!unpacked{,/**/*}"
 
 win:
+  files:
+    # Keep this matcher inclusive: an exclusions-only platform matcher makes
+    # electron-builder prepend **/* alongside the shared runtime allowlist.
+    - package.json
+    - "!node_modules/7zip-bin-full/mac/**/*"
+    - "!node_modules/7zip-bin-full/linux/**/*"
+    - "!node_modules/7zip-bin-full/win/{arm,arm64,ia32}/**/*"
+    - "!node_modules/7zip-bin-full/win/x64/7zc/**/*"
   icon: assets/quenching/1.ico
   target:
     - target: dir
@@ -52,6 +70,7 @@ npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
 asarUnpack:
+  - node_modules/7zip-bin-full/**/*
   - node_modules/@jamiephan/stormlib/prebuilds/**/*.node
   - node_modules/@jamiephan/stormlib/build/**/*.node
   - node_modules/@jamiephan/casclib/prebuilds/**/*.node

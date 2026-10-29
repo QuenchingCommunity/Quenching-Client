@@ -1,0 +1,6 @@
+{
+  "ip -details link show ens18": "2: ens18: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq state UP mode DEFAULT group default qlen 1000\n    link/ether bc:24:11:10:b7:a3 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 1500 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus virtio parentdev virtio2 \n    altname enp0s18\n",
+  "nft list tables": "table ip filter\ntable ip6 filter\n",
+  "ufw status": "Status: active\n\nTo                         Action      From\n--                         ------      ----\n22/tcp                     ALLOW       Anywhere                  \n80/tcp                     ALLOW       Anywhere                  \n443/tcp                    ALLOW       Anywhere                  \n443/udp                    ALLOW       Anywhere                   # Quenching optional game transport\n22/tcp (v6)                ALLOW       Anywhere (v6)             \n80/tcp (v6)                ALLOW       Anywhere (v6)             \n443/tcp (v6)               ALLOW       Anywhere (v6)             \n443/udp (v6)               ALLOW       Anywhere (v6)              # Quenching optional game transport\n\n",
+  "systemctl is-active quenching-match-wire.service quenching-match-player-301-lab.service": "active\nactive\n"
+}

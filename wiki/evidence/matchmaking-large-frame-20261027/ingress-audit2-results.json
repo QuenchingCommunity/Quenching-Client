@@ -1,0 +1,501 @@
+[
+  {
+    "name": "udp443",
+    "response": {
+      "id": "2QQ68zrI5Qk3Qn4Fg00021OVs",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T15:12:08.478Z",
+      "updatedAt": "2026-10-27T15:12:18.784Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124",
+        "port": 443
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 133752,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-gbzret4d"
+            ],
+            "resolvers": [
+              "8.8.8.8",
+              "8.8.4.4",
+              "2001:4860:4860::8888",
+              "2001:4860:4860::8844"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 31898,
+            "longitude": 103.96,
+            "latitude": 1.38,
+            "network": "Oracle",
+            "tags": [
+              "oci-ap-singapore-1",
+              "oci",
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.47-1~deb12u1-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-yanranxiaoxi"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "udp6112",
+    "response": {
+      "id": "2vqzCW8ZvedWY0veF00021OVs",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T15:12:09.186Z",
+      "updatedAt": "2026-10-27T15:12:19.531Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124",
+        "port": 6112
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 43969,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Prinode",
+            "tags": [
+              "datacenter-network",
+              "u-finenumbers"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#6112: timed out\n;; communications error to 191.40.41.124#6112: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 6112 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 16276,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "OVH",
+            "tags": [
+              "datacenter-network",
+              "u-fzzzn"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "1.0.0.1"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#6112: timed out\n;; communications error to 191.40.41.124#6112: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 6112 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#6112: timed out\n;; communications error to 191.40.41.124#6112: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 6112 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "https443",
+    "response": {
+      "id": "2sqk1sNDs5DfUojMI00021OVs",
+      "type": "http",
+      "status": "finished",
+      "createdAt": "2026-10-27T15:12:10.448Z",
+      "updatedAt": "2026-10-27T15:12:11.362Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "request": {
+          "path": "/match-player-301-lab/health",
+          "method": "GET"
+        }
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 43969,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Prinode",
+            "tags": [
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "finished",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {
+              "server": "nginx/1.24.0 (Ubuntu)",
+              "date": "Tue, 27 Oct 2026 15:12:10 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "close",
+              "cache-control": [
+                "no-store",
+                "no-store"
+              ],
+              "x-quenching-node": "cn1"
+            },
+            "rawHeaders": "Server: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:10 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store",
+            "rawBody": "{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "rawOutput": "HTTP/1.1 200\nServer: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:10 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store\n\n{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "truncated": false,
+            "statusCode": 200,
+            "statusCodeName": "OK",
+            "timings": {
+              "total": 28,
+              "dns": 7,
+              "tcp": 4,
+              "tls": 11,
+              "firstByte": 5,
+              "download": 1
+            },
+            "tls": {
+              "authorized": true,
+              "protocol": "TLSv1.3",
+              "cipherName": "TLS_AES_256_GCM_SHA384",
+              "createdAt": "2026-10-26T14:20:44.000Z",
+              "expiresAt": "2027-01-24T14:20:43.000Z",
+              "issuer": {
+                "C": "US",
+                "O": "Let's Encrypt",
+                "CN": "YE2"
+              },
+              "subject": {
+                "CN": "qmapi-cn1.txzy.net",
+                "alt": "DNS:qmapi-cn1.txzy.net"
+              },
+              "keyType": "EC",
+              "keyBits": 256,
+              "serialNumber": "05:C9:5F:8F:BD:AD:FF:66:AB:A3:98:2B:4D:31:B6:87:2F:15",
+              "fingerprint256": "8C:29:78:C6:13:65:C6:81:E9:BB:81:91:C5:31:8A:83:B7:4F:DD:D9:D2:4A:35:BA:6E:A7:09:58:9D:3D:3F:FB",
+              "publicKey": "04:23:DA:3A:7E:70:33:89:AF:1A:28:3C:0E:30:41:40:06:CC:D0:E9:67:08:7F:AB:77:17:24:C0:AB:F9:FB:95:C3:C9:4B:7F:5D:3B:0E:3A:C4:F7:1F:DC:31:14:27:80:13:D8:FE:5B:A1:1D:D3:6C:8A:10:C9:2B:DA:9D:66:43:02"
+            }
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 16276,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "OVH",
+            "tags": [
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "finished",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {
+              "server": "nginx/1.24.0 (Ubuntu)",
+              "date": "Tue, 27 Oct 2026 15:12:10 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "close",
+              "cache-control": [
+                "no-store",
+                "no-store"
+              ],
+              "x-quenching-node": "cn1"
+            },
+            "rawHeaders": "Server: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:10 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store",
+            "rawBody": "{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "rawOutput": "HTTP/1.1 200\nServer: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:10 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store\n\n{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "truncated": false,
+            "statusCode": 200,
+            "statusCodeName": "OK",
+            "timings": {
+              "total": 132,
+              "dns": 7,
+              "tcp": 38,
+              "tls": 47,
+              "firstByte": 40,
+              "download": 0
+            },
+            "tls": {
+              "authorized": true,
+              "protocol": "TLSv1.3",
+              "cipherName": "TLS_AES_256_GCM_SHA384",
+              "createdAt": "2026-10-26T14:20:44.000Z",
+              "expiresAt": "2027-01-24T14:20:43.000Z",
+              "issuer": {
+                "C": "US",
+                "O": "Let's Encrypt",
+                "CN": "YE2"
+              },
+              "subject": {
+                "CN": "qmapi-cn1.txzy.net",
+                "alt": "DNS:qmapi-cn1.txzy.net"
+              },
+              "keyType": "EC",
+              "keyBits": 256,
+              "serialNumber": "05:C9:5F:8F:BD:AD:FF:66:AB:A3:98:2B:4D:31:B6:87:2F:15",
+              "fingerprint256": "8C:29:78:C6:13:65:C6:81:E9:BB:81:91:C5:31:8A:83:B7:4F:DD:D9:D2:4A:35:BA:6E:A7:09:58:9D:3D:3F:FB",
+              "publicKey": "04:23:DA:3A:7E:70:33:89:AF:1A:28:3C:0E:30:41:40:06:CC:D0:E9:67:08:7F:AB:77:17:24:C0:AB:F9:FB:95:C3:C9:4B:7F:5D:3B:0E:3A:C4:F7:1F:DC:31:14:27:80:13:D8:FE:5B:A1:1D:D3:6C:8A:10:C9:2B:DA:9D:66:43:02"
+            }
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-gbzret4d"
+            ],
+            "resolvers": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ]
+          },
+          "result": {
+            "status": "finished",
+            "resolvedAddress": "191.40.41.124",
+            "headers": {
+              "server": "nginx/1.24.0 (Ubuntu)",
+              "date": "Tue, 27 Oct 2026 15:12:11 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "close",
+              "cache-control": [
+                "no-store",
+                "no-store"
+              ],
+              "x-quenching-node": "cn1"
+            },
+            "rawHeaders": "Server: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:11 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store",
+            "rawBody": "{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "rawOutput": "HTTP/1.1 200\nServer: nginx/1.24.0 (Ubuntu)\nDate: Tue, 27 Oct 2026 15:12:11 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nConnection: close\nCache-Control: no-store\nX-Quenching-Node: cn1\nCache-Control: no-store\n\n{\"service\":\"quenching-two-player-node-test\",\"protocolVersion\":1,\"instanceId\":\"e4fd02cc-4e82-4d14-963e-6ee22d585334\",\"gameVersion\":\"3.0.1.24371\",\"gameBinarySha256\":\"eb39ab298ae1d84d307aba4d400f2a7dbda2900a46964bb28aeba592f45fa97a\",\"modes\":[\"duel\",\"solo\"],\"mapName\":\"Glory Hills\",\"metadata\":{\"mapPath\":\"Maps/QuenchingMatch/glory-hills-ffca04e3cf42a6e0.w3m\",\"fileBytes\":101152,\"fileCrc32\":3655473126,\"mapXoro\":2175164114,\"sha1\":\"0aeee23b7aa5dda0b214e0f4b4f6a248806c0826\",\"sha256\":\"ffca04e3cf42a6e0117870fc27fe6afd60f02f6a065d5c1a7ebaa0a4257b178e\",\"maxSlots\":2,\"checksumSources\":[{\"name\":\"war3map.j\",\"bytes\":38645},{\"name\":\"war3map.w3e\",\"bytes\":75345},{\"name\":\"war3map.wpm\",\"bytes\":147472},{\"name\":\"war3map.doo\",\"bytes\":105594}],\"mapModified\":false,\"nativeValidationPassed\":false,\"width\":72,\"height\":72,\"mapInfoFormat\":33,\"mapFlags\":179220,\"slotsSource\":\"native-selected-map-query-2276\",\"checksumMode\":\"native-tcpn-owned-lobby-reference\",\"checksumReference\":\"native-host-wire-reference-2276/report.json\"},\"roomsEnabled\":true,\"mapMetadataVersion\":2,\"legacyAutomaticQueue\":true,\"tickMs\":30,\"chatRelay\":true,\"playerNames\":true,\"waiting\":0,\"activeGames\":0,\"testEnabledUntil\":1793905104584}",
+            "truncated": false,
+            "statusCode": 200,
+            "statusCodeName": "OK",
+            "timings": {
+              "total": 759,
+              "dns": 81,
+              "tcp": 215,
+              "tls": 242,
+              "firstByte": 220,
+              "download": 1
+            },
+            "tls": {
+              "authorized": true,
+              "protocol": "TLSv1.3",
+              "cipherName": "TLS_AES_256_GCM_SHA384",
+              "createdAt": "2026-10-26T14:20:44.000Z",
+              "expiresAt": "2027-01-24T14:20:43.000Z",
+              "issuer": {
+                "C": "US",
+                "O": "Let's Encrypt",
+                "CN": "YE2"
+              },
+              "subject": {
+                "CN": "qmapi-cn1.txzy.net",
+                "alt": "DNS:qmapi-cn1.txzy.net"
+              },
+              "keyType": "EC",
+              "keyBits": 256,
+              "serialNumber": "05:C9:5F:8F:BD:AD:FF:66:AB:A3:98:2B:4D:31:B6:87:2F:15",
+              "fingerprint256": "8C:29:78:C6:13:65:C6:81:E9:BB:81:91:C5:31:8A:83:B7:4F:DD:D9:D2:4A:35:BA:6E:A7:09:58:9D:3D:3F:FB",
+              "publicKey": "04:23:DA:3A:7E:70:33:89:AF:1A:28:3C:0E:30:41:40:06:CC:D0:E9:67:08:7F:AB:77:17:24:C0:AB:F9:FB:95:C3:C9:4B:7F:5D:3B:0E:3A:C4:F7:1F:DC:31:14:27:80:13:D8:FE:5B:A1:1D:D3:6C:8A:10:C9:2B:DA:9D:66:43:02"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

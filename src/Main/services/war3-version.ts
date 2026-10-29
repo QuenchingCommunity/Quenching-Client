@@ -1,4 +1,7 @@
-import { getSelectedGameChannel, getSelectedGameFolder } from './game-channel';
+import { getSelectedGameChannel } from './game-channel';
+import { assertWar3VersionSupported } from '../../shared/war3-support';
+import { GameChannel, gameChannelFolder } from '../../shared/game-channel';
+import { VersionSelection, normalizeVersionSelection } from '../../shared/mod-profile';
 import fs from 'fs-extra';
 import path from 'path';
 import { execFile } from 'child_process';
@@ -6,42 +9,18 @@ import { promisify } from 'util';
 
 const execFileAsync = promisify(execFile);
 
-/** Shaders for War3 < 2.0.0 (from 1.8/ps.zip) */
-export const SHADER_ZIP_PRE200 = 'shaders1.xx.zip';
-/** Shaders for War3 >= 2.0.0 and < 2.0.3 */
-export const SHADER_ZIP_LEGACY = 'shaders2.02.zip';
-/** Shaders for War3 >= 2.0.3 */
-export const SHADER_ZIP_MODERN = 'shaders2.03.zip';
-
-/** UI package for War3 1.32-1.36 and 2.0.0-2.0.4. */
+/** UI layout retained for supported Warcraft III 2.0.4. */
 export const UI_ZIP_20 = 'zip-ui-20.zip';
-/** UI package for newer/other War3 versions. */
 export const UI_ZIP_30 = 'zip-ui-30.zip';
-
 export type UiZipName = typeof UI_ZIP_20 | typeof UI_ZIP_30;
 
-export type ShaderZipName =
-    | typeof SHADER_ZIP_PRE200
-    | typeof SHADER_ZIP_LEGACY
-    | typeof SHADER_ZIP_MODERN;
-
-/** Marker written inside `_retail_/shaders` (moves with classic QMoff park). */
+/** Marker moves with the selected branch's shaders. */
 export const SHADER_PACK_MARKER = '.quenching-shader-pack';
-
-/** Versions strictly below this use shaders1.xx.zip. */
-const PRE200_THRESHOLD: [number, number, number] = [2, 0, 0];
-/** Versions strictly below this (and >= 2.0.0) use shaders2.02.zip. */
-const LEGACY_THRESHOLD: [number, number, number] = [2, 0, 3];
 
 export type War3VersionInfo = {
     version: string;
     parts: number[];
     source: 'build.info' | 'exe' | 'unknown';
-    /** true when version < 2.0.3 (uses shaders1.xx or shaders2.02). */
-    useLegacyShaders: boolean;
-    /** true when version < 2.0.0 (uses shaders1.xx.zip). */
-    usePre200Shaders: boolean;
-    shaderZip: ShaderZipName;
 };
 
 function normalizeWar3Root(war3Path: string): string {
@@ -59,61 +38,21 @@ export function parseVersionParts(version: string): number[] {
     return cleaned.length > 0 ? cleaned : [0];
 }
 
-function isVersionBelow(version: string | null | undefined, threshold: [number, number, number]): boolean {
+/** Known unsupported builds must never receive a supported build's UI. */
+export function getUiZipForVersion(version: string | null | undefined, selection: VersionSelection = 'auto'): UiZipName {
     if (!version) {
-        return false;
+        const explicit = normalizeVersionSelection(selection);
+        if (explicit !== 'auto') return explicit === 'v204' ? UI_ZIP_20 : UI_ZIP_30;
+        assertWar3VersionSupported({ parts: [0], source: 'unknown' });
     }
-    const parts = parseVersionParts(version);
-    for (let i = 0; i < threshold.length; i++) {
-        const a = parts[i] ?? 0;
-        const b = threshold[i];
-        if (a < b) return true;
-        if (a > b) return false;
-    }
-    return false;
+    const tier = assertWar3VersionSupported({ parts: parseVersionParts(version), source: 'build.info' });
+    return tier === 'v204' ? UI_ZIP_20 : UI_ZIP_30;
 }
 
-/** true when version < 2.0.0 */
-export function isPre200War3Version(version: string | null | undefined): boolean {
-    return isVersionBelow(version, PRE200_THRESHOLD);
-}
-
-/** true when version < 2.0.3 (includes pre-2.0.0) */
-export function isLegacyWar3Version(version: string | null | undefined): boolean {
-    return isVersionBelow(version, LEGACY_THRESHOLD);
-}
-
-export function getShaderZipForVersion(version: string | null | undefined): ShaderZipName {
-    if (isPre200War3Version(version)) {
-        return SHADER_ZIP_PRE200;
-    }
-    if (isLegacyWar3Version(version)) {
-        return SHADER_ZIP_LEGACY;
-    }
-    return SHADER_ZIP_MODERN;
-}
-
-/**
- * The 2.0 UI layout is required by War3 1.32-1.36 and 2.0.0-2.0.4.
- * Unknown versions deliberately use the current 3.0 layout.
- */
-export function getUiZipForVersion(version: string | null | undefined): UiZipName {
-    if (!version) {
-        return UI_ZIP_30;
-    }
-
-    const [major = 0, minor = 0, patch = 0] = parseVersionParts(version);
-    const uses20Ui =
-        (major === 1 && minor >= 32 && minor <= 36) ||
-        (major === 2 && minor === 0 && patch >= 0 && patch <= 4);
-
-    return uses20Ui ? UI_ZIP_20 : UI_ZIP_30;
-}
-
-async function readVersionFromBuildInfo(war3Path: string): Promise<string | null> {
+async function readVersionFromBuildInfo(war3Path: string, channel: GameChannel): Promise<string | null> {
     const root = normalizeWar3Root(war3Path);
     const candidates = [
-        path.join(root, getSelectedGameFolder(), '.build.info'),
+        path.join(root, gameChannelFolder(channel), '.build.info'),
         path.join(root, '.build.info'),
     ];
 
@@ -134,10 +73,10 @@ async function readVersionFromBuildInfo(war3Path: string): Promise<string | null
             }
             // A shared root manifest can contain both Retail and PTR active rows.
             const productIdx = headers.findIndex((h) => h === 'product');
-            const product = getSelectedGameChannel() === 'ptr' ? 'w3t' : 'w3';
+            const product = channel === 'ptr' ? 'w3t' : 'w3';
             let rows = lines.slice(1);
             if (productIdx >= 0) rows = rows.filter(line => (line.split('|')[productIdx] || '').trim().toLowerCase() === product);
-            else if (getSelectedGameChannel() === 'ptr' && buildInfoPath === path.join(root, '.build.info')) continue;
+            else if (channel === 'ptr' && buildInfoPath === path.join(root, '.build.info')) continue;
             if (!rows.length) continue;
             // Prefer the active row (Active=1) of THIS product when present.
             const activeIdx = headers.findIndex((h) => h === 'active');
@@ -162,12 +101,12 @@ async function readVersionFromBuildInfo(war3Path: string): Promise<string | null
     return null;
 }
 
-function getExeCandidates(war3Path: string): string[] {
+function getExeCandidates(war3Path: string, channel: GameChannel): string[] {
     const root = normalizeWar3Root(war3Path);
     return [
-        path.join(root, getSelectedGameFolder(), 'x86_64', 'Warcraft III.exe'),
-        path.join(root, getSelectedGameFolder(), 'Warcraft III.exe'),
-        ...(getSelectedGameChannel() === 'retail' ? [
+        path.join(root, gameChannelFolder(channel), 'x86_64', 'Warcraft III.exe'),
+        path.join(root, gameChannelFolder(channel), 'Warcraft III.exe'),
+        ...(channel === 'retail' ? [
             path.join(root, 'x86_64', 'Warcraft III.exe'),
             path.join(root, 'Warcraft III.exe'),
             path.join(root, 'War3.exe'),
@@ -175,12 +114,12 @@ function getExeCandidates(war3Path: string): string[] {
     ];
 }
 
-async function readVersionFromExe(war3Path: string): Promise<string | null> {
+async function readVersionFromExe(war3Path: string, channel: GameChannel): Promise<string | null> {
     if (process.platform !== 'win32') {
         return null;
     }
 
-    for (const exePath of getExeCandidates(war3Path)) {
+    for (const exePath of getExeCandidates(war3Path, channel)) {
         if (!(await fs.pathExists(exePath))) {
             continue;
         }
@@ -207,67 +146,23 @@ async function readVersionFromExe(war3Path: string): Promise<string | null> {
     return null;
 }
 
-export async function detectWar3Version(war3Path: string | undefined | null): Promise<War3VersionInfo> {
-    if (!war3Path) {
-        return {
-            version: '',
-            parts: [0],
-            source: 'unknown',
-            useLegacyShaders: false,
-            usePre200Shaders: false,
-            shaderZip: SHADER_ZIP_MODERN,
-        };
+export async function detectWar3Version(
+    war3Path: string | undefined | null,
+    channel: GameChannel = getSelectedGameChannel(),
+): Promise<War3VersionInfo> {
+    if (war3Path) {
+        const fromBuild = await readVersionFromBuildInfo(war3Path, channel);
+        if (fromBuild) return { version: fromBuild, parts: parseVersionParts(fromBuild), source: 'build.info' };
+        const fromExe = await readVersionFromExe(war3Path, channel);
+        if (fromExe) return { version: fromExe, parts: parseVersionParts(fromExe), source: 'exe' };
+        console.warn(`[War3Version] Could not detect version for: ${war3Path}`);
     }
-
-    const fromBuild = await readVersionFromBuildInfo(war3Path);
-    if (fromBuild) {
-        return {
-            version: fromBuild,
-            parts: parseVersionParts(fromBuild),
-            source: 'build.info',
-            useLegacyShaders: isLegacyWar3Version(fromBuild),
-            usePre200Shaders: isPre200War3Version(fromBuild),
-            shaderZip: getShaderZipForVersion(fromBuild),
-        };
-    }
-
-    const fromExe = await readVersionFromExe(war3Path);
-    if (fromExe) {
-        return {
-            version: fromExe,
-            parts: parseVersionParts(fromExe),
-            source: 'exe',
-            useLegacyShaders: isLegacyWar3Version(fromExe),
-            usePre200Shaders: isPre200War3Version(fromExe),
-            shaderZip: getShaderZipForVersion(fromExe),
-        };
-    }
-
-    console.warn(`[War3Version] Could not detect version for: ${war3Path}; defaulting to ${SHADER_ZIP_MODERN}`);
-    return {
-        version: '',
-        parts: [0],
-        source: 'unknown',
-        useLegacyShaders: false,
-        usePre200Shaders: false,
-        shaderZip: SHADER_ZIP_MODERN,
-    };
+    return { version: '', parts: [0], source: 'unknown' };
 }
 
-export async function resolveShaderZipName(war3Path: string): Promise<ShaderZipName> {
+export async function resolveUiZipName(war3Path: string, selection: VersionSelection = 'auto'): Promise<UiZipName> {
     const info = await detectWar3Version(war3Path);
-    const tier = info.usePre200Shaders
-        ? ' [pre-2.0.0]'
-        : info.useLegacyShaders
-          ? ' [2.0.0�C2.0.2]'
-          : ' [>= 2.0.3]';
-    console.log(`[War3Version] ${info.version || 'unknown'} (${info.source}) �� ${info.shaderZip}${tier}`);
-    return info.shaderZip;
-}
-
-export async function resolveUiZipName(war3Path: string): Promise<UiZipName> {
-    const info = await detectWar3Version(war3Path);
-    const zipName = getUiZipForVersion(info.version);
+    const zipName = getUiZipForVersion(info.version, selection);
     console.log(`[War3Version] ${info.version || 'unknown'} (${info.source}) -> ${zipName}`);
     return zipName;
 }

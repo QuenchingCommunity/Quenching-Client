@@ -1,0 +1,29 @@
+{
+  "ao_policy": "optimized_3.6_with_terrain_identity",
+  "fog_optimizations": {
+    "reduce_samples": true,
+    "half_resolution": true,
+    "cheap_candidate_rejection": true
+  },
+  "terrain_identity": "terrain_identity_v1_6bit_spatial_signature_confirmed_2x2",
+  "outline_strength": 0.4,
+  "outline_width_pixels": 2,
+  "new_ssao": false,
+  "source": "production_37_identity_optimized_v1",
+  "native_light": {
+    "enabled": true,
+    "source": "b1 shadow cascades",
+    "fallback": "legacy direction"
+  },
+  "fog_visibility": {
+    "protocol": "native_fow_depth10_visibility4_signature6_v1",
+    "paired_files": [
+      "ps/hd.bls",
+      "ps/sd_on_hd.bls",
+      "ps/foliage.bls",
+      "ps/fog.bls",
+      "ps/volumetricfog.bls"
+    ],
+    "distance_fog_composite": "preserve_fog_colour_and_fade_outline_with_transmission_squared"
+  }
+}

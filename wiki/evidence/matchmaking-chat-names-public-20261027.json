@@ -1,0 +1,19 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "tickMs": 30,
+  "gameId": "899fc757-61f1-45d2-a0b8-7785f1569529",
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true
+}

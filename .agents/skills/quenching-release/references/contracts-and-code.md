@@ -1,13 +1,13 @@
 # 协议、代码与发布工具位置
 
-路径相对仓库根；私有工具实际保存在 `_irys/`，不随 Git 克隆。缺失时报告缺少哪项输入／工具；不要把私钥或整个 `_irys/` 纳入仓库以“补齐发布环境”。以下接口是当前源码合同，不代表它们均已在线部署。
+路径相对仓库根；私有工具实际保存在 `_irys/`，不随 Git 克隆。缺失时报告缺少哪项输入／工具；不要把私钥或整个 `_irys/` 纳入仓库以“补齐发布环境”。以下接口是当前源码合同，不代表它们均已在线部署。发布阶段与资源／Git 历史以 [测试优先流程](test-first-workflow.md) 为准；先两次人工验收再做正式大包。
 
 ## 1. 仓库与元数据接口
 
 | 用途 | 位置／说明 |
 | --- | --- |
-| MOD GitHub | `https://github.com/UIZorrot/Quenching-Assets`；完整包和 MOD 更新产物 |
-| 客户端 GitHub | `https://github.com/UIZorrot/Quenching-Client`；Win／Mac 便携包和 Windows 更新产物 |
+| MOD GitHub | `https://github.com/QuenchingCommunity/Quenching-Assets`；完整包和 MOD 更新产物 |
+| 客户端 GitHub | `https://github.com/QuenchingCommunity/Quenching-Client`；Win／Mac 便携包和 Windows 更新产物 |
 | MOD GitLawb | `quenching-mod-updates`；公开仓库 URL 由 `_irys/gitlawb-migration-source.ts` 给出 |
 | 客户端 GitLawb | `quenching-client-updates`；核对已签名客户端清单和私有 checkout 的 remote，不盲猜 DID |
 | GitLawb 下载 | `https://node.gitlawb.com/api/v1/repos/<DID>/<repo>/blob/<path>`；不是 GitLab Releases |
@@ -24,18 +24,25 @@
 
 更新目标由签名索引中的 MOD sequence／客户端 targetVersion 决定，不走 GitHub 最新创建时间，也未实现直接发现 GitHub Latest Release 并自动下整客户端的兜底。公开 tag／显示名可以不变，内部目标必须向前。
 
+2026-10-23 上述两库及 OpenQuenching／Quenching-Gitbook 转移至 QuenchingCommunity；旧 UIZorrot 地址依靠 GitHub 重定向兼容。新发布使用组织地址，保留旧签名清单原字节，不为换 owner 直接改已签名 JSON。已分发旧客户端镜像识别只支持旧 owner，故旧清单仍保留旧 URL；新客户端和发布器源码同时识别两个 owner。不要在旧命名空间重建同名仓库，否则会破坏重定向。私有历史发布脚本仍有旧 owner，下一次运行前须显式核对目标（含 gh -R、url-base 和镜像前缀），不能盲重跑旧发布。详见 wiki/github-organization-migration-20261023.md。
+
 `version.que` 支持旧纯文本 `v3.4` 和 schema 1 JSON。当前 JSON 必须含 `schema:1`、有效 `version`、数字版本 `modVersion`、整数 `allowed:0|1`；不是字符串 `"1"`。源码见 `src/shared/release-gate.ts`。
 
-内测变量是 `QUENCHING_PREVIEW_UPDATES=1`；候选位置可使用 `QUENCHING_VERSION_URL`、`QUENCHING_MANIFEST_URL`、`QUENCHING_CLIENT_MANIFEST_URL`。仅对本次隔离启动生效，不写入正式包／系统永久环境。生产回归清除这些变量。预览变量不授予官网下载或发布权限，也不能凭空补出未部署的 manifest。
+独立内测使用 EXE 同级 `quenching-update-test.json` 启用 `QUENCHING_UPDATE_TEST=1` 和本次 `QUENCHING_UPDATE_TEST_BASE`，首次交付必须有持久标记。该 base 下分别提供 `version.que`、`client-manifests/latest.json`、`mod-zip-manifest.json`／`mod-sync-manifest.json`，失败不回退正式。详见 `src/Main/services/update-test-init.ts`、`update-channel.ts` 和 `test-first-workflow.md`。
+
+旧预览变量是 `QUENCHING_PREVIEW_UPDATES=1`，不能代替独立测试通道；候选位置可使用 `QUENCHING_VERSION_URL`、`QUENCHING_MANIFEST_URL`、`QUENCHING_CLIENT_MANIFEST_URL`。仅对本次隔离启动生效，不写入正式包／系统永久环境。生产回归清除这些变量。预览变量不授予官网下载或发布权限，也不能凭空补出未部署的 manifest。
 
 ## 2. 客户端运行代码地图
 
 | 负责内容 | 代码位置 |
 | --- | --- |
-| 应用内部／公开版本 | `package.json`、`src/Renderer/version.ts` |
+| 应用内部／公开版本 | `package.json`、根 `release-version.json`、读取公开 JSON 的 `src/Renderer/version.ts` |
+| UIQUE／WebUI 版本生成及检查 | `scripts/prepare-release-assets.mjs`、`scripts/templates/quenching-webui.html`；见 `version-assets.md` |
 | 生产编译 | `scripts/webpack.build/`；Main／Renderer／Preload 的 partial 配置 |
 | Win 打包范围、ASAR／原生解包 | `electron-builder.yml` |
-| Windows 上制作 Mac .app／ZIP | `scripts/package-mac-app.mjs` |
+| 便携导出的测试／正式通道 | `scripts/portable-release-channel.mjs`、私有 `_irys/export-win-test.mjs`；默认测试并要求本次 base |
+| 测试标记与配置隔离初始化 | `src/Main/services/update-test-init.ts`、`update-channel.ts`；EXE 同级 JSON，更新后保留 |
+| Mac 原生架构制作 ad-hoc .app／ZIP、冷缓存下载及 ZIP 启动验收 | `.github/workflows/build-mac.yml`、`scripts/package-mac-app.mjs`、`scripts/lib/electron-download.mjs`、`scripts/smoke-mac-archive.mjs`；Windows 不可代替 Mac 打包及启动验收 |
 | 主进程更新服务注册／健康确认 | `src/main.ts`、`src/Main/ipc/client-update-handlers.ts`、`src/Main/ipc/mod-update-handlers.ts` |
 | 活动 preload／API 类型 | `src/Main/preload.ts`、`src/types/electron-api.d.ts` |
 | 初检、合并弹窗、确认、进度、更新顺序 | `src/Renderer/components/MainWindow/index.tsx` |
@@ -73,7 +80,7 @@ MOD `_patch/keep.que` 末尾有效记录示例：
 - 所选分支 `.quenching/installed-mod.json`：已安装 MOD 状态；不是启动全量遍历的依据。
 - 客户端 `resources/assets/updater/client-files.json.gz`：官方客户端快照，与更新事务一起提交。
 - 客户端 `.quenching-client-update/`：事务、备份和健康记录；不是发布方 store。
-- 发布方 `--store/file-sync-history.json` 及快照／对象缓存：持久发布历史；不是客户端缓存，不能随测试目录清掉。
+- 发布方 `--store/file-sync-history.json` 及小型快照是持久元数据；测试／正式 store 分开。大对象缓存可按已验证 URL／哈希重取，不要求永久保留，不整删历史账本和小快照。
 
 ## 3. 私有发布工具与参数
 
@@ -87,7 +94,7 @@ MOD `_patch/keep.que` 末尾有效记录示例：
 
 ### schema 2：当前客户端发布器和旧 MOD 兼容
 
-`_irys/build-file-sync.mjs`：扫描官方输入，读取持久历史，生成快照、需要上传的 SHA-256 `.bin` 对象、可选分片／差分及签名索引，不自行上传或改官网。
+`_irys/build-file-sync.mjs`：扫描官方输入，读取小型历史账本，生成快照、需要上传的 SHA-256 `.bin` 对象、可选分片／差分及签名索引，不自行上传或改官网。客户端扫描排除根级测试标记／配置／缓存／启动说明，保留测试选择文件在 ASAR 外；测试产物不混入正式 store。
 
 通用参数：
 
@@ -169,6 +176,9 @@ node _irys/build-client-update.mjs
 基础更新回归：
 
 ```powershell
+node scripts/test-portable-release-channel.mjs
+node --import tsx scripts/test-portable-update-test.ts
+npm run test:update-channel
 npm run test:file-sync
 npm run test:mod-zip
 node scripts/test-mod-update-node.mjs
@@ -187,6 +197,6 @@ npm run build
 
 按本次受影响功能追加 `test:custom-skin-textures`、`test:system-language`、`test:skin-i18n`、`test:news-language`、`test:i18n`、`test:post-processing-config`、`test:webui-asset-sync`。埋点有关时再跑 `test:startup-telemetry` 和 `node scripts/test-startup-telemetry-state.mjs`；普通发布不趁机改其 URL。
 
-`test:file-sync` 使用真实服务、隔离配置／小文件／本地 HTTP，覆盖跨版本只下载差异、官方历史新增／恢复／改回、对象／分片／差分回退、签名篡改、文件保留、应用回滚和助手健康确认。它不能证明已分发旧客户端能识别 schema 2，也不能代替正式源和真实旧便携包升级。
+`test:file-sync` 使用真实服务、隔离配置／小文件／本地 HTTP，覆盖跨版本只下载差异、官方历史新增／恢复／改回、对象／分片／差分回退、签名篡改、文件保留、应用回滚和助手健康确认。它不能证明已分发旧客户端能识别 schema 2，也不能代替两次人工验收、正式源和按需获取旧客户端的升级验证。
 
 开发浏览器回归在 `scripts/research/`，选择本次相关页面。网络／IPC 模拟与真实游戏只读预览分清；没有页面运行错误才可交付。全仓 TypeScript 既有诊断单列，不能以生产构建通过宣称全仓类型检查通过。

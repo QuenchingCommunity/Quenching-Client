@@ -1,0 +1,111 @@
+{
+  "at": "2026-10-28T10:21:14.566Z",
+  "root": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\__Bin\\win-unpacked",
+  "version": "3.7.0",
+  "files": 157,
+  "bytes": 441511341,
+  "MB": 441.511341,
+  "MiB": 421.05802631378174,
+  "previousBytes": 441376741,
+  "deltaBytes": 134600,
+  "resourceFiles": 1096,
+  "expandedBytes": 1126301502,
+  "resourceBytes": 100881691,
+  "resourceReductionPercent": 91.04310073094443,
+  "hypotheticalLooseTotal": 1466931152,
+  "groups": {
+    "Electron root": 280938140,
+    "resources/app.asar": 41551492,
+    "resources/app.asar.unpacked": 5295707,
+    "resources/assets/fonts": 1432860,
+    "resources/assets/ps-list": 486912,
+    "resources/assets/py_screen_info": 8125749,
+    "resources/assets/quenching": 102023117,
+    "resources/assets/updater": 1613614,
+    "resources/statics": 43750
+  },
+  "packedResources": [
+    {
+      "name": "resources-core.7z",
+      "bytes": 20582071,
+      "sha256": "cfb427401e8d58b01d96978ab29c4b330dd76c54565f12fb1e858b1f7d4b9500"
+    },
+    {
+      "name": "resources-ui.7z",
+      "bytes": 20825966,
+      "sha256": "e2ebd90fa11fec97117d99692f26a7e1d4e12cd43f3a9863cc3aa260cede4bbf"
+    },
+    {
+      "name": "resources-terrain.7z",
+      "bytes": 20711057,
+      "sha256": "73eddbed521ad8d4082f71a1e899ca7f28c86d7e3206168ff5b87fa0a4d4ca29"
+    },
+    {
+      "name": "resources-foliage-color.7z",
+      "bytes": 19658872,
+      "sha256": "9e0d1ba8e3a5fa8e0c03bbcaab361aab58a9e71feb0da374a9f2b1eeb72152da"
+    },
+    {
+      "name": "resources-foliage-detail.7z",
+      "bytes": 19103725,
+      "sha256": "080a0e4ba31cee2c4ba4509bb9c528b5bcfd499640d957c0c579c7706fcfd352"
+    }
+  ],
+  "checks": {
+    "noLooseResources": true,
+    "noLegacyArchives": true,
+    "noTemporarySources": true,
+    "archiveHashesMatch": true,
+    "currentBundles": true
+  },
+  "largestFiles": [
+    {
+      "path": "QMClient.exe",
+      "bytes": 188838400
+    },
+    {
+      "path": "resources/app.asar",
+      "bytes": 41551492
+    },
+    {
+      "path": "resources/assets/quenching/resources-ui.7z",
+      "bytes": 20825966
+    },
+    {
+      "path": "resources/assets/quenching/resources-terrain.7z",
+      "bytes": 20711057
+    },
+    {
+      "path": "resources/assets/quenching/resources-core.7z",
+      "bytes": 20582071
+    },
+    {
+      "path": "resources/assets/quenching/resources-foliage-color.7z",
+      "bytes": 19658872
+    },
+    {
+      "path": "resources/assets/quenching/resources-foliage-detail.7z",
+      "bytes": 19103725
+    },
+    {
+      "path": "icudtl.dat",
+      "bytes": 10468208
+    },
+    {
+      "path": "LICENSES.chromium.html",
+      "bytes": 9099045
+    },
+    {
+      "path": "libGLESv2.dll",
+      "bytes": 8418304
+    },
+    {
+      "path": "resources/assets/py_screen_info/screen_info.exe",
+      "bytes": 8125749
+    },
+    {
+      "path": "resources.pak",
+      "bytes": 5755349
+    }
+  ]
+}

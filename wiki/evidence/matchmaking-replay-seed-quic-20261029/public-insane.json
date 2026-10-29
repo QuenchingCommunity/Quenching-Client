@@ -1,0 +1,163 @@
+{
+  "client": {
+    "origin": "https://qmapi-cn1.txzy.net",
+    "syntheticClients": true,
+    "realWarcraftTested": false,
+    "transport": "quic-copies-v2",
+    "tlsVerified": true,
+    "serverSelfAddress": false,
+    "publicQuicVerified": true,
+    "congestion": "bbr-standard",
+    "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+    "tickMs": 30,
+    "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+    "randomSeedVerified": true,
+    "seed": 706932754,
+    "nativeComputerSlotsConfirmed": true,
+    "legacyAndReforgedNames": true,
+    "nativeProfileCannotOverwriteName": true,
+    "lobbyChat": true,
+    "gameStarted": true,
+    "allChat": true,
+    "reverseAllyChat": true,
+    "privateChat": true,
+    "senderBoundToConnection": true,
+    "recipientPrivacyAndNoSelfEcho": true,
+    "actionsStillForwarded": true,
+    "normalLeave": true,
+    "transportEvents": [
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready",
+        "ticketConsumed": false
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 45,
+          "duplicateCopies": 37,
+          "fastCopiesWon": 0,
+          "copyBytes": 2352,
+          "copyBudgetSkips": 47,
+          "copyCoalesced": 44,
+          "copyBlockMaxUs": 0,
+          "lockWaitMaxUs": 0,
+          "frameSendMaxUs": 619
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      },
+      {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 44,
+          "duplicateCopies": 44,
+          "fastCopiesWon": 0,
+          "copyBytes": 2156,
+          "copyBudgetSkips": 37,
+          "copyCoalesced": 43,
+          "copyBlockMaxUs": 0,
+          "lockWaitMaxUs": 0,
+          "frameSendMaxUs": 0
+        }
+      },
+      {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    ]
+  },
+  "server": {
+    "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+    "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+    "randomSeed": 706932754,
+    "computerDifficulty": null,
+    "errors": [],
+    "states": [
+      {
+        "at": "2026-10-28T17:51:30.567Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "lobby",
+        "joined": 1
+      },
+      {
+        "at": "2026-10-28T17:51:31.769Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "lobby",
+        "joined": 2
+      },
+      {
+        "at": "2026-10-28T17:51:31.853Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "countdown"
+      },
+      {
+        "at": "2026-10-28T17:51:32.854Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "loading"
+      },
+      {
+        "at": "2026-10-28T17:51:32.927Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "running",
+        "tickMs": 30,
+        "maxAheadFrames": 67
+      },
+      {
+        "at": "2026-10-28T17:51:33.982Z",
+        "gameId": "b0c781ed-62c5-4b51-8fa2-a2009a21a40d",
+        "instanceId": "b0ed3f6f-d41e-453f-b79a-8d1b1766e5d5",
+        "gameVersion": "3.0.1.24371",
+        "mode": "duel",
+        "state": "closed",
+        "reason": "players-left",
+        "frameCount": 34,
+        "keepAliveCount": 56
+      }
+    ],
+    "result": {
+      "reason": "forfeit",
+      "firstLeavingPlayer": 1,
+      "players": [
+        {
+          "playerId": 1,
+          "outcome": "loss"
+        },
+        {
+          "playerId": 2,
+          "outcome": "win"
+        }
+      ]
+    }
+  }
+}

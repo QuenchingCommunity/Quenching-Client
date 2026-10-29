@@ -4,6 +4,9 @@ import { verifyModIntegrity } from '../services/mod-integrity-service';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameDir } from '../services/game-channel';
 import { isBranchModDisabled } from '../services/branch-mod-toggle';
 import { applyInstalledProfile } from '../services/post-install-profile';
+import { configManager } from '../services/config-manager';
+import { resolveModProfile } from '../services/mod-profile';
+import { assertShaderProfileSupported } from '../../shared/mod-profile';
 
 function assertWar3Path(war3Path: unknown): asserts war3Path is string {
   if (typeof war3Path !== 'string' || !war3Path.trim()) throw new Error('未提供魔兽路径');
@@ -20,6 +23,7 @@ export function registerModUpdateHandlers() {
     if (!getChannelModEnabled(getSelectedGameChannel()) || await isBranchModDisabled(getSelectedGameDir(war3Path))) {
       throw new Error('Enable the selected branch MOD before applying an update');
     }
+    assertShaderProfileSupported(await resolveModProfile(war3Path, configManager.get('modSettings') || {}));
     const result = await applyModUpdate(war3Path, {
       onProgress: (progress) => {
         // File installation finishes before the selected profile is reapplied.

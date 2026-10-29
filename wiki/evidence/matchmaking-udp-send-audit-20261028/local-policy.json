@@ -1,0 +1,35 @@
+{
+  "outboundBlockRules": [
+    {
+      "name": "codex_sandbox_offline_block_loopback_tcp",
+      "Enabled": "Yes",
+      "Profiles": "Domain,Private,Public",
+      "Protocol": "TCP",
+      "LocalIP": "Any",
+      "RemoteIP": "127.0.0.0/8,::/127",
+      "LocalPort": "Any",
+      "RemotePort": "1-65535"
+    },
+    {
+      "name": "codex_sandbox_offline_block_loopback_udp",
+      "Enabled": "Yes",
+      "Profiles": "Domain,Private,Public",
+      "Protocol": "UDP",
+      "LocalIP": "Any",
+      "RemoteIP": "127.0.0.0/8,::/127",
+      "LocalPort": "Any",
+      "RemotePort": "Any"
+    },
+    {
+      "name": "codex_sandbox_offline_block_outbound",
+      "Enabled": "Yes",
+      "Profiles": "Domain,Private,Public",
+      "Protocol": "Any",
+      "LocalIP": "Any",
+      "RemoteIP": "0.0.0.0-126.255.255.255,128.0.0.0-255.255.255.255,::-::,::2-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+    }
+  ],
+  "ruleQueryExit": 0,
+  "systemHttpProxyEnabled": true,
+  "proxyRuntimeError": "URLError"
+}

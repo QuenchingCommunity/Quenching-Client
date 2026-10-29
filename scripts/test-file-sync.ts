@@ -247,12 +247,17 @@ export async function run() {
     const publisherAvailable = await fs.pathExists(path.join(process.cwd(), '_irys/build-file-sync.mjs'));
     if (publisherAvailable) {
     const publisherRoot = path.join(root, 'publisher-input'); const store = path.join(root, 'publisher-store');
+    // Test a deterministic publisher policy, never the operator's private defaults.
+    const sourcePolicy = path.join(root, 'source-policy.json');
+    await fs.writeJson(sourcePolicy, { schema: 1, githubMirrors: ['https://gh-proxy.org/'], metadataMirrors: [
+      { from: 'https://qm.txzy.net/quenching/', to: 'https://metadata-backup.example/quenching/' },
+    ] });
     const signingKey = path.join(root, 'ephemeral.pem'); await fs.writeFile(signingKey, keys.privateKey.export({ type: 'pkcs8', format: 'pem' }));
     const seed = path.join(root, 'seed.gz'); await fs.writeFile(seed, encodeSnapshot(first));
     const invoke = async (version: string, sequence: number, candidate: string, extra: string[] = []) => {
       const output = await promisify(execFile)(process.execPath, ['_irys/build-file-sync.mjs', '--product', 'quenching-mod', '--root', publisherRoot,
         '--version', version, '--sequence', String(sequence), '--output', candidate, '--store', store,
-        '--url-base', 'https://github.com/example/releases/download/latest', '--seed-snapshot', seed, '--private-key', signingKey, ...extra], { maxBuffer: 5000 });
+        '--url-base', 'https://github.com/example/releases/download/latest', '--seed-snapshot', seed, '--private-key', signingKey, '--source-policy', sourcePolicy, ...extra], { maxBuffer: 5000 });
       assert.ok(output.stdout.length < 5000);
       const value = await fs.readJson(path.join(candidate, 'mod-sync-manifest.json')); const unsigned = { ...value }; delete unsigned.signature;
       assert.ok(crypto.verify(null, Buffer.from(canonical(unsigned)), publicKey, Buffer.from(value.signature.value, 'base64')));
@@ -266,8 +271,11 @@ export async function run() {
     await fs.remove(publisherRoot); await writeTree(publisherRoot, publisherTarget);
     const out38 = path.join(root, 'out38'); const published = await invoke('3.8', 80, out38, ['--chunk-url-base', 'https://gitlawb.example/raw', '--chunk-size', '4', '--github-mirror', 'https://gh-proxy.org/', '--metadata-url-base', 'https://qm.txzy.net/quenching/test-files']);
     assert.deepEqual(validateFileSync(published.fileSync).githubMirrors, ['https://gh-proxy.org/']);
-    assert.ok(published.fileSync.inventory.sources.every((url: string) => url.startsWith('https://qm.txzy.net/quenching/test-files/')));
-    assert.ok(Object.values(published.fileSync.baselines).every((item: any) => item.sources.every((url: string) => url.startsWith('https://qm.txzy.net/quenching/test-files/'))));
+    for (const item of [published.fileSync.inventory, ...Object.values(published.fileSync.baselines)] as any[]) {
+      assert.equal(item.sources.length, 2);
+      assert.ok(item.sources[0].startsWith('https://qm.txzy.net/quenching/test-files/'));
+      assert.equal(item.sources[1], item.sources[0].replace('qm.txzy.net', 'metadata-backup.example'));
+    }
     assert.ok(published.fileSync.objects.every((url: string) => !url.startsWith('https://qm.txzy.net/')), 'metadata hosting does not move large resource objects to the website');
     assert.ok(await fs.pathExists(path.join(out38, hash('original') + '.bin')), 'reverted resource must be downloadable for intermediate versions');
     assert.ok(!await fs.pathExists(path.join(out38, hash('stable') + '.bin')), 'unchanged resource must not be uploaded');
@@ -284,11 +292,20 @@ export async function run() {
     const clientSeed = path.join(root, 'client-seed.gz'); await fs.writeFile(clientSeed, encodeSnapshot(clientFirst));
     await writeTree(path.join(root, 'client-original-official'), clientOriginal);
     const clientPublishRoot = path.join(root, 'client-publish-input'); await writeTree(clientPublishRoot, clientTarget);
+    const testPrivateFiles = {
+      'quenching-update-test.json': '{"schema":1,"enabled":true,"baseUrl":"https://qm.txzy.net/quenching/update-test/fixture/"}',
+      '.test-config/settings.json': 'private tester settings', '.test-user-data/Cache/session': 'private tester cache',
+      'README-TEST.txt': 'test instructions', 'start-update-test.cmd': 'test launch script',
+    };
+    await writeTree(clientPublishRoot, testPrivateFiles);
     const clientCandidate = path.join(root, 'client-candidate');
     await promisify(execFile)(process.execPath, ['_irys/build-file-sync.mjs', '--product', 'quenching-client', '--root', clientPublishRoot,
       '--version', '3.8.0', '--runtime-version', '28.2.0', '--output', clientCandidate, '--store', path.join(root, 'client-store'),
       '--url-base', 'https://github.com/example/releases/download/latest', '--seed-root', path.join(root, 'client-original-official'), '--seed-version', '3.5.0', '--private-key', signingKey], { maxBuffer: 5000 });
     const publishedClient = await fs.readJson(path.join(clientCandidate, 'latest.json')); validateClientUpdateManifest(publishedClient, publicKey);
+    const publishedInventory = decodeSnapshot(await fs.readFile(path.join(clientCandidate, new URL(publishedClient.fileSync.inventory.sources[0]).pathname.split('/').pop()!)), 'quenching-client', '3.8.0');
+    assert.ok(publishedInventory.files.every((file: any) => !(file.path in testPrivateFiles)), 'local channel and tester data must not enter update snapshots');
+    for (const value of Object.values(testPrivateFiles)) assert.equal(await fs.pathExists(path.join(clientCandidate, hash(value) + '.bin')), false, 'test data must not become a public object');
     assert.ok(await fs.pathExists(path.join(clientCandidate, hash('same launcher') + '.bin')));
     await fs.outputFile(path.join(clientPublishRoot, 'icudtl.dat'), 'unexpected runtime change');
     await assert.rejects(() => promisify(execFile)(process.execPath, ['_irys/build-file-sync.mjs', '--product', 'quenching-client', '--root', clientPublishRoot,

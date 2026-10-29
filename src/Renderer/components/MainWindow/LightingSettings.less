@@ -1,0 +1,54 @@
+.settings-lighting {
+  padding: 16px;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 10px !important;
+    font-family: 'Trajan Pro 3', serif;
+    line-height: 1.35;
+  }
+
+  .settings-lighting-brightness {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 432px;
+
+    > button {
+      flex: 1;
+      min-width: 0 !important;
+      padding-inline: 8px;
+    }
+  }
+
+  .settings-lighting-angle-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 540px;
+    min-width: 0;
+
+    > .ant-slider {
+      flex: 1;
+      min-width: 0;
+      margin-inline: 6px;
+    }
+
+    .ant-input-number {
+      width: 88px;
+      flex: 0 0 88px;
+      background: rgba(0, 0, 0, 0.5);
+      border-color: rgba(212, 175, 55, 0.3);
+      color: #aaa;
+
+      &:hover, &.ant-input-number-focused {
+        border-color: #d4af37;
+      }
+
+      input {
+        color: inherit;
+        font-size: 12px;
+      }
+    }
+  }
+}

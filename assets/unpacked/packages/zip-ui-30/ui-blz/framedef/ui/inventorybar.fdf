@@ -1,0 +1,284 @@
+Frame "SIMPLEBUTTON" "ObserverInventoryButtonTemplate" {
+	Width 0.033,
+	Height 0.033,
+}
+
+Frame "SIMPLEFRAME" "SimpleObserverInventoryBar" {
+    UseActiveContext,
+    Width 0.128,
+    Height 0.175,       
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_0" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2145, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_1" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2385, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_2" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2625, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_3" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2145, -0.0755,
+	}
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_4" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2385, -0.0755,
+	}
+	
+	Frame "SIMPLEBUTTON" "ObserverInventoryButton_5" INHERITS "ObserverInventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleObserverInventoryBar", TOPRIGHT, 0.2625, -0.0755,
+	}
+
+	Frame "TEXT" "ObserverInventoryText"{
+        Width 0.0,
+		Height 0.0,
+	}     
+}
+
+Frame "SIMPLEBUTTON" "InventoryButtonTemplate" {
+	Width 0.0195,
+	Height 0.0195,
+}
+
+Frame "SIMPLEFRAME" "SimpleInventoryBar" {
+    UseActiveContext,
+	SetAllPoints, 
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_0" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2145, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_1" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2385, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_2" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2625, -0.0505,
+	}
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_3" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2145, -0.0755,
+	}
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_4" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2385, -0.0755,
+	}
+	
+	Frame "SIMPLEBUTTON" "InventoryButton_5" INHERITS "InventoryButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.2625, -0.0755,
+	}
+
+	Frame "TEXT" "InventoryText"{
+        Width 0.07125,
+		Height 0.01125,    
+        DecorateFileNames,
+        SetPoint TOPLEFT, "SimpleInventoryBar", TOPRIGHT, 0.0187, 0.015,
+        Text " ",		
+		FrameFont "MasterFont", 0.00001 , "",  
+		FontFlags "FIXEDSIZE",
+		FontColor 0.99 0.827 0.070 0,
+		FontShadowColor 0.0 0.0 0.0 0.9,	
+		FontShadowOffset 0.001 -0.001,	
+        FontJustificationH JUSTIFYCENTER,
+	}     
+}
+Frame "SIMPLEFRAME" "SimpleInventoryCover" {
+	UseActiveContext,
+    DecorateFileNames,	
+    Width 0.001,
+    Height 0.001,        
+	SetPoint BOTTOMRIGHT, "ConsoleUI", BOTTOMLEFT, 0.6, 0.0,
+	
+	Texture "InventoryCoverTexture" {       
+		Width 0.0001,
+		Height 0.0001, 
+		SetPoint BOTTOMRIGHT, "SimpleInventoryCover", BOTTOMRIGHT, 0.0, 0.0,
+		File "ConsoleInventoryCoverTexture",
+	}
+}
+
+Frame "SIMPLEFRAME" "SimpleEquipmentInventoryPanel" {
+    UseActiveContext,
+	DecorateFileNames,
+	Height 0.2408,
+	Width 0.3,
+	SetPoint BOTTOMRIGHT, "ConsoleBottomBar", TOPRIGHT, 0.0, 0.03,
+}
+
+Frame "SIMPLEBUTTON" "EquipmentButtonTemplate" {
+	Width 0.03125,
+	Height 0.03125,
+}
+
+String "TitleTextTemplate" {
+    Font "MasterFont", 0.014,
+    FontJustificationH JUSTIFYLEFT,
+    FontJustificationV JUSTIFYMIDDLE,    
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,	
+    FontShadowOffset 0.002 -0.002,	
+}
+
+Frame "SIMPLEFRAME" "SimpleEquipmentPanel" {
+    UseActiveContext,
+	DecorateFileNames,
+	Height 0.2408,
+	Width 0.2075,
+	SetPoint BOTTOMRIGHT, "SimpleEquipmentInventoryPanel", TOPRIGHT, 0.0, 0.0,
+
+	String "UnitName" INHERITS "TitleTextTemplate" {
+		SetPoint TOP, "SimpleEquipmentPanel", TOP, 0.0, -0.015,
+		Text "Garek",
+	}
+
+	String "UnitClass" INHERITS "TitleTextTemplate" {
+		SetPoint TOP, "UnitName", TOP, 0.0, -0.015,
+
+    	Font "MasterFont", 0.009,
+		Text "Level 10 Lieutenant",
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_0" INHERITS "EquipmentButtonTemplate" {
+		DecorateFileNames,
+		SetPoint TOPLEFT, "SimpleEquipmentPanel", TOPLEFT, 0.012, -0.016,
+
+		Texture { 
+			File "EquipmentHead",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_1" INHERITS "EquipmentButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleEquipmentPanel", TOPLEFT, 0.012, -0.04725,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentChest",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_2" INHERITS "EquipmentButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleEquipmentPanel", TOPLEFT, 0.012, -0.0785,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentGloves",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_3" INHERITS "EquipmentButtonTemplate" {
+		SetPoint TOPLEFT, "SimpleEquipmentPanel", TOPLEFT, 0.012, -0.10975,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentBoots",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_4" INHERITS "EquipmentButtonTemplate" {
+		SetPoint BOTTOMLEFT, "SimpleEquipmentPanel", BOTTOMLEFT, 0.012, 0.0115,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentRing",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_5" INHERITS "EquipmentButtonTemplate" {
+		SetPoint BOTTOMRIGHT, "SimpleEquipmentPanel", BOTTOMRIGHT, -0.012, 0.0115,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentRingAlt",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_6" INHERITS "EquipmentButtonTemplate" {
+		SetPoint BOTTOMRIGHT, "SimpleEquipmentPanel", BOTTOM, 0.0, 0.0115,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentPrimary",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_7" INHERITS "EquipmentButtonTemplate" {
+		SetPoint BOTTOMLEFT, "SimpleEquipmentPanel", BOTTOM, 0.0, 0.0115,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentOffhand",
+		}
+	}
+
+	Frame "SIMPLEBUTTON" "EquipmentButton_8" INHERITS "EquipmentButtonTemplate" {
+		SetPoint BOTTOMLEFT, "SimpleEquipmentPanel", BOTTOMLEFT, 0.012, 0.04275,
+		DecorateFileNames,
+
+		Texture {
+			File "EquipmentTrinket",
+		}
+	}
+}
+
+Frame "BACKDROP" "EquipmentPanelBackdrop" {
+	DecorateFileNames,
+	Height 0.2408,
+	Width 0.2075,
+	SetPoint BOTTOMRIGHT, "SimpleEquipmentInventoryPanel", TOPRIGHT, 0.0, 0.0,
+    BackdropTileBackground,
+    BackdropBackground  "EscMenuBackground",
+    BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+    BackdropCornerSize  0.02f,
+    BackdropBackgroundInsets 0.0021 0.0021 0.0021 0.0021,
+    BackdropEdgeFile  "EscMenuBorder",
+	BackdropBackgroundSize  0.256,
+	BackdropBlendAll,
+}
+
+String "TalentTextTemplate" {
+    Font "MasterFont", 0.009,
+    FontJustificationH JUSTIFYCENTER,
+    FontJustificationV JUSTIFYTOP,    
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,	
+    FontShadowOffset 0.002 -0.002,
+}
+
+Frame "SIMPLEFRAME" "SimpleTalentsPanel" {
+    UseActiveContext,
+	DecorateFileNames,
+	Width 0.14,
+	Height 0.2408,
+
+	String "TalentsTitle" INHERITS "TalentTextTemplate" {
+		Height 0.011875,
+		Width 0.1,
+		Font "MasterFont", 0.014,
+		Text "TALENTS",
+		SetPoint TOP, "SimpleTalentsPanel", TOP, 0.0, -0.015,
+	}
+
+	String "PointsAvailableText" INHERITS "TalentTextTemplate" {
+		Height 0.011875,
+		Width 0.1,
+		SetPoint TOP, "TalentsTitle", TOP, 0.0, -0.015,
+	}
+}
+
+Frame "BACKDROP" "TalentPanelBackdrop" {
+	DecorateFileNames,
+	Width 0.14,
+	Height 0.2408,
+	SetPoint BOTTOMRIGHT, "SimpleTalentsPanel", TOPRIGHT, 0.0, 0.0,
+    BackdropTileBackground,
+    BackdropBackground  "EscMenuBackground",
+    BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+    BackdropCornerSize  0.02f,
+    BackdropBackgroundInsets 0.0021 0.0021 0.0021 0.0021,
+    BackdropEdgeFile  "EscMenuBorder",
+	BackdropBackgroundSize  0.256,
+    BackdropBlendAll,
+}

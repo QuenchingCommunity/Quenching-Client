@@ -1,3 +1,5 @@
+import { applyBattleUnitScales, hasBattleUnitScales, restoreBattleUnitScales } from './battle-unit-scale';
+
 export type SkinArtSet = 'sd' | 'hd' | 'de';
 export interface VersionSkinChange { field: string; value: string }
 export interface VersionSkinChoice { unitId: string; skinId: string; changes: VersionSkinChange[] }
@@ -45,7 +47,8 @@ export function scopedSkin(changes: VersionSkinChange[], artSet: SkinArtSet): Ve
 export function writeVersionSkins(text: string, baseline: SkinSections, artSet: SkinArtSet, choices: VersionSkinChoice[]) {
   assertArtSet(artSet);
   if (!Array.isArray(choices) || choices.length === 0 || choices.length > 256) throw new Error('无效的皮肤选择');
-  let lines = text.split(/\r?\n/);
+  const battle = hasBattleUnitScales(text);
+  let lines = restoreBattleUnitScales(text).split(/\r?\n/);
   const seen = new Set<string>();
   for (const choice of choices) {
     if (!/^[A-Za-z0-9]{4}$/.test(choice.unitId) || seen.has(choice.unitId) || !choice.skinId) throw new Error('无效或重复的单位');
@@ -74,15 +77,15 @@ export function writeVersionSkins(text: string, baseline: SkinSections, artSet: 
       ...qualifiedOriginals.map(([key, value]) => `${key}=${value}`),
       ...block);
   }
-  return lines.join('\r\n');
+  return applyBattleUnitScales(lines.join('\r\n'), battle);
 }
 
 /** Retain explicit per-version choices when the legacy global resource pack rebuilds its template. */
 export function preserveVersionSkins(replacement: string, previous: string, selections: SkinSelections) {
-  const sections = parseSkinSections(previous);
+  const sections = parseSkinSections(restoreBattleUnitScales(previous));
   let result = replacement;
   for (const artSet of ['sd', 'hd', 'de'] as const) {
-    const choices = Object.entries(selections[artSet] || {}).filter(([id]) => sections[id]).map(([unitId, skinId]) => ({
+    const choices = Object.entries(selections[artSet] || {}).filter(([id, skinId]) => skinId !== 'original' && sections[id]).map(([unitId, skinId]) => ({
       unitId, skinId, changes: Object.entries(sections[unitId]).filter(([field]) => SKIN_FIELDS.some(base => field === `${base}:${artSet}`)).map(([field, value]) => ({ field, value })),
     })).filter(choice => choice.changes.length > 0);
     if (choices.length) result = writeVersionSkins(result, sections, artSet, choices);

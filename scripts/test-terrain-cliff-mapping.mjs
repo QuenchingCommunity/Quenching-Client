@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { readSlkTable } from './terrain-slk-utils.mjs';
 
-const assetDir = path.resolve('assets/quenching/tile');
+const assetDir = path.resolve('assets/unpacked/tile');
 const packageRoot = process.argv[2] ? path.resolve(process.argv[2]) : null;
 
 // These SLKs contain non-UTF-8 Excel metadata. Reading as latin1 also keeps

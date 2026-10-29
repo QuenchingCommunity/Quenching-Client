@@ -1,3 +1,4 @@
+import { resourceArchiveExists } from './bundled-packages';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder } from './game-channel';
 import fs from 'fs-extra';
 import path from 'path';
@@ -29,7 +30,7 @@ export async function applyBlightSettings(war3Path: string, enabled: boolean): P
         return;
     }
     const zipPath = path.join(await AssetSyncService.getAssetsDir(), 'quenching', zipName);
-    if (!(await fs.pathExists(zipPath))) throw new Error(`Blight zip not found: ${zipPath}`);
+    if (!(await resourceArchiveExists(zipPath))) throw new Error(`Blight zip not found: ${zipPath}`);
     await fs.ensureDir(terrainArtPath);
     await AssetSyncService.extractZip(zipPath, terrainArtPath);
     if (!(await fs.pathExists(blightDir))) throw new Error(`Blight extract failed, missing ${blightDir}`);

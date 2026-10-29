@@ -1,0 +1,45 @@
+{
+  "atUtc": "2026-10-27T18:59:06.151122+00:00",
+  "mutations": false,
+  "checks": {
+    "ss -lunp": "UNCONN 0      0                  *:443             *:*    users:((\"match-wire\",pid=106494,fd=5))     ",
+    "ss -ltnp": "LISTEN 0      511          0.0.0.0:443       0.0.0.0:*    users:((\"nginx\",pid=86274,fd=6),(\"nginx\",pid=86273,fd=6),(\"nginx\",pid=86272,fd=6),(\"nginx\",pid=86271,fd=6),(\"nginx\",pid=86269,fd=6))\nLISTEN 0      511        127.0.0.1:3785      0.0.0.0:*    users:((\"MainThread\",pid=93145,fd=21))                                                                                              ",
+    "iptables -t raw -S": "-P PREROUTING ACCEPT\n-P OUTPUT ACCEPT\n",
+    "iptables -t mangle -S": "-P PREROUTING ACCEPT\n-P INPUT ACCEPT\n-P FORWARD ACCEPT\n-P OUTPUT ACCEPT\n-P POSTROUTING ACCEPT\n",
+    "iptables -t nat -S": "-P PREROUTING ACCEPT\n-P INPUT ACCEPT\n-P OUTPUT ACCEPT\n-P POSTROUTING ACCEPT\n",
+    "nft list tables": "table ip filter\ntable ip6 filter\n"
+  },
+  "nginx": {
+    "valid": true,
+    "directives": [
+      "    server_name qmapi-cn1.txzy.net;",
+      "    listen 443 ssl;",
+      "    server_name qmapi-cn1.txzy.net;",
+      "    location = /health { proxy_pass http://127.0.0.1:3785/match-player-301-lab/health; }",
+      "    location ^~ /match-player-301-lab/ {",
+      "        proxy_pass http://127.0.0.1:3785;",
+      "        proxy_http_version 1.1;",
+      "        proxy_set_header Upgrade $http_upgrade;",
+      "        proxy_set_header Connection $quenching_upgrade;",
+      "        proxy_read_timeout 6h;"
+    ]
+  },
+  "protocolProbe": {
+    "gameId": "409c241a-981f-458e-8977-89e69c794647",
+    "errors": [],
+    "lastState": {
+      "at": "2026-10-27T18:58:12.704Z",
+      "gameId": "409c241a-981f-458e-8977-89e69c794647",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "closed",
+      "reason": "players-left",
+      "frameCount": 13,
+      "keepAliveCount": 26
+    },
+    "syntheticClients": true,
+    "serverSelfAddress": true,
+    "publicUdpVerified": false
+  }
+}

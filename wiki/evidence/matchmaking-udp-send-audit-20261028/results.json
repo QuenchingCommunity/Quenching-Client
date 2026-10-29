@@ -1,0 +1,376 @@
+{
+  "startUtc": "2026-10-27T19:03:05.200914+00:00",
+  "ticketUsed": false,
+  "packetCapturePrivilege": false,
+  "targetQuic": {
+    "config": {
+      "host": "qmapi-cn1.txzy.net",
+      "port": 443,
+      "path": "/match-player-301-lab/games/9329d469-8951-488c-b483-8d26fc4dd18d/wire"
+    },
+    "resolvedIPv4": [
+      "191.40.41.124"
+    ],
+    "exitCode": 1,
+    "events": [
+      {
+        "detail": "timeout: no recent network activity",
+        "event": "preflight-error",
+        "phase": "dial"
+      },
+      {
+        "error": "quic-preflight-unavailable"
+      }
+    ],
+    "qlogs": [
+      {
+        "file": "8ba6d455168262f68ea5be5740_client.sqlog",
+        "counts": {
+          "null": 1,
+          "transport:connection_started": 1,
+          "recovery:congestion_state_updated": 1,
+          "transport:parameters_set": 1,
+          "security:key_updated": 2,
+          "transport:packet_sent": 8,
+          "recovery:metrics_updated": 5,
+          "recovery:loss_timer_updated": 10,
+          "transport:connection_closed": 1
+        },
+        "sent": [
+          {
+            "at": 40.965,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 0,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 40.965,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 1,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 241.9278,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 2,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 241.9278,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 3,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 642.1274,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 4,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 642.1274,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 5,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 1442.4978,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 6,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 1442.4978,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 7,
+              "version": "1",
+              "scil": 0,
+              "dcil": 13,
+              "dcid": "8ba6d455168262f68ea5be5740"
+            },
+            "rawLength": 1280
+          }
+        ],
+        "received": [],
+        "connection": [
+          {
+            "time": 40.4254,
+            "name": "transport:connection_started",
+            "data": {
+              "local": {
+                "ip_v4": "0.0.0.0",
+                "port_v4": 63540
+              },
+              "remote": {
+                "ip_v4": "191.40.41.124",
+                "port_v4": 443
+              }
+            }
+          },
+          {
+            "time": 3041.5701,
+            "name": "transport:connection_closed",
+            "data": {
+              "initiator": "local",
+              "trigger": "idle_timeout"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "publicQuicControl": {
+    "config": {
+      "host": "1.1.1.1",
+      "port": 443,
+      "path": "/match-player-301-lab/games/b2145f1b-dbf9-4983-b654-a94e8acf11ac/wire"
+    },
+    "resolvedIPv4": [
+      "1.1.1.1"
+    ],
+    "exitCode": 1,
+    "events": [
+      {
+        "detail": "timeout: no recent network activity",
+        "event": "preflight-error",
+        "phase": "dial"
+      },
+      {
+        "error": "quic-preflight-unavailable"
+      }
+    ],
+    "qlogs": [
+      {
+        "file": "d5ffce58bedbc82df792608d_client.sqlog",
+        "counts": {
+          "null": 1,
+          "transport:connection_started": 1,
+          "recovery:congestion_state_updated": 1,
+          "transport:parameters_set": 1,
+          "security:key_updated": 2,
+          "transport:packet_sent": 8,
+          "recovery:metrics_updated": 5,
+          "recovery:loss_timer_updated": 10,
+          "transport:connection_closed": 1
+        },
+        "sent": [
+          {
+            "at": 30.472,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 0,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 30.472,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 1,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 231.2627,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 2,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 231.2627,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 3,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 631.8642,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 4,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 631.8642,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 5,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 1432.6363,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 6,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          },
+          {
+            "at": 1432.6363,
+            "header": {
+              "packet_type": "initial",
+              "packet_number": 7,
+              "version": "1",
+              "scil": 0,
+              "dcil": 12,
+              "dcid": "d5ffce58bedbc82df792608d"
+            },
+            "rawLength": 1280
+          }
+        ],
+        "received": [],
+        "connection": [
+          {
+            "time": 29.9529,
+            "name": "transport:connection_started",
+            "data": {
+              "local": {
+                "ip_v4": "0.0.0.0",
+                "port_v4": 63539
+              },
+              "remote": {
+                "ip_v4": "1.1.1.1",
+                "port_v4": 443
+              }
+            }
+          },
+          {
+            "time": 3030.9257,
+            "name": "transport:connection_closed",
+            "data": {
+              "initiator": "local",
+              "trigger": "idle_timeout"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "socketCalls": [
+    {
+      "requestedDestination": [
+        "191.40.41.124",
+        443
+      ],
+      "socketPeer": [
+        "191.40.41.124",
+        443
+      ],
+      "localSocket": [
+        "192.168.0.100",
+        63536
+      ],
+      "sendReturnBytes": [
+        36,
+        36,
+        36
+      ],
+      "socketError": 0
+    },
+    {
+      "requestedDestination": [
+        "191.40.41.124",
+        53
+      ],
+      "socketPeer": [
+        "191.40.41.124",
+        53
+      ],
+      "localSocket": [
+        "192.168.0.100",
+        63538
+      ],
+      "sendReturnBytes": [
+        36,
+        36,
+        36
+      ],
+      "socketError": 0
+    }
+  ],
+  "dnsUdpControl": {
+    "peer": [
+      "1.1.1.1",
+      53
+    ],
+    "matched": true,
+    "elapsedMs": 60.3
+  },
+  "endUtc": "2026-10-27T19:03:08.602454+00:00"
+}

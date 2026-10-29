@@ -1,4 +1,4 @@
-// Builds assets/quenching/dnc/dnc30-de-rpg: the 3.0 HD DNC with every Intensity ×1.15.
+// Builds assets/unpacked/dnc/dnc30-de-rpg: the 3.0 HD DNC with every Intensity ×1.15.
 // Re-run after dnc30-hd changes: npx tsx scripts/build-dnc-de-rpg.ts
 import path from 'node:path';
 import fs from 'fs-extra';

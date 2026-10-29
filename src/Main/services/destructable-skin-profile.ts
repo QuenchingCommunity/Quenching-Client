@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import path from 'node:path';
 import type { EffectiveGraphics, EffectiveVersion } from '../../shared/mod-profile';
 import { skinEraForVersion } from './unit-skin-profile';
@@ -11,5 +12,5 @@ export function destructableSkinTemplate(
 ): string {
   const name = graphics === 'de' ? 'destructableskin-de.txt'
     : treeMode === 'original' ? 'destructableskin.txt' : 'destructableskin-org.txt';
-  return path.join(quenchingDir, 'skin', ...(skinEraForVersion(version) === 'v20' ? ['legacy'] : []), name);
+  return resourcePath(quenchingDir, 'skin', ...(skinEraForVersion(version) === 'v20' ? ['legacy'] : []), name);
 }

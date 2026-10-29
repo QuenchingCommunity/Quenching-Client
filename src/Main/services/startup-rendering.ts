@@ -4,9 +4,10 @@ import { configManager } from './config-manager';
 import { getChannelModEnabled, getSelectedGameChannel, hasGameChannelDirectory } from './game-channel';
 import { isThirdPartyQuenchingPaused } from './third-party-resources';
 import { readCurrentModVersion } from './mod-integrity-service';
-import { assertWarcraftNotRunning, getInstalledModState } from './mod-update-service';
+import { getInstalledModState } from './mod-update-service';
 import { AssetSyncService, syncLightingResources } from './asset-sync';
 import { startupResourceBarrier } from './startup-resource-barrier';
+import { UIService } from './ui-service';
 
 export type StartupRenderingResult = { status: 'applied' | 'skipped' | 'failed'; reason?: string; error?: string };
 
@@ -23,16 +24,12 @@ export async function applyStartupRendering(): Promise<StartupRenderingResult> {
     if (!await readCurrentModVersion(gamePath) && (await getInstalledModState(gamePath))?.sequence === 34) {
       return { status: 'skipped', reason: 'legacy-package' };
     }
-    try { await assertWarcraftNotRunning(); }
-    catch (error) {
-      if (String(error instanceof Error ? error.message : error).includes('Warcraft III is running')) {
-        return { status: 'skipped', reason: 'game-running' };
-      }
-      throw error;
-    }
     // These are client-bundled resources; basic rendering does not require a full package marker.
-    const assets = path.join(await AssetSyncService.getAssetsDir(), 'quenching');
+    const assets = path.join(await AssetSyncService.getAssetsDir(["dnc","skin"]), 'quenching');
     await syncLightingResources(gamePath, assets, settings, undefined, { forceEnvironment: true });
+    // UI refresh belongs to startup/profile application, never a settings read.
+    // Its version/style marker makes an unchanged UI a no-op.
+    await UIService.syncConfiguredUI(gamePath);
     return { status: 'applied' };
   }).catch((error): StartupRenderingResult => {
     const detail = error instanceof Error ? error.message : String(error);

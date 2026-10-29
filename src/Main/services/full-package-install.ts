@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'node:path';
-import { extractZipArchive } from './zip-extraction';
+import { extractArchive } from './archive-extraction';
 
-const CLIENT_PACKAGE_MESSAGE = '这是客户端文件，不是 MOD 资源包。请解压客户端后运行 QMClient，再选择 QMF 完整资源包 ZIP 或已解压的资源文件夹。';
+const CLIENT_PACKAGE_MESSAGE = '这是客户端文件，不是 MOD 资源包。请解压客户端后运行 QMClient，再选择 QMF 完整资源包（ZIP、RAR、7z）或已解压的资源文件夹。';
 
 function packagePath(name: string): string {
   const relative = name.replace(/\\/g, '/').replace(/^(?:QMF\d+(?:\.\d+)+\/|_retail_\/|_ptr_\/)+/i, '');
@@ -23,7 +23,7 @@ async function listPackageFiles(source: string): Promise<Array<{ relative: strin
       const relative = path.relative(source, file);
       packagePath(relative); // Detect client folders before copying any files.
       if (entry.isDirectory()) await visit(file);
-      else if (entry.isFile() && !(dir === source && /\.zip$/i.test(entry.name))) {
+      else if (entry.isFile() && !(dir === source && /\.(?:zip|rar|7z)$/i.test(entry.name))) {
         files.push({ relative, bytes: (await fs.stat(file)).size });
       }
     }
@@ -88,10 +88,13 @@ export async function installPackageArchives(
   onProgress?: InstallProgress,
   beforeInstall?: BeforeInstall,
 ): Promise<number> {
-  const staging = await fs.mkdtemp(path.join(path.dirname(targetDir), '.quenching-zip-stage-'));
+  const tempParent = path.join(path.dirname(targetDir), '_tmp');
+  await fs.ensureDir(tempParent);
+  if ((await fs.lstat(tempParent)).isSymbolicLink()) throw new Error('安装暂存目录不能是链接。');
+  const staging = await fs.mkdtemp(path.join(tempParent, 'package-install-'));
   try {
     for (let i = 0; i < zipPaths.length; i++) {
-      await extractZipArchive(zipPaths[i], staging, {
+      await extractArchive(zipPaths[i], staging, {
         stripLeadingDirectory: ['_retail_', '_ptr_'],
         mapFile: packagePath,
         onProgress: (percent, name) => onProgress?.(

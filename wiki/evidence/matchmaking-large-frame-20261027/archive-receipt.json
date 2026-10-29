@@ -1,0 +1,12 @@
+[
+  {
+    "path": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\archives\\Quenching-Match-Wire-BBR-20261027-source.zip",
+    "bytes": 209792,
+    "sha256": "7c0a6715c83bfb60a2520085456fae59f35e0dd95e0a68dfddbd41b6e6a8b348"
+  },
+  {
+    "path": "D:\\Quenching\\QM\\MOD\\QuenChing-Electron-Client\\analysis_outputs\\archives\\Quenching-Match-Wire-BBR-20261027-binaries.zip",
+    "bytes": 8396613,
+    "sha256": "57a474af0945f219c83e7ce329ac3704def753e3033f9b47e556c09852f5ff5e"
+  }
+]

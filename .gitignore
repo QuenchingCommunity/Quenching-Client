@@ -8,6 +8,10 @@ dist/
 dist1/
 dist2/
 __Bin/
+# Generated from assets/unpacked by every standard launch/build command.
+/assets/quenching/resources.7z
+/assets/quenching/resources-*.7z
+/assets/quenching/resources.manifest.json
 *.app
 *.dmg
 *.exe
@@ -36,6 +40,7 @@ projects/Autohotkey-GUI
 projects/QuenChing-Mod-Client/dist/
 
 # Temp / verification dumps (UI packs, stormlib tests, etc.)
+/_tmp/
 .tmp/
 .tmp-*/
 .tmp-*.tar
@@ -43,6 +48,7 @@ projects/QuenChing-Mod-Client/dist/
 jamiephan-stormlib-*.tgz
 
 # Local analysis / backups / experiments
+/assets/backup/background-videos/
 analysis_outputs/
 backup/
 experiments/*
@@ -76,4 +82,5 @@ yarn-error.log*
 # Prefer deleting the unused one rather than ignoring both.
 
 __pycache__/
+offline.exe
 *.pyc

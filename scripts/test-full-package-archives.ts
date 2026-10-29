@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import archiver from 'archiver';
 import { installPackageArchives, installPackageSources, resolvePackageArchives } from '../src/Main/services/full-package-install';
 
-const work = path.resolve('_irys/work');
+const work = path.resolve('_tmp/archive-formats');
 await fs.ensureDir(work);
 const root = await fs.mkdtemp(path.join(work, 'zip-install-test-'));
 async function zip(file: string, contents: Record<string, string>) {

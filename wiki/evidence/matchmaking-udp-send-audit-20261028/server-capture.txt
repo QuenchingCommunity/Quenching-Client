@@ -1,0 +1,12 @@
+2026-10-27T19:03:04+00:00 RainYun-jskHCafV systemd[1]: Started quenching-udp-send-audit-20261028.service - /usr/bin/timeout 35 /usr/bin/tcpdump -l -nn -tttt -i any -c 160 "udp and (port 443 or port 53)".
+2026-10-27T19:03:04+00:00 RainYun-jskHCafV timeout[111400]: tcpdump: data link type LINUX_SLL2
+2026-10-27T19:03:04+00:00 RainYun-jskHCafV timeout[111400]: tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+2026-10-27T19:03:04+00:00 RainYun-jskHCafV timeout[111400]: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+2026-10-27T19:03:06+00:00 RainYun-jskHCafV timeout[111400]: 2026-10-27 19:03:06.003512 ens18 In  IP 112.45.97.250.3420 > 191.40.41.124.53: 29045 updateM+ [b2&3=0x656e] [26990a] [25448q] [26413n] [29541au] [|domain]
+2026-10-27T19:03:06+00:00 RainYun-jskHCafV timeout[111400]: 2026-10-27 19:03:06.003513 ens18 In  IP 112.45.97.250.3420 > 191.40.41.124.53: 29045 updateM+ [b2&3=0x656e] [26990a] [25448q] [26413n] [29541au] [|domain]
+2026-10-27T19:03:06+00:00 RainYun-jskHCafV timeout[111400]: 2026-10-27 19:03:06.003513 ens18 In  IP 112.45.97.250.3420 > 191.40.41.124.53: 29045 updateM+ [b2&3=0x656e] [26990a] [25448q] [26413n] [29541au] [|domain]
+2026-10-27T19:03:39+00:00 RainYun-jskHCafV timeout[111400]: 3 packets captured
+2026-10-27T19:03:39+00:00 RainYun-jskHCafV timeout[111400]: 3 packets received by filter
+2026-10-27T19:03:39+00:00 RainYun-jskHCafV timeout[111400]: 0 packets dropped by kernel
+2026-10-27T19:03:39+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-send-audit-20261028.service: Main process exited, code=exited, status=124/n/a
+2026-10-27T19:03:39+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-send-audit-20261028.service: Failed with result 'exit-code'.

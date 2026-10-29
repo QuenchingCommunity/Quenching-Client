@@ -1,0 +1,141 @@
+{
+  "health": {
+    "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+    "activeGames": 0,
+    "waiting": 0,
+    "tickMs": 30,
+    "chatRelay": true,
+    "playerNames": true
+  },
+  "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+  "errors": [],
+  "timings": [
+    {
+      "at": "2026-10-27T15:46:08.953Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 13,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 7.1,
+        "p95Ms": 7.1,
+        "p99Ms": 7.1,
+        "maxMs": 7.1,
+        "lastMs": 7.1
+      },
+      "timerDelayMs": {
+        "count": 13,
+        "windowSamples": 13,
+        "p50Ms": 0.1,
+        "p95Ms": 0.7,
+        "p99Ms": 0.7,
+        "maxMs": 0.7,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 1,
+            "windowSamples": 1,
+            "p50Ms": 1.3,
+            "p95Ms": 1.3,
+            "p99Ms": 1.3,
+            "maxMs": 1.3,
+            "lastMs": 1.3
+          },
+          "leadFrames": 0,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 1,
+            "windowSamples": 1,
+            "p50Ms": 1.2,
+            "p95Ms": 1.2,
+            "p99Ms": 1.2,
+            "maxMs": 1.2,
+            "lastMs": 1.2
+          },
+          "leadFrames": 0,
+          "pendingPingAgeMs": null
+        }
+      ]
+    }
+  ],
+  "states": [
+    {
+      "at": "2026-10-27T15:46:07.491Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "lobby",
+      "joined": 1
+    },
+    {
+      "at": "2026-10-27T15:46:07.535Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "lobby",
+      "joined": 2
+    },
+    {
+      "at": "2026-10-27T15:46:07.545Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "countdown"
+    },
+    {
+      "at": "2026-10-27T15:46:08.546Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "loading"
+    },
+    {
+      "at": "2026-10-27T15:46:08.549Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "running",
+      "tickMs": 30,
+      "maxAheadFrames": 67
+    },
+    {
+      "at": "2026-10-27T15:46:08.953Z",
+      "gameId": "863e58d5-d6b0-401f-95a2-2feb046d3867",
+      "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+      "gameVersion": "3.0.1.24371",
+      "mode": "duel",
+      "state": "closed",
+      "reason": "players-left",
+      "frameCount": 13,
+      "keepAliveCount": 26
+    }
+  ],
+  "result": {
+    "reason": "forfeit",
+    "firstLeavingPlayer": 1,
+    "players": [
+      {
+        "playerId": 1,
+        "outcome": "loss"
+      },
+      {
+        "playerId": 2,
+        "outcome": "win"
+      }
+    ]
+  },
+  "udpSidecarActive": "active"
+}

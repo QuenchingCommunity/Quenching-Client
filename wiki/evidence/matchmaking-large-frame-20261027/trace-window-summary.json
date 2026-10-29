@@ -1,0 +1,44 @@
+{
+  "syntheticTrafficOnly": true,
+  "defaultRenoTrace": [
+    {
+      "file": "571871e04eee1cd8881f_client.sqlog",
+      "samples": 1244,
+      "initialCwndBytes": 40960,
+      "minimumCwndBytes": 2905,
+      "lastCwndBytes": 10170,
+      "smoothedRttMinMs": 100.288,
+      "smoothedRttMaxMs": 105.628,
+      "lastMetrics": {
+        "congestion_window": 10170,
+        "bytes_in_flight": 74,
+        "packets_in_flight": 2,
+        "pto_count": 0,
+        "min_rtt": 100.212131,
+        "smoothed_rtt": 100.459,
+        "latest_rtt": 100.369836,
+        "rtt_variance": 0.082,
+        "time": 14984.271584
+      }
+    },
+    {
+      "file": "571871e04eee1cd8881f_server.sqlog",
+      "samples": 1140,
+      "initialCwndBytes": 40960,
+      "minimumCwndBytes": 3308,
+      "lastCwndBytes": 12021,
+      "smoothedRttMinMs": 100.219,
+      "smoothedRttMaxMs": 101.348975,
+      "lastMetrics": {
+        "congestion_window": 12021,
+        "bytes_in_flight": 36,
+        "packets_in_flight": 1,
+        "min_rtt": 100.162726,
+        "smoothed_rtt": 100.428,
+        "latest_rtt": 100.368323,
+        "rtt_variance": 0.09,
+        "time": 14882.91483
+      }
+    }
+  ]
+}

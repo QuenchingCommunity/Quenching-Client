@@ -1,0 +1,5 @@
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on ens18, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+1 packet captured
+1 packet received by filter
+0 packets dropped by kernel

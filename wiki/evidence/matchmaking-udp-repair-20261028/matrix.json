@@ -1,0 +1,693 @@
+{
+  "startUtc": "2026-10-27T19:23:07.802511+00:00",
+  "purpose": "observe arrival before guest firewall; DNS timeouts alone are not a failure criterion",
+  "firewallChanged": false,
+  "local": [
+    {
+      "port": 53,
+      "sendReturnBytes": [
+        25,
+        25,
+        25
+      ]
+    },
+    {
+      "port": 123,
+      "sendReturnBytes": [
+        26,
+        26,
+        26
+      ]
+    },
+    {
+      "port": 443,
+      "sendReturnBytes": [
+        26,
+        26,
+        26
+      ]
+    },
+    {
+      "port": 3478,
+      "sendReturnBytes": [
+        27,
+        27,
+        27
+      ]
+    },
+    {
+      "port": 6112,
+      "sendReturnBytes": [
+        27,
+        27,
+        27
+      ]
+    },
+    {
+      "port": 8443,
+      "sendReturnBytes": [
+        27,
+        27,
+        27
+      ]
+    },
+    {
+      "port": 24443,
+      "sendReturnBytes": [
+        28,
+        28,
+        28
+      ]
+    }
+  ],
+  "external53": {
+    "port": 53,
+    "request": {
+      "type": "dns",
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 53,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "created": {
+      "id": "28jIzWkdsRs3I6BYU00021OZv",
+      "probesCount": 3
+    },
+    "result": {
+      "id": "28jIzWkdsRs3I6BYU00021OZv",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T19:23:10.530Z",
+      "updatedAt": "2026-10-27T19:23:20.848Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124"
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 45102,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Alibaba (US) Technology",
+            "tags": [
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#53: timed out\n;; communications error to 191.40.41.124#53: timed out\n\n; <<>> DiG 9.18.33-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 53 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 8888,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "xTom",
+            "tags": [
+              "datacenter-network",
+              "u-kukuhpe",
+              "u-kukuhpe:ayo-edebiri"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#53: timed out\n;; communications error to 191.40.41.124#53: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 53 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-Zeptiny"
+            ],
+            "resolvers": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#53: timed out\n;; communications error to 191.40.41.124#53: timed out\n\n; <<>> DiG 9.18.41-1~deb12u1-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 53 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  "external123": {
+    "port": 123,
+    "request": {
+      "type": "dns",
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 123,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "created": {
+      "id": "2CYC9VmXQIDJ1PPsS00021OZv",
+      "probesCount": 3
+    },
+    "result": {
+      "id": "2CYC9VmXQIDJ1PPsS00021OZv",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T19:23:10.657Z",
+      "updatedAt": "2026-10-27T19:23:20.935Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124",
+        "port": 123
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 45102,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Alibaba (US) Technology",
+            "tags": [
+              "datacenter-network"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#123: timed out\n;; communications error to 191.40.41.124#123: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 123 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 59253,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-zGato"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8",
+              "2606:4700:4700::1111",
+              "2001:4860:4860::8888"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#123: timed out\n;; communications error to 191.40.41.124#123: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 123 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-TommyTuoTone"
+            ],
+            "resolvers": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#123: timed out\n;; communications error to 191.40.41.124#123: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 123 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  "external3478": {
+    "port": 3478,
+    "request": {
+      "type": "dns",
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 3478,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "created": {
+      "id": "2j9C5iqO0fmNcdWqB00021OZv",
+      "probesCount": 3
+    },
+    "result": {
+      "id": "2j9C5iqO0fmNcdWqB00021OZv",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T19:23:10.703Z",
+      "updatedAt": "2026-10-27T19:23:21.057Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124",
+        "port": 3478
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 43969,
+            "longitude": 114.17,
+            "latitude": 22.28,
+            "network": "Prinode",
+            "tags": [
+              "datacenter-network",
+              "u-k1pfel"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#3478: timed out\n;; communications error to 191.40.41.124#3478: timed out\n\n; <<>> DiG 9.18.41-1~deb12u1-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 3478 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 59253,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-forest479"
+            ],
+            "resolvers": [
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#3478: timed out\n;; communications error to 191.40.41.124#3478: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 3478 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-yanranxiaoxi"
+            ],
+            "resolvers": [
+              "private",
+              "private"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#3478: timed out\n;; communications error to 191.40.41.124#3478: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 3478 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  "external443": {
+    "port": 443,
+    "request": {
+      "type": "dns",
+      "target": "qmapi-cn1.txzy.net",
+      "limit": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "protocol": "UDP",
+        "resolver": "191.40.41.124",
+        "port": 443,
+        "query": {
+          "type": "A"
+        }
+      }
+    },
+    "created": {
+      "id": "2wJnY577LFqmgp4ib00021OZv",
+      "probesCount": 3
+    },
+    "result": {
+      "id": "2wJnY577LFqmgp4ib00021OZv",
+      "type": "dns",
+      "status": "finished",
+      "createdAt": "2026-10-27T19:23:10.688Z",
+      "updatedAt": "2026-10-27T19:23:20.940Z",
+      "target": "qmapi-cn1.txzy.net",
+      "probesCount": 3,
+      "locations": [
+        {
+          "country": "HK"
+        },
+        {
+          "country": "SG"
+        },
+        {
+          "country": "US"
+        }
+      ],
+      "measurementOptions": {
+        "resolver": "191.40.41.124",
+        "port": 443
+      },
+      "results": [
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "Eastern Asia",
+            "country": "HK",
+            "state": null,
+            "city": "Hong Kong",
+            "asn": 133752,
+            "longitude": 113.94,
+            "latitude": 22.29,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-zGato"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8",
+              "2606:4700:4700::1111",
+              "2001:4860:4860::8888"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "AS",
+            "region": "South-eastern Asia",
+            "country": "SG",
+            "state": null,
+            "city": "Singapore",
+            "asn": 59253,
+            "longitude": 103.85,
+            "latitude": 1.29,
+            "network": "LeaseWeb",
+            "tags": [
+              "datacenter-network",
+              "u-zGato"
+            ],
+            "resolvers": [
+              "1.1.1.1",
+              "8.8.8.8",
+              "2606:4700:4700::1111",
+              "2001:4860:4860::8888"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.49-1~deb12u2-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        },
+        {
+          "probe": {
+            "continent": "NA",
+            "region": "Northern America",
+            "country": "US",
+            "state": "NY",
+            "city": "Buffalo",
+            "asn": 36352,
+            "longitude": -78.88,
+            "latitude": 42.89,
+            "network": "HostPapa",
+            "tags": [
+              "datacenter-network",
+              "u-su-haris"
+            ],
+            "resolvers": [
+              "8.8.8.8",
+              "8.8.4.4",
+              "2001:4860:4860::8888",
+              "2001:4860:4860::8844"
+            ]
+          },
+          "result": {
+            "status": "failed",
+            "failureSource": "resolver",
+            "rawOutput": ";; communications error to 191.40.41.124#443: timed out\n;; communications error to 191.40.41.124#443: timed out\n\n; <<>> DiG 9.18.49-1~deb12u1-Debian <<>> -t A qmapi-cn1.txzy.net @191.40.41.124 -p 443 -4 +timeout=5 +tries=2 +nofail +nocookie +nosplit +nsid\n;; global options: +cmd\n;; no servers could be reached",
+            "statusCodeName": null,
+            "statusCode": null,
+            "answers": [],
+            "timings": {
+              "total": 0
+            },
+            "resolver": null
+          }
+        }
+      ]
+    }
+  },
+  "endUtc": "2026-10-27T19:23:21.717244+00:00"
+}

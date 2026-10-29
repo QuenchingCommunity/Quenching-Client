@@ -1,0 +1,18 @@
+{
+  "server": "191.40.41.124",
+  "endpoint": "https://qmapi-cn1.txzy.net",
+  "transport": "public-https-wss",
+  "cloudflareProxy": true,
+  "publicHttpsVerified": true,
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "instanceId": "229682f2-f167-4429-ad68-b5c931e7d13d",
+  "mapUpload": true,
+  "roomListing": true,
+  "mapDownload": true,
+  "gameId": "a57cafdb-4976-402c-bbca-b27df866a2ab",
+  "twoSyntheticPeersStarted": true,
+  "actionForwarded": true,
+  "leaveObserved": true,
+  "unauthenticatedRoomsHttpStatus": 403
+}

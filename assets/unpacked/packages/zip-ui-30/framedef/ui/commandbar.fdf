@@ -1,0 +1,80 @@
+Frame "SIMPLEBUTTON" "CommandButtonTemplate" {
+	Width 0.027,
+	Height 0.027,	
+}
+
+Frame "SIMPLEFRAME" "CommandBarFrame" {
+	DecorateFileNames,
+    UseActiveContext,
+    SetAllPoints,
+	Width 0.1745,
+	Height 0.129,
+
+	Frame "SIMPLEBUTTON" "CommandButton_0" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, -0.025, -0.039,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_1" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.005, -0.039,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_2" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.036, -0.039,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_3" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.07, -0.039,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_4" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT,-0.025, -0.069,
+	}		
+		
+	Frame "SIMPLEBUTTON" "CommandButton_5" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.005, -0.069,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_6" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.036, -0.069,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_7" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.07, -0.069,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_8" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, -0.025, -0.099,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_9" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.005, -0.099,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_10" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.036, -0.099,
+	}
+	
+	Frame "SIMPLEBUTTON" "CommandButton_11" INHERITS "CommandButtonTemplate" {
+		SetPoint TOPLEFT, "CommandBarFrame", TOPLEFT, 0.07, -0.099,
+	}
+
+	String "QuenchingVersionText" {
+		SetPoint BOTTOM, "CommandButton_0", TOP, 0.0475, 0.008,
+		Width 0.07,
+		Height 0.01640625,
+		Font "MasterFont", 0.01,
+		FontJustificationH JUSTIFYCENTER,
+		FontJustificationV JUSTIFYMIDDLE,
+		FontColor 1.0 1.0 1.0 1.0,
+		FontShadowColor 0.0 0.0 0.0 0.9,
+		FontShadowOffset 0.001 -0.001,
+		Text "V3.7 TEST",
+	}			
+}
+
+Frame "SIMPLEFRAME" "ReplayCommandBarFrame" {
+    UseActiveContext,
+    SetAllPoints,
+	Width 0.0,
+	Height 0.0
+}

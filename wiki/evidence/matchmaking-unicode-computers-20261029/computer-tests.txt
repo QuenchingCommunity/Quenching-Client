@@ -1,0 +1,13 @@
+✔ easy fills only extra human slots and is encoded on the actual W3GS lobby wire (48.6598ms)
+✔ normal fills only extra human slots and is encoded on the actual W3GS lobby wire (11.2195ms)
+✔ insane fills only extra human slots and is encoded on the actual W3GS lobby wire (14.3605ms)
+✔ off retains open extra slots; invalid difficulty cannot create a game (2.6059ms)
+✔ room creator owns computer settings, guests inherit, and invalid settings are rejected (153.4062ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 942.7542

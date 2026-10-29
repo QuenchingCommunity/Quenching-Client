@@ -4,6 +4,7 @@ import { GithubOutlined, GlobalOutlined, HeartOutlined } from '@ant-design/icons
 import { useTranslation } from '../../utils/i18n';
 import { useSound } from '../../hooks/useSound';
 import { OverlayModal } from './OverlayModal';
+import { APP_VERSION } from '../../version';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -106,6 +107,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onClose }) => {
           }}>
             {t('main.title.secondary')}
           </Text>
+          <Text style={{ color: '#f1ce75', display: 'block', marginTop: 8 }}>{APP_VERSION}</Text>
         </div>
 
         <Divider style={{ borderColor: 'rgba(212, 175, 55, 0.2)', margin: '30px 0' }} />

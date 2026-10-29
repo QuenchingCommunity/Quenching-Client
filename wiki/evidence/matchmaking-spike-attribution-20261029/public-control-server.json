@@ -1,0 +1,1071 @@
+{
+  "gameId": "396b2fea-3be2-4f2e-84c8-3be5172aa5cd",
+  "timings": [
+    {
+      "at": "2026-10-28T18:41:48.352Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 71,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 71,
+        "windowSamples": 71,
+        "p50Ms": 0.3,
+        "p95Ms": 1.1,
+        "p99Ms": 1.6,
+        "maxMs": 1.6,
+        "lastMs": 0.5
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 3,
+            "windowSamples": 3,
+            "p50Ms": 64.3,
+            "p95Ms": 71.2,
+            "p99Ms": 71.2,
+            "maxMs": 71.2,
+            "lastMs": 71.2
+          },
+          "leadFrames": 16,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 3,
+            "windowSamples": 3,
+            "p50Ms": 69.7,
+            "p95Ms": 71.1,
+            "p99Ms": 71.1,
+            "maxMs": 71.1,
+            "lastMs": 71.1
+          },
+          "leadFrames": 7,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:41:53.357Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 236,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 236,
+        "windowSamples": 236,
+        "p50Ms": 0.4,
+        "p95Ms": 1.1,
+        "p99Ms": 1.3,
+        "maxMs": 1.6,
+        "lastMs": 0.5
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 8,
+            "windowSamples": 8,
+            "p50Ms": 67.1,
+            "p95Ms": 234.7,
+            "p99Ms": 234.7,
+            "maxMs": 234.7,
+            "lastMs": 67.1
+          },
+          "leadFrames": 7,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 8,
+            "windowSamples": 8,
+            "p50Ms": 69.7,
+            "p95Ms": 227.9,
+            "p99Ms": 227.9,
+            "maxMs": 227.9,
+            "lastMs": 115.6
+          },
+          "leadFrames": 6,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:41:58.386Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 402,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 402,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 13,
+            "windowSamples": 13,
+            "p50Ms": 71.2,
+            "p95Ms": 234.7,
+            "p99Ms": 234.7,
+            "maxMs": 234.7,
+            "lastMs": 72.4
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 13,
+            "windowSamples": 13,
+            "p50Ms": 88.3,
+            "p95Ms": 227.9,
+            "p99Ms": 227.9,
+            "maxMs": 227.9,
+            "lastMs": 135.9
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:03.399Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 568,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 568,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 0.9,
+        "p99Ms": 1.3,
+        "maxMs": 1.7,
+        "lastMs": 0.5
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 18,
+            "windowSamples": 18,
+            "p50Ms": 71.2,
+            "p95Ms": 234.7,
+            "p99Ms": 234.7,
+            "maxMs": 234.7,
+            "lastMs": 132.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 18,
+            "windowSamples": 18,
+            "p50Ms": 110.1,
+            "p95Ms": 227.9,
+            "p99Ms": 227.9,
+            "maxMs": 227.9,
+            "lastMs": 152.6
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:08.401Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 733,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 733,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0.4
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 23,
+            "windowSamples": 23,
+            "p50Ms": 72.4,
+            "p95Ms": 234.7,
+            "p99Ms": 309.9,
+            "maxMs": 309.9,
+            "lastMs": 63.7
+          },
+          "leadFrames": 6,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 23,
+            "windowSamples": 23,
+            "p50Ms": 115.6,
+            "p95Ms": 227.9,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 64.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:13.425Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 899,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 899,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 28,
+            "windowSamples": 28,
+            "p50Ms": 67.3,
+            "p95Ms": 234.7,
+            "p99Ms": 309.9,
+            "maxMs": 309.9,
+            "lastMs": 65.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 28,
+            "windowSamples": 28,
+            "p50Ms": 92,
+            "p95Ms": 227.9,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 71.1
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:18.426Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1064,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1064,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1.2,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 33,
+            "windowSamples": 33,
+            "p50Ms": 67.3,
+            "p95Ms": 234.7,
+            "p99Ms": 309.9,
+            "maxMs": 309.9,
+            "lastMs": 64.9
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 33,
+            "windowSamples": 33,
+            "p50Ms": 77.2,
+            "p95Ms": 227.9,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 65.1
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:23.444Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1230,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1230,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1.1,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 38,
+            "windowSamples": 38,
+            "p50Ms": 67.3,
+            "p95Ms": 234.7,
+            "p99Ms": 309.9,
+            "maxMs": 309.9,
+            "lastMs": 68.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 38,
+            "windowSamples": 38,
+            "p50Ms": 74.6,
+            "p95Ms": 227.9,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 69.2
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:28.464Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1396,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1396,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1.1,
+        "p99Ms": 1.3,
+        "maxMs": 1.7,
+        "lastMs": 0.5
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 43,
+            "windowSamples": 43,
+            "p50Ms": 68.7,
+            "p95Ms": 193.2,
+            "p99Ms": 309.9,
+            "maxMs": 309.9,
+            "lastMs": 128.9
+          },
+          "leadFrames": 6,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 43,
+            "windowSamples": 43,
+            "p50Ms": 74.6,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 134.8
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:33.472Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1562,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1562,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 0.8,
+        "p99Ms": 1.2,
+        "maxMs": 1.7,
+        "lastMs": 0.4
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 48,
+            "windowSamples": 48,
+            "p50Ms": 70.3,
+            "p95Ms": 234.7,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 92.6
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 48,
+            "windowSamples": 48,
+            "p50Ms": 74.6,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 66.6
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:38.494Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1728,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1728,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1,
+        "p99Ms": 1.4,
+        "maxMs": 1.7,
+        "lastMs": 0.7
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 53,
+            "windowSamples": 53,
+            "p50Ms": 70.3,
+            "p95Ms": 234.7,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 62.7
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 53,
+            "windowSamples": 53,
+            "p50Ms": 74.6,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 66.1
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:43.506Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 1894,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 1894,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1.1,
+        "p99Ms": 1.6,
+        "maxMs": 1.8,
+        "lastMs": 0.3
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 58,
+            "windowSamples": 58,
+            "p50Ms": 68.7,
+            "p95Ms": 234.7,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 61.5
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 58,
+            "windowSamples": 58,
+            "p50Ms": 72.1,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 66.4
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:48.527Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2060,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2060,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 1.1,
+        "p99Ms": 1.7,
+        "maxMs": 1.8,
+        "lastMs": 0.4
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 63,
+            "windowSamples": 63,
+            "p50Ms": 67.1,
+            "p95Ms": 193.2,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 64.2
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 63,
+            "windowSamples": 63,
+            "p50Ms": 71.1,
+            "p95Ms": 196.5,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 67.9
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:53.534Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2226,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2226,
+        "windowSamples": 256,
+        "p50Ms": 0.1,
+        "p95Ms": 0.9,
+        "p99Ms": 1.3,
+        "maxMs": 1.8,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 68,
+            "windowSamples": 68,
+            "p50Ms": 66,
+            "p95Ms": 193.2,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 61.3
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 68,
+            "windowSamples": 68,
+            "p50Ms": 69.7,
+            "p95Ms": 196.5,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 63.3
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:42:58.551Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2392,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2392,
+        "windowSamples": 256,
+        "p50Ms": 0.2,
+        "p95Ms": 0.9,
+        "p99Ms": 1.2,
+        "maxMs": 1.8,
+        "lastMs": 0.1
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 73,
+            "windowSamples": 73,
+            "p50Ms": 66.8,
+            "p95Ms": 234.7,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 94.8
+          },
+          "leadFrames": 12,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 73,
+            "windowSamples": 73,
+            "p50Ms": 69.2,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 65.4
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:43:03.577Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2558,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2558,
+        "windowSamples": 256,
+        "p50Ms": 0.4,
+        "p95Ms": 1,
+        "p99Ms": 1.5,
+        "maxMs": 1.8,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 78,
+            "windowSamples": 78,
+            "p50Ms": 66.8,
+            "p95Ms": 285.4,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 64.1
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 78,
+            "windowSamples": 78,
+            "p50Ms": 69.7,
+            "p95Ms": 203.2,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 65.8
+          },
+          "leadFrames": 3,
+          "pendingPingAgeMs": null
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:43:08.583Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2723,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2723,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.5,
+        "maxMs": 1.8,
+        "lastMs": 0.9
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 83,
+            "windowSamples": 83,
+            "p50Ms": 66.9,
+            "p95Ms": 252.8,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 61.6
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": 0
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 83,
+            "windowSamples": 83,
+            "p50Ms": 69.9,
+            "p95Ms": 198.4,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 64.4
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:43:13.583Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 2888,
+      "actionQueueMs": {
+        "count": 0,
+        "windowSamples": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0,
+        "lastMs": 0
+      },
+      "timerDelayMs": {
+        "count": 2888,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.2,
+        "maxMs": 1.8,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 88,
+            "windowSamples": 88,
+            "p50Ms": 66.6,
+            "p95Ms": 252.8,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 62.4
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": 0
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 88,
+            "windowSamples": 88,
+            "p50Ms": 69.2,
+            "p95Ms": 198.4,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 63.4
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T18:43:17.474Z",
+      "tickMs": 30,
+      "maxAheadFrames": 67,
+      "frameCount": 3017,
+      "actionQueueMs": {
+        "count": 1,
+        "windowSamples": 1,
+        "p50Ms": 12.2,
+        "p95Ms": 12.2,
+        "p99Ms": 12.2,
+        "maxMs": 12.2,
+        "lastMs": 12.2
+      },
+      "timerDelayMs": {
+        "count": 3017,
+        "windowSamples": 256,
+        "p50Ms": 0.3,
+        "p95Ms": 1,
+        "p99Ms": 1.3,
+        "maxMs": 1.8,
+        "lastMs": 0
+      },
+      "syncWaitTicks": 0,
+      "peers": [
+        {
+          "playerId": 1,
+          "nativeRttMs": {
+            "count": 92,
+            "windowSamples": 92,
+            "p50Ms": 66.8,
+            "p95Ms": 252.8,
+            "p99Ms": 441.5,
+            "maxMs": 441.5,
+            "lastMs": 83
+          },
+          "leadFrames": 5,
+          "pendingPingAgeMs": null
+        },
+        {
+          "playerId": 2,
+          "nativeRttMs": {
+            "count": 92,
+            "windowSamples": 92,
+            "p50Ms": 69.2,
+            "p95Ms": 198.4,
+            "p99Ms": 311.6,
+            "maxMs": 311.6,
+            "lastMs": 77
+          },
+          "leadFrames": 2,
+          "pendingPingAgeMs": null
+        }
+      ]
+    }
+  ],
+  "wireRttMs": {
+    "1": {
+      "count": 18,
+      "windowSamples": 18,
+      "p50Ms": 0.3,
+      "p95Ms": 0.5,
+      "p99Ms": 0.5,
+      "maxMs": 0.5,
+      "lastMs": 0.2
+    },
+    "2": {
+      "count": 18,
+      "windowSamples": 18,
+      "p50Ms": 0.4,
+      "p95Ms": 0.5,
+      "p99Ms": 0.5,
+      "maxMs": 0.5,
+      "lastMs": 0.2
+    }
+  },
+  "errors": []
+}

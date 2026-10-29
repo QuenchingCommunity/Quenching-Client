@@ -32,7 +32,7 @@ const rows = [];
 for (const era of ['00', '16', '18', '20', '30']) {
     let changed = 0;
     for (const type of ['terrain', 'clifftypes']) {
-        const bytes = await fs.readFile(`assets/quenching/tile/${type}${era}.slk`);
+        const bytes = await fs.readFile(`assets/unpacked/tile/${type}${era}.slk`);
         const table = readSlkTable(bytes.toString('latin1'));
         assert.deepEqual([...table.headers], [...native[type].headers], `${type}${era}: all native fields must survive`);
         assert.deepEqual([...table.rows.keys()], [...native[type].rows.keys()], `${type}${era}: all native records must survive`);

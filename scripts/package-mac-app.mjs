@@ -11,13 +11,14 @@
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs-extra';
-import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { validateMacNative, smokeMacNative } from './mac-native.mjs';
 import { signMacApp } from './sign-mac-app.js';
 import { downloadElectronZip } from './lib/electron-download.mjs';
+import { createPortable7z } from './lib/portable-7z.mjs';
+import { isDistributableAsset, RESOURCE_ARCHIVES, RESOURCE_MANIFEST } from '../src/shared/bundled-resource-paths.mjs';
 
 const require = createRequire(import.meta.url);
 const asar = require('@electron/asar');
@@ -25,6 +26,7 @@ const plist = require('plist');
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = require('../package.json');
+const release = require('../release-version.json');
 const electronPkg = require('electron/package.json');
 
 const arch = process.argv.includes('--x64') ? 'x64' : process.argv.includes('--arm64') ? 'arm64' : process.platform === 'darwin' ? process.arch : 'arm64';
@@ -72,11 +74,13 @@ function copyAppSources(stagingDir) {
 		license: pkg.license,
 		dependencies: pkg.dependencies,
 	}, { spaces: 2 });
+	fs.copySync(path.join(root, 'release-version.json'), path.join(stagingDir, 'release-version.json'));
 
 	fs.copySync(path.join(root, 'dist'), path.join(stagingDir, 'dist'), {
 		filter: (src) => {
 			const rel = path.relative(path.join(root, 'dist'), src).replace(/\\/g, '/');
 			if (!rel) return true;
+			if (!isDistributableAsset(rel)) return false;
 			if (rel === 'statics' || rel.startsWith('statics/')) return false;
 			if (rel.endsWith('.map')) return false;
 			return true;
@@ -88,6 +92,12 @@ function copyAppSources(stagingDir) {
 	fs.mkdirSync(nmDest, { recursive: true });
 	const copyFilter = (src) => {
 		const base = path.basename(src);
+		if (base.toLowerCase() === 'offline.exe') return false;
+		const archiveRelative = path.relative(path.join(nmSrc, '7zip-bin-full'), src).replace(/\\/g, '/');
+		if (archiveRelative && !archiveRelative.startsWith('..') && !path.isAbsolute(archiveRelative)) {
+			if (/^(win|linux)(\/|$)/.test(archiveRelative) || /^mac\/(?!$)/.test(archiveRelative) && !archiveRelative.startsWith(`mac/${arch}`)) return false;
+			if (/^7zz(?:c|s|sc)$/.test(base)) return false;
+		}
 		if (base === '.bin' || base === 'test' || base === 'tests' || base === '__tests__') return false;
 		if (src.endsWith('.map')) return false;
 		return true;
@@ -139,7 +149,7 @@ function customizeMacApp(appPath) {
 	updatePlist(path.join(appPath, 'Contents', 'Info.plist'), {
 		CFBundleIdentifier: bundleId,
 		CFBundleName: appName,
-		CFBundleDisplayName: appName,
+		CFBundleDisplayName: `${appName} ${release.displayVersion}${release.channel === 'test' ? ' TEST' : ''}`,
 		CFBundleExecutable: appName,
 		CFBundleShortVersionString: pkg.version,
 		CFBundleVersion: pkg.version,
@@ -147,6 +157,9 @@ function customizeMacApp(appPath) {
 		NSRequiresAquaSystemAppearance: false,
 	});
 	renameBundle(appPath, 'Electron', appName);
+	updatePlist(path.join(appPath, 'Contents', 'Info.plist'), {
+		CFBundleDisplayName: `${appName} ${release.displayVersion}${release.channel === 'test' ? ' TEST' : ''}`,
+	});
 
 	const frameworks = path.join(appPath, 'Contents', 'Frameworks');
 	const helperSuffixes = [
@@ -183,7 +196,9 @@ async function main() {
 	const zipPath = await downloadElectronZip(electronPkg.version, arch);
 	console.log(`[package-mac-app] electron zip: ${zipPath}`);
 
-	const workRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'qm-mac-app-'));
+	const taskParent=path.join(root,'_tmp','mac-client-package');
+    await fs.ensureDir(taskParent);
+	const workRoot = await fs.mkdtemp(path.join(taskParent, 'qm-mac-app-'));
 	const extractDir = path.join(workRoot, 'electron');
 	const stagingDir = path.join(workRoot, 'app');
 	const asarPath = path.join(workRoot, 'app.asar');
@@ -202,6 +217,7 @@ async function main() {
 		console.log('[package-mac-app] packing asar...');
 		await asar.createPackageWithOptions(stagingDir, asarPath, {
 			unpack: '**/*.{node,dylib,so}',
+			unpackDir: 'node_modules/7zip-bin-full',
 		});
 
 		await fs.remove(finalAppDir);
@@ -218,15 +234,15 @@ async function main() {
 			await fs.copy(unpacked, path.join(resources, 'app.asar.unpacked'));
 		}
 
-		await fs.access(path.join(root, 'assets/quenching/shaders.zip'));
-		await fs.access(path.join(root, 'assets/quenching/shaders-300-legacy.zip'));
+		for (const name of RESOURCE_ARCHIVES) await fs.access(path.join(root, 'assets/quenching', name));
+		await fs.access(path.join(root, 'assets/quenching', RESOURCE_MANIFEST));
 		await fs.copy(path.join(root, 'assets'), path.join(resources, 'assets'), { filter: source => {
 			const relative = path.relative(path.join(root, 'assets'), source).split(path.sep).join('/');
-			return relative !== 'quenching/shaders' && !relative.startsWith('quenching/shaders/');
+			return !relative || isDistributableAsset(relative);
 		} });
 		const staticsSrc = path.join(root, 'dist', 'statics');
 		if (fs.existsSync(staticsSrc)) {
-			await fs.copy(staticsSrc, path.join(resources, 'statics'));
+			await fs.copy(staticsSrc, path.join(resources, 'statics'), {filter: source => isDistributableAsset(path.relative(staticsSrc,source))});
 		}
 
 		const required = [
@@ -241,16 +257,17 @@ async function main() {
 			}
 		}
 
-		const zipOut = path.join(outDir, `${appName}-darwin-${arch}.zip`);
+		const archiveOut = path.join(outDir, `${appName}-darwin-${arch}.tar.7z`);
         await signMacApp(finalAppPath);
         smokeMacNative(path.join(finalAppPath, 'Contents/MacOS', appName), path.join(resources, 'app.asar'));
-        console.log(`[package-mac-app] zipping signed app with symlinks and permissions: ${zipOut}`);
-        if (fs.existsSync(zipOut)) await fs.remove(zipOut);
-        const zipped = spawnSync('ditto', ['-c', '-k', '--sequesterRsrc', '--keepParent', finalAppPath, zipOut], { stdio: 'inherit' });
-        if (zipped.status !== 0) throw new Error('Failed to ZIP the signed Mac app');
-        const bytes = (await fs.stat(zipOut)).size;
+        // PAX keeps signed framework links, Unix modes, ACLs and extended attributes.
+        const tarFile=path.join(workRoot,`${appName}.app.tar`);
+        const tarred=spawnSync('tar',['--format=pax','--acls','--xattrs','-cf',tarFile,'-C',path.dirname(finalAppPath),path.basename(finalAppPath)],{stdio:'inherit'});
+        if(tarred.status!==0)throw new Error('Failed to archive signed Mac app metadata');
+        await createPortable7z(tarFile,archiveOut,path.basename(tarFile));
+        const bytes = (await fs.stat(archiveOut)).size;
 		console.log(`[package-mac-app] .app: ${finalAppPath}`);
-		console.log(`[package-mac-app] zip: ${zipOut} (${(bytes / 1024 / 1024).toFixed(1)} MB)`);
+		console.log(`[package-mac-app] 7z: ${archiveOut} (${(bytes / 1024 / 1024).toFixed(1)} MB)`);
         console.log('Native modules and ad hoc signature passed. This build is not Developer ID notarized.');
 	} finally {
 		await fs.remove(workRoot).catch(() => {});

@@ -1,0 +1,19 @@
+{
+  "origin": "http://127.0.0.1:3786",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "instanceId": "c68d1692-7f53-4430-aba0-188a7ea247e8",
+  "tickMs": 30,
+  "gameId": "71ba0c4f-8a2a-486d-90ba-ce96fc883147",
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true
+}

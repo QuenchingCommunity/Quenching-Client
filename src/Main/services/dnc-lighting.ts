@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import { applyUnitLightAngle } from '../../shared/dnc-rotation';
 
 /** 向上查找当前行是否位于指定 MDL 动画块内（如 Rotation N） */
 function isInsideMdlBlock(lines: string[], lineIndex: number, headerPattern: RegExp): boolean {
@@ -22,9 +23,8 @@ function isInsideMdlBlock(lines: string[], lineIndex: number, headerPattern: Reg
 const ROTATION_HEADER = /^rotation\s+\d+\b/;
 const INTENSITY_HEADER = /^intensity\b/;
 
-/** 亮度等级 1–5 对应 Intensity 乘数（不含 AmbIntensity） */
+/** 3.x templates contain finalized level-3 values, with 15% steps relative to that baseline. */
 const LIGHTING_BRIGHTNESS_MULTIPLIERS: readonly number[] = [0.7, 0.9, 1.1, 1.3, 1.5];
-const HD30_BATTLE_BRIGHTNESS_MULTIPLIERS: readonly number[] = [0.7, 0.9, 1.05, 1.2, 1.35];
 
 export function normalizeBrightnessLevel(level: unknown): number {
     const n = typeof level === 'number' ? level : parseInt(String(level), 10);
@@ -33,9 +33,34 @@ export function normalizeBrightnessLevel(level: unknown): number {
 }
 
 export function getBrightnessMultiplier(level: unknown, mode?: string, options?: DncLightingOptions): number {
-    const hd30Battle = options?.isVersion30 && !options.deMode && (mode === 'battle' || mode === 'melee');
-    const multipliers = hd30Battle ? HD30_BATTLE_BRIGHTNESS_MULTIPLIERS : LIGHTING_BRIGHTNESS_MULTIPLIERS;
-    return multipliers[normalizeBrightnessLevel(level) - 1];
+    const normalized = normalizeBrightnessLevel(level);
+    return options?.isVersion30 ? Math.round((1 + (normalized - 3) * 0.15) * 100) / 100 : LIGHTING_BRIGHTNESS_MULTIPLIERS[normalized - 1];
+}
+
+export function getAmbientBrightnessOffset(level: unknown, mode?: string): number {
+    return Math.round(((normalizeBrightnessLevel(level) - 3) * 0.015 +
+        (mode === 'battle' || mode === 'melee' ? 0.04 : 0)) * 1000000) / 1000000;
+}
+
+function transformScalarField(content: string, field: string, factor: number, offset: number): string {
+    if (factor === 1 && offset === 0) return content;
+    const scalar = '[-+]?(?:\\d*\\.\\d+|\\d+\\.?\\d*)(?:[eE][-+]?\\d+)?';
+    const transform = (value: string, shift = offset) => String(Math.round((Number(value) * factor + shift) * 1000000) / 1000000);
+    let result = content.replace(new RegExp(`(^[\\t ]*static\\s+${field}\\s+)(${scalar})`, 'gmi'),
+        (_match, prefix, value) => prefix + transform(value));
+    result = result.replace(new RegExp(`(^[\\t ]*${field}\\s+\\d+\\s*\\{)([^{}]*)(\\})`, 'gmi'),
+        (_match, header, body: string, end) => {
+            const keys = body.replace(new RegExp(`(^[\\t ]*\\d+\\s*:\\s*)(${scalar})`, 'gmi'),
+                (_key, prefix, value) => prefix + transform(value));
+            return header + keys.replace(new RegExp(`(^[\\t ]*(?:InTan|OutTan)\\s+)(${scalar})`, 'gmi'),
+                (_key, prefix, value) => prefix + transform(value, /\bBezier\s*,/i.test(body) ? offset : 0)) + end;
+        });
+    return result;
+}
+
+export function applyFinalizedDncBrightness(content: string, level: unknown, mode?: string): string {
+    const ambient = transformScalarField(content, 'AmbIntensity', 1, getAmbientBrightnessOffset(level, mode));
+    return transformScalarField(ambient, 'Intensity', getBrightnessMultiplier(level, mode, { isVersion30: true }), 0);
 }
 
 function formatIntensityValue(value: number): string {
@@ -82,29 +107,6 @@ export function applyBrightnessToIntensity(lines: string[], multiplier: number):
         }
     }
 
-    return modified;
-}
-
-/** Keep daytime peaks and raise the dimmer keys, halving the day/night intensity difference. */
-function reduceDayNightIntensityDifference(lines: string[]): boolean {
-    let modified = false;
-    for (let i = 0; i < lines.length; i++) {
-        if (!/^Intensity\s+\d+\s*\{/i.test(lines[i].trim())) continue;
-        const keys: Array<{ index: number; value: number; time: string }> = [];
-        for (let j = i + 1; j < lines.length && !lines[j].includes('}'); j++) {
-            const match = lines[j].trim().match(/^(\d+):\s*([\d.-]+),?$/);
-            if (match) keys.push({ index: j, value: Number(match[2]), time: match[1] });
-        }
-        if (!keys.length) continue;
-        const peak = Math.max(...keys.map(key => key.value));
-        for (const key of keys) {
-            const value = peak - (peak - key.value) * 0.5;
-            if (value === key.value) continue;
-            const indent = lines[key.index].match(/^\s*/)?.[0] || '\t\t';
-            lines[key.index] = `${indent}${key.time}: ${value},`;
-            modified = true;
-        }
-    }
     return modified;
 }
 
@@ -244,10 +246,30 @@ function applySurfaceBaseline(lines: string[], isUnit: boolean): boolean {
 export interface DncLightingOptions {
     deMode?: boolean;
     isVersion30?: boolean;
+    unitLightAngle?: number;
 }
 
-async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: number, options: DncLightingOptions) {
-    const content = await fs.readFile(filePath, 'utf-8');
+/** Applied to freshly restored terrain models; other modes keep their source rotation. */
+function applyBattleTerrainRotation(content: string, filePath: string, mode: string): string {
+    const name = path.basename(filePath).toLowerCase();
+    if (!['battle', 'melee'].includes(mode) || !name.includes('terrain') || name.includes('unit')) return content;
+    const newline = content.includes('\r\n') ? '\r\n' : '\n';
+    return content.replace(/^([\t ]*)Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/gm,
+        (_block, indent) => [`${indent}Rotation 1 {`, `${indent}\tDontInterp,`,
+            `${indent}\t0: { 0.25, 0.25, 0.75, 0 },`, `${indent}}`].join(newline));
+}
+
+/** Pure transform, also used to recover the current profile's rotation on disable. */
+export function renderDncLighting(content: string, filePath: string, mode: string, brightness: unknown, options: DncLightingOptions): string {
+    if (mode === 'rpg') mode = 'standard';
+    const brightnessLevel = normalizeBrightnessLevel(brightness);
+    const finish = (text: string) => {
+        const name=path.basename(filePath).toLowerCase();
+        return name.includes('unit') && !name.includes('terrain') ? applyUnitLightAngle(text, options.unitLightAngle) : text;
+    };
+    if (options.isVersion30) {
+        return finish(applyBattleTerrainRotation(applyFinalizedDncBrightness(content, brightnessLevel, mode), filePath, mode));
+    }
     const lines = content.split(/\r?\n/);
     let modified = false;
 
@@ -256,8 +278,6 @@ async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: 
     const isUnit = lowerName.includes('unit');
     const isTerrain = lowerName.includes('terrain');
     const targetAmb = getTargetAmbIntensity(category, mode);
-    const isBattle = mode === 'battle' || mode === 'melee';
-    const hd30Battle = options.isVersion30 && !options.deMode && isBattle;
 
     if (category === 'surface' && !options.deMode && !options.isVersion30) {
         const useUnitBaseline = isUnit && !isTerrain;
@@ -271,36 +291,11 @@ async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: 
         const line = lines[i].trim();
         const lowerLine = line.toLowerCase();
 
-        if (options.isVersion30 && lowerLine.startsWith('static ambintensity')) {
-            const match = line.match(/static\s+AmbIntensity\s+([\d.-]+)/i);
-            if (match) {
-                const base = parseFloat(match[1]);
-                const offset = isBattle ? (options.deMode ? 0.03 : 0.05) : mode === 'rpg' ? 0.01 : 0;
-                const ambient = hd30Battle ? (category === 'underground' ? -0.1 : isTerrain ? 0.15 : 0.12) : base + offset;
-                const newVal = `\tstatic AmbIntensity ${formatIntensityValue(ambient)},`;
-                if (lines[i] !== newVal) {
-                    lines[i] = newVal;
-                    modified = true;
-                }
-            }
-        } else if (!options.isVersion30 && lowerLine.startsWith('static ambintensity') && targetAmb !== null) {
+        if (lowerLine.startsWith('static ambintensity') && targetAmb !== null) {
             const newVal = `\tstatic AmbIntensity ${targetAmb.toFixed(2)},`;
             if (lines[i] !== newVal) {
                 lines[i] = newVal;
                 modified = true;
-            }
-        }
-
-        if (options.isVersion30 && lowerLine.startsWith('static shadowintensity')) {
-            const match = line.match(/static\s+ShadowIntensity\s+([\d.-]+)/i);
-            if (match) {
-                const base = parseFloat(match[1]);
-                const multiplier = isBattle ? (options.deMode ? 0.66 : 1) : mode === 'rpg' ? 1.2 : 1;
-                const newVal = `\tstatic ShadowIntensity ${formatIntensityValue(base * multiplier)},`;
-                if (lines[i] !== newVal) {
-                    lines[i] = newVal;
-                    modified = true;
-                }
             }
         }
 
@@ -316,14 +311,17 @@ async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: 
         }
     }
 
-    if (hd30Battle && reduceDayNightIntensityDifference(lines)) modified = true;
     if (applyBrightnessToIntensity(lines, getBrightnessMultiplier(brightnessLevel, mode, options))) {
         modified = true;
     }
 
-    if (modified) {
-        await fs.writeFile(filePath, lines.join('\n'), 'utf-8');
-    }
+    return finish(applyBattleTerrainRotation(modified ? lines.join('\n') : content, filePath, mode));
+}
+
+async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: number, options: DncLightingOptions) {
+    const content = await fs.readFile(filePath, 'utf-8');
+    const result = renderDncLighting(content, filePath, mode, brightnessLevel, options);
+    if (result !== content) await fs.writeFile(filePath, result, 'utf-8');
 }
 
 async function listMdlFiles(dir: string): Promise<string[]> {
@@ -337,8 +335,14 @@ async function listMdlFiles(dir: string): Promise<string[]> {
 }
 
 /** Patch a freshly restored DNC directory for the lighting mode and brightness level. */
-export async function applyDncLighting(dncDir: string, mode: string, brightnessLevel: unknown, options: DncLightingOptions): Promise<void> {
+export async function applyDncLighting(dncDir: string, mode: string, brightnessLevel: unknown, options: DncLightingOptions, onProgress?: (completed: number, total: number) => void): Promise<void> {
     if (!(await fs.pathExists(dncDir))) return;
+    if (mode === 'rpg') mode = 'standard'; // RPG changes materials and shares the finalized Standard DNC baseline.
     const level = normalizeBrightnessLevel(brightnessLevel);
-    for (const file of await listMdlFiles(dncDir)) await patchDncMdlFile(file, mode, level, options);
+    const files = await listMdlFiles(dncDir);
+    onProgress?.(0, files.length);
+    for (const [index, file] of files.entries()) {
+        await patchDncMdlFile(file, mode, level, options);
+        onProgress?.(index + 1, files.length);
+    }
 }

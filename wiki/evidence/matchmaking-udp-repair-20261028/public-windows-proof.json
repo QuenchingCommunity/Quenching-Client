@@ -1,0 +1,80 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "transport": "quic-copies-v2",
+  "tlsVerified": true,
+  "serverSelfAddress": false,
+  "publicQuicVerified": true,
+  "congestion": "bbr-standard",
+  "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "tickMs": 30,
+  "gameId": "069a6cdc-0093-4654-abee-69f91a455e5c",
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true,
+  "transportEvents": [
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "preflight-ready",
+      "ticketConsumed": false
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "connected"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "stats": {
+        "sentFrames": 38,
+        "duplicateCopies": 32,
+        "fastCopiesWon": 0,
+        "copyBytes": 2200,
+        "copyBudgetSkips": 33,
+        "copyCoalesced": 37,
+        "copyBlockMaxUs": 0,
+        "lockWaitMaxUs": 0,
+        "frameSendMaxUs": 588
+      }
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "closed"
+    },
+    {
+      "transport": "quic-copies-v2",
+      "stats": {
+        "sentFrames": 37,
+        "duplicateCopies": 40,
+        "fastCopiesWon": 2,
+        "copyBytes": 1989,
+        "copyBudgetSkips": 30,
+        "copyCoalesced": 36,
+        "copyBlockMaxUs": 0,
+        "lockWaitMaxUs": 0,
+        "frameSendMaxUs": 436
+      }
+    },
+    {
+      "transport": "quic-copies-v2",
+      "state": "closed"
+    }
+  ]
+}

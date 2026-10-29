@@ -19,11 +19,13 @@ const bundled = await build({
   },
   platform: 'node', format: 'cjs', packages: 'external', bundle: true, write: false,
   plugins: [{ name: 'mod-update-fixture', setup(plugin) {
-    plugin.onResolve({ filter: /^(electron)$|(?:mod-update-service|mod-integrity-service|game-channel|branch-mod-toggle|post-install-profile)$/ },
-      (args) => ({ path: args.path, namespace: 'fixture' }));
+    plugin.onResolve({ filter: /^(electron)$|(?:config-manager|mod-profile|mod-update-service|mod-integrity-service|game-channel|branch-mod-toggle|post-install-profile)$/ },
+      (args) => args.path.includes('shared/') ? undefined : ({ path: args.path, namespace: 'fixture' }));
     plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, (args) => ({
       contents: args.path === 'electron'
         ? 'export const ipcMain = { handle: (name, handler) => globalThis.__modUpdateProfileFixture.handlers.set(name, handler) };'
+        : args.path.endsWith('config-manager') ? 'export const configManager={get:()=>({})};'
+        : args.path.endsWith('mod-profile') ? 'export const resolveModProfile=async()=>({graphics:"hd"});'
         : args.path.endsWith('mod-update-service')
           ? 'export const getInstalledModState = async () => null; export const getModUpdateStatus = async () => null; export async function applyModUpdate(path, options) { globalThis.__modUpdateProfileFixture.calls.push("patch"); options.onProgress({phase:"complete",percent:100,message:"files done"}); return globalThis.__modUpdateProfileFixture.result; }'
           : args.path.endsWith('mod-integrity-service')

@@ -1,0 +1,40 @@
+{
+  "origin": "https://qmapi-cn1.txzy.net",
+  "syntheticClients": true,
+  "realWarcraftTested": false,
+  "transport": "wss-with-quic-probe",
+  "tlsVerified": true,
+  "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+  "tickMs": 30,
+  "gameId": "9c6fd054-143b-4cc9-b82b-6d7eae5da449",
+  "legacyAndReforgedNames": true,
+  "nativeProfileCannotOverwriteName": true,
+  "lobbyChat": true,
+  "gameStarted": true,
+  "allChat": true,
+  "reverseAllyChat": true,
+  "privateChat": true,
+  "senderBoundToConnection": true,
+  "recipientPrivacyAndNoSelfEcho": true,
+  "actionsStillForwarded": true,
+  "normalLeave": true,
+  "transportEvents": [
+    {
+      "transport": "wss",
+      "state": "fallback-before-ticket",
+      "reason": "quic-preflight-unavailable"
+    },
+    {
+      "transport": "wss-connected"
+    },
+    {
+      "transport": "wss",
+      "state": "fallback-before-ticket",
+      "reason": "quic-preflight-unavailable"
+    },
+    {
+      "transport": "wss-connected"
+    }
+  ],
+  "wireRecordCount": 194
+}

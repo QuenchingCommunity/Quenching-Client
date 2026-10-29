@@ -1,0 +1,11 @@
+✔ local game delay is separated from the WAN wait using the existing ping stamp (3.1759ms)
+✔ unrelated stamps and bounded sample retention do not change transport bytes (6.4636ms)
+✔ a real TCP peer delaying its pong is attributed to the local bridge/game segment (222.8363ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 430.1334

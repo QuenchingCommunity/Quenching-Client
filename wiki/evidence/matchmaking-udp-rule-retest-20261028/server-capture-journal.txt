@@ -1,0 +1,9 @@
+2026-10-27T18:53:38+00:00 RainYun-jskHCafV systemd[1]: Started quenching-udp-rule-retest-20261028.service - /usr/bin/timeout 45 /usr/bin/tcpdump -l -nn -tttt -i ens18 -c 300 "udp port 443 or (tcp dst port 443 and (tcp[tcpflags] & tcp-syn != 0))".
+2026-10-27T18:53:38+00:00 RainYun-jskHCafV timeout[110532]: tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+2026-10-27T18:53:38+00:00 RainYun-jskHCafV timeout[110532]: listening on ens18, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+2026-10-27T18:53:40+00:00 RainYun-jskHCafV timeout[110532]: 2026-10-27 18:53:40.701580 IP 112.45.97.250.3499 > 191.40.41.124.443: Flags [S], seq 3123134045, win 65535, options [mss 1440,nop,wscale 8,nop,nop,sackOK], length 0
+2026-10-27T18:54:23+00:00 RainYun-jskHCafV timeout[110532]: 1 packet captured
+2026-10-27T18:54:23+00:00 RainYun-jskHCafV timeout[110532]: 1 packet received by filter
+2026-10-27T18:54:23+00:00 RainYun-jskHCafV timeout[110532]: 0 packets dropped by kernel
+2026-10-27T18:54:23+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-rule-retest-20261028.service: Main process exited, code=exited, status=124/n/a
+2026-10-27T18:54:23+00:00 RainYun-jskHCafV systemd[1]: quenching-udp-rule-retest-20261028.service: Failed with result 'exit-code'.

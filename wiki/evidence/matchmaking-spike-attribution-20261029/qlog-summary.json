@@ -1,0 +1,780 @@
+[
+  {
+    "file": "8ce6bef13b01e62b9a6276c330_client.sqlog",
+    "counts": {
+      "null": 1,
+      "transport:connection_started": 1,
+      "recovery:congestion_state_updated": 4,
+      "transport:parameters_set": 2,
+      "security:key_updated": 8,
+      "transport:packet_sent": 3219,
+      "recovery:metrics_updated": 4586,
+      "recovery:loss_timer_updated": 4772,
+      "transport:version_information": 1,
+      "transport:packet_received": 3449,
+      "recovery:packet_lost": 929,
+      "security:key_discarded": 6,
+      "transport:alpn_information": 1,
+      "recovery:mtu_updated": 4,
+      "transport:connection_closed": 1
+    },
+    "networkLatestRttMs": {
+      "count": 1685,
+      "p50": 67.1,
+      "p95": 80.08,
+      "p99": 95.57,
+      "max": 131.96
+    },
+    "topNetworkRtt": [
+      {
+        "time": 52764.6931,
+        "smoothed_rtt": 78.961,
+        "latest_rtt": 131.9571,
+        "rtt_variance": 22.954,
+        "bytes_in_flight": 243,
+        "packets_in_flight": 4
+      },
+      {
+        "time": 21186.0489,
+        "smoothed_rtt": 83.082,
+        "latest_rtt": 128.6789,
+        "rtt_variance": 24.402,
+        "bytes_in_flight": 364,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 21100.1931,
+        "smoothed_rtt": 74.375,
+        "latest_rtt": 113.4976,
+        "rtt_variance": 14.371,
+        "bytes_in_flight": 247,
+        "packets_in_flight": 3
+      },
+      {
+        "time": 13359.4669,
+        "smoothed_rtt": 75.999,
+        "latest_rtt": 107.4615,
+        "rtt_variance": 12.632,
+        "congestion_window": 72489,
+        "bytes_in_flight": 176,
+        "packets_in_flight": 3
+      },
+      {
+        "time": 16823.8638,
+        "smoothed_rtt": 80.973,
+        "latest_rtt": 105.7997,
+        "rtt_variance": 13.149,
+        "congestion_window": 79550,
+        "bytes_in_flight": 174,
+        "packets_in_flight": 3
+      },
+      {
+        "time": 60884.2273,
+        "smoothed_rtt": 72.573,
+        "latest_rtt": 104.1328,
+        "rtt_variance": 10.945,
+        "bytes_in_flight": 122,
+        "packets_in_flight": 2
+      },
+      {
+        "time": 17892.4637,
+        "smoothed_rtt": 74.73,
+        "latest_rtt": 100.8575,
+        "rtt_variance": 12.185,
+        "congestion_window": 81864,
+        "bytes_in_flight": 306,
+        "packets_in_flight": 4
+      },
+      {
+        "time": 23962.4896,
+        "smoothed_rtt": 74.004,
+        "latest_rtt": 100.1794,
+        "rtt_variance": 10.612,
+        "bytes_in_flight": 371,
+        "packets_in_flight": 5
+      }
+    ],
+    "lossAndExpiryEvents": [
+      {
+        "time": 62526.1708,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3142,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62590.1836,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3144,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62590.1836,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3145,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62658.4019,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 62713.4277,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3152,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62894.2499,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3160,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62894.2499,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3162,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62894.2499,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3163,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3166,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3167,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3168,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3169,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3170,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63056.0555,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3172,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63130.8848,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3176,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63130.8848,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3177,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63146.612,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 63146.612,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3179,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63176.3338,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 63212.4003,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3184,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63264.1222,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3187,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63330.1243,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3190,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63330.1243,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3191,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63401.0995,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3195,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63446.6237,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3198,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      }
+    ]
+  },
+  {
+    "file": "b34f69db078fcecd041409_client.sqlog",
+    "counts": {
+      "null": 1,
+      "transport:connection_started": 1,
+      "recovery:congestion_state_updated": 2,
+      "transport:parameters_set": 2,
+      "security:key_updated": 8,
+      "transport:packet_sent": 3190,
+      "recovery:metrics_updated": 4517,
+      "recovery:loss_timer_updated": 4596,
+      "transport:version_information": 1,
+      "transport:packet_received": 3418,
+      "security:key_discarded": 6,
+      "transport:alpn_information": 1,
+      "recovery:mtu_updated": 4,
+      "recovery:packet_lost": 894,
+      "transport:connection_closed": 1
+    },
+    "networkLatestRttMs": {
+      "count": 1638,
+      "p50": 60.44,
+      "p95": 73.63,
+      "p99": 85.61,
+      "max": 131.64
+    },
+    "topNetworkRtt": [
+      {
+        "time": 53231.5074,
+        "smoothed_rtt": 72.858,
+        "latest_rtt": 131.638,
+        "rtt_variance": 24.398,
+        "bytes_in_flight": 372,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 21674.6168,
+        "smoothed_rtt": 73.654,
+        "latest_rtt": 129.4543,
+        "rtt_variance": 21.182,
+        "bytes_in_flight": 290,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 17302.0355,
+        "smoothed_rtt": 76.674,
+        "latest_rtt": 99.2591,
+        "rtt_variance": 14.776,
+        "congestion_window": 79963,
+        "bytes_in_flight": 251,
+        "packets_in_flight": 4
+      },
+      {
+        "time": 17300.524,
+        "smoothed_rtt": 73.448,
+        "latest_rtt": 98.2305,
+        "rtt_variance": 11.098,
+        "congestion_window": 79780,
+        "bytes_in_flight": 352,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 53187.6698,
+        "smoothed_rtt": 64.461,
+        "latest_rtt": 94.307,
+        "rtt_variance": 10.139,
+        "bytes_in_flight": 398,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 19226.4741,
+        "smoothed_rtt": 72.396,
+        "latest_rtt": 93.1793,
+        "rtt_variance": 14.095,
+        "congestion_window": 84175,
+        "bytes_in_flight": 351,
+        "packets_in_flight": 5
+      },
+      {
+        "time": 21734.3419,
+        "smoothed_rtt": 75.885,
+        "latest_rtt": 91.502,
+        "rtt_variance": 20.348,
+        "bytes_in_flight": 120,
+        "packets_in_flight": 2
+      },
+      {
+        "time": 44354.6602,
+        "smoothed_rtt": 66.536,
+        "latest_rtt": 90.9699,
+        "rtt_variance": 8.661,
+        "bytes_in_flight": 176,
+        "packets_in_flight": 3
+      }
+    ],
+    "lossAndExpiryEvents": [
+      {
+        "time": 62679.2239,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3110,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62827.4961,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3117,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62827.4961,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3118,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 62938.4051,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3124,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3127,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3128,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3129,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3130,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3131,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63102.9168,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3132,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63175.244,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 63190.0955,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3137,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63228.7665,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 63228.7665,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3139,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63309.7277,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3144,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63403.9017,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3147,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63403.9017,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3148,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63403.9017,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3149,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63403.9017,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3150,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63475.4455,
+        "name": "recovery:loss_timer_updated",
+        "data": {
+          "event_type": "expired",
+          "timer_type": "ack",
+          "packet_number_space": "application_data"
+        }
+      },
+      {
+        "time": 63475.4455,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3155,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63475.4455,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3156,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63614.9692,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3165,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63703.88,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3170,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      },
+      {
+        "time": 63731.6995,
+        "name": "recovery:packet_lost",
+        "data": {
+          "header": {
+            "packet_type": "1RTT",
+            "packet_number": 3172,
+            "dcil": 0
+          },
+          "trigger": "time_threshold"
+        }
+      }
+    ]
+  }
+]

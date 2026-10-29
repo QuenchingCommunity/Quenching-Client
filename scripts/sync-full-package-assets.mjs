@@ -1,4 +1,4 @@
-/** Sync documented client resource mappings into the current QMF maintenance tree.
+/** Sync the HD 3.01 / Standard / brightness-3 baseline into the QMF maintenance tree.
  * Default is read-only; --write backs up changed destinations before copying.
  * This does not create release ZIPs, modify version markers or publish manifests.
  */
@@ -9,9 +9,14 @@ import { fileURLToPath } from 'node:url';
 import { alignPackageDestructables } from './full-package-sync-utils.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const root = path.resolve(process.argv[2] || 'D:/Quenching/QM/Latest');
+const args = process.argv.slice(2);
+if (args.some(arg => arg.startsWith('--') && arg !== '--write')) throw new Error('Usage: node scripts/sync-full-package-assets.mjs [LATEST_ROOT] [--write]');
+const roots = args.filter(arg => arg !== '--write');
+if (roots.length > 1) throw new Error('Provide at most one Latest root');
+const root = path.resolve(roots[0] || 'D:/Quenching/QM/Latest');
 const assets = path.join(repo, 'assets', 'quenching');
 if (!(await fs.pathExists(path.join(root, '_patch', 'keep.que')))) throw new Error('QMF version marker is missing');
+if (await fs.pathExists(path.join(root, '_manual'))) throw new Error('Latest/_manual is retired; remove it explicitly before synchronizing the default baseline');
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 async function filesUnder(directory, prefix = '') {
     const files = [];
@@ -27,13 +32,8 @@ const plans = [];
 const trees = [
     ['shaders/vs', 'shaders/shaders-300-hd/vs'],
     ['shaders/ps', 'shaders/shaders-300-hd/ps/standard'],
-    ['_manual/_20/shaders', 'shaders/shaders203'],
-    ['_manual/_30/shaders-hd', 'shaders/shaders-300-hd'],
-    ['_manual/_30/shaders-de', 'shaders/shaders-300-de'],
+    // Modern DNC templates already contain the finalized level-3 values.
     ['environment/dnc', 'dnc/dnc30-hd'],
-    ['_manual/_20/environment/dnc', 'dnc/dnc20'],
-    ['_manual/_30/env-hd/dnc', 'dnc/dnc30-hd'],
-    ['_manual/_30/env-de/dnc', 'dnc/dnc30-de'],
     ['replaceabletextures/water-rel', 'water/water-rel'],
     ['replaceabletextures/water-trans', 'water/water-trans'],
 ];
@@ -57,6 +57,9 @@ for (const name of ['shoreline1.dds', 'shorelineparticlexy.dds']) {
     for (const folder of ['textures/fx', 'textures/_setting']) await planFile(`${folder}/${name}`, path.join(assets, 'water', 'shoreline', name));
 }
 await planFile('units/unitskin.txt', path.join(assets, 'skin', 'unitskin-new.txt'));
+await planFile('PostProcessingConfig.txt', path.join(assets, 'PostProcessingConfig.txt'));
+await planFile('webui/index.html', path.join(assets, 'index.html'));
+await planFile('webui/QuenchingOn.png', path.join(assets, 'tx', 'QuenchingOnCN.png'));
 const skin = alignPackageDestructables(
     await fs.readFile(path.join(assets, 'skin', 'destructableskin.txt'), 'utf8'),
     await fs.readFile(path.join(assets, 'skin', 'legacy', 'destructableskin.txt'), 'utf8'),
@@ -88,7 +91,7 @@ const changed = plans.filter(plan => plan.beforeSha256 !== plan.sha256);
 console.log(`Mapped files: ${plans.length}; changed: ${changed.length}; destructable records: ${skin.records}; preserved MOD overrides: ${skin.overrides.length}`);
 for (const plan of changed) console.log(plan.relative);
 if (process.argv.includes('--write') && changed.length) {
-    const parent = path.join(repo, '_backup');
+    const parent = path.join(repo, '_tmp');
     await fs.ensureDir(parent);
     const backup = await fs.mkdtemp(path.join(parent, 'latest-resource-sync-'));
     for (const plan of changed) {

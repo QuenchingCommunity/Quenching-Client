@@ -1,0 +1,143 @@
+{
+  "schema": 3,
+  "id": "391a544386edbea58757766ddf522c5392ac099c484594336a8acd19aafff45d",
+  "archives": {
+    "resources-core.7z": {
+      "name": "resources-core.7z",
+      "id": "34d67fb150889ffe0d4ef7c84ebc9dc37afda42ba803bf374baaaac7d19c23cf",
+      "size": 18609183,
+      "sha256": "f509105fd6c0d8112e04408c1ed052b304ccd7108c063fdf877308c1ee5c8794"
+    },
+    "resources-ui.7z": {
+      "name": "resources-ui.7z",
+      "id": "c404693801ec2af0224cf40983507359042f12160b99c1a12051deef5075d19d",
+      "size": 20189406,
+      "sha256": "34e5e6f01d8aad3b84b7cbb61547b7b6801b5d7b10df7d3a695a437117cbaf05"
+    },
+    "resources-terrain.7z": {
+      "name": "resources-terrain.7z",
+      "id": "4f8eb1b7d15bf2c770c80fcf7013fa344ac3e4da03a439f900f40f5825eb77b2",
+      "size": 20711057,
+      "sha256": "73eddbed521ad8d4082f71a1e899ca7f28c86d7e3206168ff5b87fa0a4d4ca29"
+    },
+    "resources-foliage-color.7z": {
+      "name": "resources-foliage-color.7z",
+      "id": "ad582752391e0ce7277d1563739741d88ec4804cf01985dd4506ab53de57ad48",
+      "size": 19658872,
+      "sha256": "9e0d1ba8e3a5fa8e0c03bbcaab361aab58a9e71feb0da374a9f2b1eeb72152da"
+    },
+    "resources-foliage-detail.7z": {
+      "name": "resources-foliage-detail.7z",
+      "id": "a83a1c1e24b7ed6aebfbb23b832c80eeb90059ca289230c33f97de4abb58312a",
+      "size": 19103725,
+      "sha256": "080a0e4ba31cee2c4ba4509bb9c528b5bcfd499640d957c0c579c7706fcfd352"
+    }
+  },
+  "files": 1022,
+  "sourceBytes": 969488353,
+  "unusedCandidates": 5,
+  "unusedCandidateBytes": 284982,
+  "groups": {
+    "EULA.docx": {
+      "files": 1,
+      "bytes": 73092
+    },
+    "EULAEN.docx": {
+      "files": 1,
+      "bytes": 64848
+    },
+    "Mac.txt": {
+      "files": 1,
+      "bytes": 77
+    },
+    "Readme.docx": {
+      "files": 1,
+      "bytes": 146635
+    },
+    "TrajanPro3-Regular.otf": {
+      "files": 1,
+      "bytes": 181288
+    },
+    "camp": {
+      "files": 2,
+      "bytes": 581143
+    },
+    "dnc": {
+      "files": 49,
+      "bytes": 70530
+    },
+    "experimental": {
+      "files": 1,
+      "bytes": 1624
+    },
+    "packages/env-20-30-public": {
+      "files": 6,
+      "bytes": 10348694
+    },
+    "packages/lordaerontree": {
+      "files": 6,
+      "bytes": 16778208
+    },
+    "packages/zip-blight-que": {
+      "files": 33,
+      "bytes": 154055176
+    },
+    "packages/zip-blight-retro": {
+      "files": 16,
+      "bytes": 2798848
+    },
+    "packages/zip-foliage-other": {
+      "files": 103,
+      "bytes": 7382214
+    },
+    "packages/zip-foliage-que": {
+      "files": 176,
+      "bytes": 181330472
+    },
+    "packages/zip-ui-20": {
+      "files": 38,
+      "bytes": 191732
+    },
+    "packages/zip-ui-30": {
+      "files": 38,
+      "bytes": 237139
+    },
+    "packages/zip-ui-pub": {
+      "files": 135,
+      "bytes": 78863170
+    },
+    "reg.reg": {
+      "files": 1,
+      "bytes": 330
+    },
+    "shaders": {
+      "files": 179,
+      "bytes": 474616827
+    },
+    "skin": {
+      "files": 13,
+      "bytes": 6776634
+    },
+    "tile": {
+      "files": 13,
+      "bytes": 413812
+    },
+    "tx": {
+      "files": 3,
+      "bytes": 3874340
+    },
+    "water": {
+      "files": 205,
+      "bytes": 30701520
+    }
+  },
+  "bootstrap": [
+    "1.ico",
+    "logo.png",
+    "update-public-key.pem",
+    "update-baselines/",
+    "index.html",
+    "local-release.json",
+    "PostProcessingConfig.txt"
+  ]
+}

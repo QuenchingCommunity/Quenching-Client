@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import os from 'node:os';
 import path from 'node:path';
 import fs from 'fs-extra';
 import { parkHdPublicEnvironment, restoreHdPublicEnvironment } from '../src/Main/services/environment-layout-service';
 
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-environment-layout-'));
+const work = path.resolve('_tmp/foliage-lock');
+await fs.ensureDir(work);
+const root = await fs.mkdtemp(path.join(work, 'environment-layout-'));
 try {
   for (const name of ['environmentmap', 'foliage', 'sky']) {
     await fs.outputFile(path.join(root, 'environment', name, 'package.dds'), name);

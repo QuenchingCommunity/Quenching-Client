@@ -1,0 +1,40 @@
+{
+  "atUtc": "2026-10-28T01:29:19.544663+00:00",
+  "health": {
+    "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+    "activeGames": 0,
+    "waiting": 0,
+    "tickMs": 30,
+    "chatRelay": true,
+    "playerNames": true
+  },
+  "gameId": "069a6cdc-0093-4654-abee-69f91a455e5c",
+  "errors": [],
+  "lastState": {
+    "at": "2026-10-28T01:27:08.446Z",
+    "gameId": "069a6cdc-0093-4654-abee-69f91a455e5c",
+    "instanceId": "e4fd02cc-4e82-4d14-963e-6ee22d585334",
+    "gameVersion": "3.0.1.24371",
+    "mode": "duel",
+    "state": "closed",
+    "reason": "players-left",
+    "frameCount": 27,
+    "keepAliveCount": 45
+  },
+  "result": {
+    "reason": "forfeit",
+    "firstLeavingPlayer": 1,
+    "players": [
+      {
+        "playerId": 1,
+        "outcome": "loss"
+      },
+      {
+        "playerId": 2,
+        "outcome": "win"
+      }
+    ]
+  },
+  "newAddress": "191.40.44.138",
+  "matchingServiceRestarted": false
+}

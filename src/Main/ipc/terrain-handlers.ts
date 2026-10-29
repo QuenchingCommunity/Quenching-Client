@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import { getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import fs from 'fs-extra';
@@ -8,6 +9,7 @@ import { assertTerrainModeAvailable } from '../services/full-package-service';
 import { installBundledResourceFile, removeBundledResourceFile } from '../services/managed-resource-files';
 import { resolveModProfile } from '../services/mod-profile';
 import { syncDecisiveTerrainTreeTextures } from '../services/decisive-terrain-tree-textures';
+import { createSettingsProgressReporter } from '../../shared/settings-progress';
 
 type TerrainVersion = 'retro' | 'v16' | 'v18' | 'latest' | 'decisive';
 
@@ -34,8 +36,8 @@ const TERRAIN_SLK_MARKER = '.quenching-terrain-slk';
 const TERRAIN_TILES_MARKER = '.quenching-terrain-tiles';
 
 async function bundledSlkVariants(name: 'cliff' | 'terrain' | 'water'): Promise<string[]> {
-    const assetsDir = await AssetSyncService.getAssetsDir();
-    const tile = path.join(assetsDir, 'quenching', 'tile');
+    const assetsDir = await AssetSyncService.getAssetsDir(["tile","skin","water"]);
+    const tile = resourcePath(path.join(assetsDir, 'quenching'), 'tile');
     if (name === 'water') return ['water-trans.slk', 'water-rel.slk'].map(file => path.join(tile, file));
     const prefix = name === 'cliff' ? 'clifftypes' : 'terrain';
     return ['00', '16', '18', '20', '30'].map(version => path.join(tile, `${prefix}${version}.slk`));
@@ -53,8 +55,8 @@ async function writeTerrainMeta(terrainArtPath: string, value: string): Promise<
 }
 
 async function copySlkFromAssets(terrainArtPath: string, fileName: string, destName: string) {
-    const assetsDir = await AssetSyncService.getAssetsDir();
-    const src = path.join(assetsDir, 'quenching', 'tile', fileName);
+    const assetsDir = await AssetSyncService.getAssetsDir(["tile","skin","water"]);
+    const src = resourcePath(path.join(assetsDir, 'quenching'), 'tile', fileName);
 
     if (!(await fs.pathExists(src))) {
         throw new Error(`地形配置文件不存在: ${src}`);
@@ -79,9 +81,9 @@ async function syncWaterSlk(terrainArtPath: string, waterMode?: string) {
     const waterSlk = path.join(terrainArtPath, 'water.slk');
 
     if (waterMode === 'transparent') {
-        const assetsDir = await AssetSyncService.getAssetsDir();
+        const assetsDir = await AssetSyncService.getAssetsDir(["tile","skin","water"]);
         const sourceName = 'water-trans.slk';
-        const waterSrc = path.join(assetsDir, 'quenching', 'tile', sourceName);
+        const waterSrc = resourcePath(path.join(assetsDir, 'quenching'), 'tile', sourceName);
         if (await fs.pathExists(waterSrc)) {
             await installBundledResourceFile(terrainArtPath, 'water.slk', waterSrc,
                 await bundledSlkVariants('water'), TERRAIN_SLK_MARKER);
@@ -186,8 +188,12 @@ async function switchToOriginalTerrain(baseDir: string) {
 export function registerTerrainHandlers() {
     ipcMain.handle(
         'terrain:update-settings',
-        async (_event, war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string) => {
+        async (event, war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string, requestId?: string) => {
+        const report = createSettingsProgressReporter((step, percent) => {
+            if (event?.sender && !event.sender.isDestroyed?.()) event.sender.send('mod:profile-progress', { step, percent, operation: 'terrain', requestId });
+        });
         try {
+            report('terrain', 0);
             console.log(`[Terrain] Updating terrain to mode: ${terrainMode}, water: ${waterMode ?? 'default'}`);
             if (!war3Path) {
                 throw new Error('未提供魔兽争霸III路径');
@@ -227,12 +233,15 @@ export function registerTerrainHandlers() {
 
             await syncDecisiveTerrainTreeTextures(
                 baseDir,
-                path.join(await AssetSyncService.getAssetsDir(), 'quenching'),
+                path.join(await AssetSyncService.getAssetsDir(["tile","skin","water"]), 'quenching'),
                 decisiveTerrain,
             );
-            await syncFoliageForTerrainIfEnabled(war3Path, terrainMode, previousTerrainMode);
+            report('environment', 20);
+            await syncFoliageForTerrainIfEnabled(war3Path, terrainMode, previousTerrainMode,
+                percent => report('environment', 20 + percent * .79));
 
             console.log(`[Terrain] Successfully updated terrain to ${terrainMode}`);
+            report('finish', 100);
             return true;
         } catch (error) {
             console.error('Failed to update terrain settings:', error);

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>淬火 · 设置说明编辑器</title>
+<style>
+:root{color-scheme:light;--paper:#f5f4ef;--panel:#fff;--ink:#24312d;--muted:#626d66;--line:#dddeda;--gold:#806127;--gold-soft:#f8f1df;--green:#34694b;--red:#a13630;font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #a78947;outline-offset:3px}button{border:1px solid var(--line);border-radius:7px;padding:8px 13px;background:var(--panel);color:var(--ink)}button:hover{border-color:var(--gold)}button.primary{background:var(--ink);border-color:var(--ink);color:white}button.quiet{background:transparent;padding:4px 8px;font-size:13px}button.gold{color:var(--gold);background:var(--gold-soft);border-color:#d9cba7}input,textarea,select{max-width:100%;min-width:0;border:1px solid #cfd4cd;border-radius:6px;background:var(--panel);color:var(--ink);padding:9px 11px}textarea{width:100%;min-height:96px;resize:vertical;line-height:1.7}input[type=text],input[type=search]{width:100%}h1,h2,h3,p{margin:0}h1{font-size:25px;letter-spacing:.03em;font-weight:600}h2{font-size:21px;font-weight:600}h3{font-size:16px;font-weight:600}.small{font-size:13px;color:var(--muted)}.eyebrow{font-size:11px;letter-spacing:.16em;color:#b8c8ba}.top{background:#20312b;color:#f9faf4;padding:25px max(24px,calc((100vw - 1390px)/2));display:flex;justify-content:space-between;gap:22px;align-items:center}.top p{color:#d0d8ce;max-width:700px;font-size:14px;margin-top:8px}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .primary{background:#e7d4a4;border-color:#e7d4a4;color:#283128}.toolbar{position:sticky;top:0;z-index:3;border-bottom:1px solid var(--line);background:#f5f4eff5;backdrop-filter:blur(8px)}.toolbar-inner{max-width:1440px;margin:auto;padding:13px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.search{flex:1 1 250px}.status{font-size:13px;color:var(--green)}.error{color:var(--red)}.layout{max-width:1440px;margin:auto;display:grid;grid-template-columns:205px minmax(0,1fr);gap:30px;padding:26px 24px 65px}aside{align-self:start;position:sticky;top:92px;max-height:calc(100vh - 115px);overflow-y:auto;padding-right:10px}.category{width:100%;text-align:left;margin-bottom:5px;border-color:transparent;background:transparent}.category[aria-pressed=true]{background:#e5e9e2;border-color:#d0d9cd;font-weight:600}.category small{float:right;color:var(--muted)}.outline{border-top:1px solid var(--line);margin-top:17px;padding-top:14px}.outline button{display:block;width:100%;text-align:left;border:0;background:none;padding:6px 8px;font-size:13px;overflow-wrap:anywhere}.outline button span{color:var(--gold);margin-right:5px}.editor-section{background:var(--panel);border:1px solid var(--line);border-radius:11px;margin-bottom:25px;padding:23px;scroll-margin-top:100px}.section-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.section-number{color:var(--gold);font-size:13px;margin-bottom:5px}.section-meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin-top:8px}.mark{border-radius:4px;padding:2px 7px;background:#edf0e9;color:var(--green)}.mark.changed{background:var(--gold-soft);color:var(--gold)}.name-field{margin-top:17px;max-width:560px}.field-label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.name-field input{font-size:16px;font-weight:600}.name-reference{margin-top:5px;font-size:12px;color:var(--muted)}.name-reference button{margin-left:8px}.copy-row{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,1.2fr);gap:22px;padding:22px 0;border-bottom:1px solid #e8eae4}.copy-row.edited .final{border-left:3px solid #ba9852;padding-left:13px}.original{font-size:14px;color:#49554e;overflow-wrap:anywhere}.original p{white-space:pre-wrap}.option-tag{font-size:12px;color:var(--gold);margin-bottom:9px}.final label{display:block}.option-name{display:flex;align-items:center;gap:8px;margin-bottom:9px}.option-name input{flex:1;padding:5px 9px;font-size:14px}.option-name span{color:var(--muted);font-size:12px;white-space:nowrap}.row-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px}.char-count{font-size:12px;color:var(--muted)}details{margin-top:10px;font-size:13px}summary{cursor:pointer;color:var(--gold)}.suggestion{padding:12px 0;color:#59634e;white-space:pre-wrap}.suggestion button{margin-top:8px}.notes{margin-top:17px}.notes summary{color:var(--muted)}.context{white-space:pre-wrap;color:var(--muted);font-size:13px;margin-top:10px}.note-input{min-height:65px;margin-top:12px}.section-footer{margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.reviewed{color:var(--green);border-color:#afc3b0;background:#f0f5ed}.empty{text-align:center;padding:70px 20px;color:var(--muted)}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);z-index:8;background:#20312b;color:white;border-radius:8px;padding:12px 20px;box-shadow:0 5px 25px #0002}.toast.error{background:#7e302d}.save-note{max-width:1440px;margin:0 auto;padding:12px 24px 0}.hidden,[hidden]{display:none!important}.only-mobile{display:none}@media(max-width:960px){.top{display:block;padding:23px}.top .actions{margin-top:17px}.layout{grid-template-columns:165px minmax(0,1fr);gap:18px}.copy-row{grid-template-columns:1fr;gap:12px}.original{padding:10px 12px;background:#f6f7f3;border-radius:5px}aside{top:125px}.toolbar-inner{padding:12px 20px}}@media(max-width:620px){.layout{display:block;padding:15px 13px 50px}.top{padding:20px 16px}h1{font-size:22px}.toolbar-inner{padding:10px 13px;gap:8px}.search{flex-basis:100%}.toolbar-inner select{flex:1}.toolbar-inner .status{flex-basis:100%}aside{position:static;max-height:none;padding:0;margin-bottom:16px}.categories{display:flex;gap:5px;overflow:auto}.category{width:auto;white-space:nowrap;padding:7px 10px;font-size:13px;margin:0}.category small{float:none;margin-left:5px}.outline{display:none}.editor-section{padding:17px}.section-top .actions{width:100%}.section-top .actions button{flex:1}.copy-row{padding:18px 0}.name-field{max-width:none}.option-name input,textarea,input[type=search]{font-size:16px}.save-note{padding:10px 15px 0}.top .actions button{flex:1}.top .actions details{margin-top:0}.section-footer button{min-height:42px}.row-actions{flex-wrap:wrap}.toast{font-size:14px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div><div class="eyebrow">QUENCHING · COPY REVIEW</div><h1>把设置说明，改成玩家的话</h1><p>对照原文修改名称与说明，也可以逐项采用建议。这里的修改不会写回客户端；完成后，把保存的 HTML 或 JSON 发给我。</p></div>
+  <div class="actions"><button type="button" class="primary" id="save-html">保存 HTML 副本</button><button type="button" id="save-json">导出 JSON</button><button type="button" id="import-json">导入草稿</button><button type="button" id="save-md">导出 Markdown</button></div>
+</header>
+<div class="toolbar"><div class="toolbar-inner">
+  <label class="search"><span class="hidden">搜索设置说明</span><input type="search" id="search" placeholder="搜索选项、原文或你的说明…" aria-label="搜索设置说明"></label>
+  <select id="filter" aria-label="筛选状态"><option value="all">全部状态</option><option value="changed">只看已修改</option><option value="pending">只看未审阅</option><option value="reviewed">只看已审阅</option></select>
+  <span id="summary" class="small"></span><span id="save-status" class="status" role="status" aria-live="polite">正在加载…</span>
+</div></div>
+<p class="save-note small">输入后会自动保存到当前浏览器。建议随时点击「保存 HTML 副本」留一份可继续编辑的文件。快捷键 Ctrl / ⌘ + S 也可保存副本。</p>
+<div class="layout"><aside aria-label="设置分类与目录"><nav id="categories" class="categories"></nav><nav id="outline" class="outline" aria-label="跳转到设置"></nav></aside><main id="entries"></main></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<script type="application/json" id="editor-seed">__SETTINGS_EDITOR_SEED__</script>
+<script>
+(() => {
+  'use strict';
+  const seed = JSON.parse(document.getElementById('editor-seed').textContent);
+  const groups = seed.groups;
+  const schema = 'quenching-settings-copy-review';
+  const storageKey = schema + ':v1';
+  const byId = new Map(groups.map(group => [group.id, group]));
+  const elements = Object.fromEntries(['entries','categories','outline','search','filter','summary','save-status','toast','import-file'].map(id => [id,document.getElementById(id)]));
+  let category = '全部';
+  let saveTimer, toastTimer;
+  let storageAvailable = true;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const fresh = () => ({ updatedAt: 0, groups: Object.fromEntries(groups.map(group => [group.id, {
+    title: group.originalTitle, reviewed: false, note: '', rows: Object.fromEntries(group.rows.map(row => [row.id, { label: row.originalLabel, text: row.original }]))
+  }])) });
+  function validate(candidate) {
+    if (!candidate || typeof candidate !== 'object' || !candidate.groups || !Number.isFinite(candidate.updatedAt)) throw Error('草稿格式不正确。');
+    const clean = fresh();
+    clean.updatedAt = candidate.updatedAt;
+    for (const group of groups) {
+      const item = candidate.groups[group.id];
+      if (!item || typeof item.title !== 'string' || typeof item.note !== 'string' || typeof item.reviewed !== 'boolean' || !item.rows || item.title.length > 1000 || item.note.length > 20000) throw Error('草稿缺少设置：' + group.originalTitle);
+      const rows = {};
+      for (const row of group.rows) {
+        const value = item.rows[row.id];
+        if (!value || typeof value.label !== 'string' || typeof value.text !== 'string' || value.label.length > 1000 || value.text.length > 20000) throw Error('草稿缺少选项：' + group.originalTitle + ' / ' + row.originalLabel);
+        rows[row.id] = { label: value.label, text: value.text };
+      }
+      clean.groups[group.id] = { title: item.title, note: item.note, reviewed: item.reviewed, rows };
+    }
+    return clean;
+  }
+  let draft = fresh();
+  if (seed.savedDraft) {
+    try { draft = validate(seed.savedDraft); } catch (error) { console.warn(error); }
+  }
+  let restored = false;
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const local = validate(JSON.parse(saved));
+      if (local.updatedAt > draft.updatedAt) { draft = local; restored = true; }
+    }
+  } catch { storageAvailable = false; }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function button(text, action, className = '') {
+    const node = el('button', className, text);
+    node.type = 'button'; node.addEventListener('click', action); return node;
+  }
+  function notify(message, error = false) {
+    clearTimeout(toastTimer);
+    elements.toast.textContent = message;
+    elements.toast.classList.toggle('error', error);
+    elements.toast.hidden = false;
+    toastTimer = setTimeout(() => { elements.toast.hidden = true; }, 4500);
+  }
+  function changed(group) {
+    const item = draft.groups[group.id];
+    return item.title !== group.originalTitle || item.note !== '' || group.rows.some(row => item.rows[row.id].label !== row.originalLabel || item.rows[row.id].text !== row.original);
+  }
+  function rowChanged(group, row) {
+    const item = draft.groups[group.id].rows[row.id];
+    return item.label !== row.originalLabel || item.text !== row.original;
+  }
+  function persist() {
+    clearTimeout(saveTimer);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+      storageAvailable = true;
+      elements['save-status'].textContent = '已保存到此浏览器 · ' + new Date(draft.updatedAt || Date.now()).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+      elements['save-status'].classList.remove('error');
+    } catch {
+      storageAvailable = false;
+      elements['save-status'].textContent = '自动保存不可用，请保存 HTML 副本';
+      elements['save-status'].classList.add('error');
+    }
+  }
+  function touch() {
+    draft.updatedAt = Date.now();
+    elements['save-status'].textContent = '正在保存…';
+    clearTimeout(saveTimer); saveTimer = setTimeout(persist, 300);
+    updateSummary();
+  }
+  function updateSummary() {
+    const reviewed = groups.filter(group => draft.groups[group.id].reviewed).length;
+    elements.summary.textContent = reviewed + ' / ' + groups.length + ' 组已审阅 · ' + groups.filter(changed).length + ' 组有修改';
+    for (const group of groups) {
+      const badge = document.getElementById('badge-' + group.id);
+      if (badge) { badge.textContent = changed(group) ? '有修改' : '原文'; badge.classList.toggle('changed', changed(group)); }
+      const nav = document.getElementById('nav-' + group.id);
+      if (nav) nav.textContent = (draft.groups[group.id].reviewed ? '✓ ' : '') + draft.groups[group.id].title;
+    }
+  }
+  function visibleGroups() {
+    const query = elements.search.value.trim().toLocaleLowerCase();
+    return groups.filter(group => {
+      const item = draft.groups[group.id], filter = elements.filter.value;
+      if (category !== '全部' && category !== group.category) return false;
+      if (filter === 'changed' && !changed(group) || filter === 'pending' && item.reviewed || filter === 'reviewed' && !item.reviewed) return false;
+      const haystack = [group.originalTitle, group.suggestedTitle, item.title, item.note, ...group.rows.flatMap(row => [row.originalLabel,row.original,row.suggestion,item.rows[row.id].label,item.rows[row.id].text])].join(' ').toLocaleLowerCase();
+      return !query || haystack.includes(query);
+    });
+  }
+  function adoptGroup(group) {
+    if (changed(group) && !confirm('用建议替换这一组的名称和说明？你已输入的内容会被覆盖，备注仍保留。')) return;
+    const item = draft.groups[group.id];
+    item.title = group.suggestedTitle;
+    for (const row of group.rows) item.rows[row.id] = { label: row.suggestedLabel, text: row.suggestion };
+    touch(); render(); notify('已采用本组建议，你可以继续改写。');
+  }
+  function renderGroup(group, index) {
+    const item = draft.groups[group.id];
+    const section = el('section','editor-section'); section.id = 'group-' + group.id;
+    const top = el('div','section-top'), heading = el('div');
+    heading.append(el('div','section-number',group.category + ' / ' + (index + 1)), el('h2','',group.originalTitle));
+    const meta = el('div','section-meta'), badge = el('span','mark'); badge.id = 'badge-' + group.id;
+    meta.append(badge,el('span','',group.rows.length + ' 个状态或选项')); heading.append(meta);
+    const actions = el('div','actions'); actions.append(button('采用本组建议',() => adoptGroup(group),'gold'));
+    top.append(heading,actions); section.append(top);
+    const name = el('label','name-field'), nameInput = el('input'); nameInput.type = 'text'; nameInput.value = item.title;
+    nameInput.setAttribute('aria-label',group.originalTitle + '：最终显示名称');
+    name.append(el('span','field-label','最终显示名称'),nameInput);
+    nameInput.addEventListener('input',() => { item.title = nameInput.value; touch(); });
+    section.append(name);
+    if (group.suggestedTitle !== group.originalTitle) {
+      const reference = el('div','name-reference','建议名称：' + group.suggestedTitle);
+      reference.append(button('使用这个名称',() => { item.title = group.suggestedTitle; nameInput.value = item.title; touch(); },'quiet'));
+      section.append(reference);
+    }
+    for (const row of group.rows) {
+      const value = item.rows[row.id], line = el('div','copy-row'); line.classList.toggle('edited',rowChanged(group,row));
+      const original = el('div','original');
+      original.append(el('div','option-tag',row.originalLabel + ' · 当前原文'),el('p','',row.original));
+      const final = el('div','final'), label = el('label','option-name'), labelInput = el('input');
+      labelInput.type = 'text'; labelInput.value = value.label; labelInput.setAttribute('aria-label',group.originalTitle + ' / ' + row.originalLabel + '：选项名称');
+      label.append(el('span','','选项名称'),labelInput);
+      const textLabel = el('label'), area = el('textarea'); area.value = value.text; area.dataset.rowId = row.id;
+      area.setAttribute('aria-label',group.originalTitle + ' / ' + row.originalLabel + '：最终说明');
+      textLabel.append(el('span','field-label','你希望玩家看到的说明'),area);
+      const actions = el('div','row-actions'), count = el('span','char-count',value.text.length + ' 字');
+      const update = () => { count.textContent = value.text.length + ' 字'; line.classList.toggle('edited',rowChanged(group,row)); touch(); };
+      labelInput.addEventListener('input',() => { value.label = labelInput.value; update(); });
+      area.addEventListener('input',() => { value.text = area.value; update(); });
+      actions.append(count,button('恢复这一项原文',() => {
+        value.label = row.originalLabel; value.text = row.original; area.value = value.text; labelInput.value = value.label; update();
+      },'quiet'));
+      const details = el('details'), summary = el('summary','','查看改写建议'), suggestion = el('div','suggestion');
+      suggestion.append(el('p','',row.suggestion),button('采用这条建议',() => {
+        value.text = row.suggestion; value.label = row.suggestedLabel; area.value = value.text; labelInput.value = value.label; update();
+      },'gold'));
+      details.append(summary,suggestion); final.append(label,textLabel,actions,details); line.append(original,final); section.append(line);
+    }
+    const notes = el('details','notes'); notes.append(el('summary','','核对备注与使用限制'),el('p','context',group.context));
+    const noteLabel = el('label'), note = el('textarea','note-input'); note.value = item.note;
+    note.placeholder = '写下你对效果、命名或限制条件的补充…'; note.setAttribute('aria-label',group.originalTitle + '：你的备注');
+    noteLabel.append(el('span','field-label','你的备注'),note); notes.append(noteLabel);
+    note.addEventListener('input',() => { item.note = note.value; touch(); }); section.append(notes);
+    const footer = el('div','section-footer'), review = button(item.reviewed ? '✓ 已审阅，再次编辑' : '本组已审阅',() => {
+      item.reviewed = !item.reviewed; touch(); render();
+    },item.reviewed ? 'reviewed' : '');
+    footer.append(el('span','small','审阅标记和输入内容会一并保存。'),review); section.append(footer);
+    return section;
+  }
+  function render() {
+    elements.categories.replaceChildren();
+    for (const name of ['全部',...new Set(groups.map(group => group.category))]) {
+      const control = button(name,() => { category = name; render(); },'category');
+      control.setAttribute('aria-pressed',String(category === name));
+      control.append(el('small','',String(name === '全部' ? groups.length : groups.filter(group => group.category === name).length)));
+      elements.categories.append(control);
+    }
+    elements.entries.replaceChildren(); elements.outline.replaceChildren();
+    const shown = visibleGroups();
+    if (!shown.length) elements.entries.append(el('div','empty','没有符合条件的选项。可以修改搜索或筛选条件。'));
+    for (const group of shown) {
+      const nav = button('',() => document.getElementById('group-' + group.id).scrollIntoView({behavior:'smooth',block:'start'})); nav.id = 'nav-' + group.id;
+      elements.outline.append(nav); elements.entries.append(renderGroup(group,groups.indexOf(group)));
+    }
+    updateSummary();
+  }
+  function download(contents, filename, type) {
+    const url = URL.createObjectURL(new Blob([contents],{type}));
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url),10000);
+  }
+  const stamp = () => new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  const safeJson = value => JSON.stringify(value).replace(/</g,'\\u003c');
+  function saveHtml() {
+    const snapshot = document.documentElement.cloneNode(true);
+    snapshot.querySelector('#editor-seed').textContent = safeJson({...seed,savedDraft:clone(draft)});
+    for (const id of ['entries','categories','outline']) snapshot.querySelector('#' + id).replaceChildren();
+    snapshot.querySelector('#search').value = ''; snapshot.querySelector('#search').setAttribute('value','');
+    snapshot.querySelector('#toast').hidden = true;
+    download('<!doctype html>\n' + snapshot.outerHTML,'quenching-copy-edited-' + stamp() + '.html','text/html;charset=utf-8');
+    notify('HTML 副本已生成，修改内容已写入副本。');
+  }
+  document.getElementById('save-html').addEventListener('click',saveHtml);
+  document.getElementById('save-json').addEventListener('click',() => {
+    download(JSON.stringify({schema,version:1,sourceDate:seed.sourceDate,exportedAt:new Date().toISOString(),groups,draft:clone(draft)},null,2),
+      'quenching-copy-' + stamp() + '.json','application/json;charset=utf-8');
+    notify('JSON 已生成，包含原文、接入标识和你的修改。');
+  });
+  const md = value => String(value).replace(/\|/g,'\\|').replace(/\r?\n/g,'<br>');
+  document.getElementById('save-md').addEventListener('click',() => {
+    const lines = ['# 淬火设置说明定稿','', '导出时间：' + new Date().toLocaleString('zh-CN'),''];
+    for (const group of groups) {
+      const item = draft.groups[group.id]; lines.push('## ' + item.title,'', '原名称：' + group.originalTitle + '；' + (item.reviewed ? '已审阅' : '未审阅'),'', '| 选项 | 当前原文 | 修改后的说明 |','| --- | --- | --- |');
+      for (const row of group.rows) lines.push('| ' + md(item.rows[row.id].label) + ' | ' + md(row.original) + ' | ' + md(item.rows[row.id].text) + ' |');
+      if (item.note) lines.push('','备注：' + item.note); lines.push('');
+    }
+    download(lines.join('\n'),'quenching-copy-' + stamp() + '.md','text/markdown;charset=utf-8');
+  });
+  document.getElementById('import-json').addEventListener('click',() => elements['import-file'].click());
+  elements['import-file'].addEventListener('change',async event => {
+    const file = event.target.files[0]; event.target.value = ''; if (!file) return;
+    try {
+      if (file.size > 2000000) throw Error('草稿文件过大，请选择本编辑器导出的 JSON。');
+      const payload = JSON.parse(await file.text());
+      if (payload.schema !== schema || payload.version !== 1) throw Error('请选择本编辑器导出的 JSON 草稿。');
+      const candidate = validate(payload.draft);
+      if (groups.some(changed) && !confirm('用导入的草稿替换当前页面内容？建议先保存当前 HTML 副本。')) return;
+      draft = candidate; draft.updatedAt = Date.now(); persist(); render(); notify('草稿已导入。');
+    } catch (error) { notify('导入失败：' + error.message,true); }
+  });
+  elements.search.addEventListener('input',render); elements.filter.addEventListener('change',render);
+  window.addEventListener('keydown',event => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveHtml(); } });
+  window.addEventListener('beforeunload',() => { if (saveTimer) persist(); });
+  render();
+  elements['save-status'].textContent = storageAvailable ? (restored ? '已恢复此浏览器的草稿' : seed.savedDraft ? '已载入 HTML 内保存的修改' : '尚无修改，输入后自动保存') : '自动保存不可用，请保存 HTML 副本';
+  elements['save-status'].classList.toggle('error',!storageAvailable);
+  window.settingsCopyEditor = { getDraft:() => clone(draft), getGroups:() => clone(groups), validate, saveHtml };
+})();
+</script>
+</body>
+</html>

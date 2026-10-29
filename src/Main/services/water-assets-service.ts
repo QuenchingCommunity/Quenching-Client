@@ -1,11 +1,12 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import fs from 'fs-extra';
 import path from 'path';
 
 export type ModWaterMode = 'transparent' | 'realistic';
 
 export async function verifyWaterModeAssets(assetsDir: string, mode: ModWaterMode): Promise<void> {
-  const waterRoot = path.join(assetsDir, 'quenching', 'water');
-  const tileRoot = path.join(assetsDir, 'quenching', 'tile');
+  const waterRoot = resourcePath(path.join(assetsDir, 'quenching'), 'water');
+  const tileRoot = resourcePath(path.join(assetsDir, 'quenching'), 'tile');
   const sourceWater = path.join(waterRoot, mode === 'transparent' ? 'water-trans' : 'water-rel');
   const shorelineNames = mode === 'transparent' ? ['shoreline1.dds', 'shorelineparticlexy.dds'] : [];
   const sources = [sourceWater,
@@ -19,8 +20,8 @@ export async function verifyWaterModeAssets(assetsDir: string, mode: ModWaterMod
 /** Client assets are immutable templates: never move or remove these sources. */
 export async function copyWaterModeFromAssets(baseDir: string, assetsDir: string, mode: ModWaterMode): Promise<void> {
   await verifyWaterModeAssets(assetsDir, mode);
-  const waterRoot = path.join(assetsDir, 'quenching', 'water');
-  const tileRoot = path.join(assetsDir, 'quenching', 'tile');
+  const waterRoot = resourcePath(path.join(assetsDir, 'quenching'), 'water');
+  const tileRoot = resourcePath(path.join(assetsDir, 'quenching'), 'tile');
   const sourceWater = path.join(waterRoot, mode === 'transparent' ? 'water-trans' : 'water-rel');
   const shorelineNames = mode === 'transparent' ? ['shoreline1.dds', 'shorelineparticlexy.dds'] : [];
 

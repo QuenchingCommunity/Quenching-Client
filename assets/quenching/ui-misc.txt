@@ -1,0 +1,770 @@
+[Misc]
+
+FadeBuffMinDuration=10
+FadeBuffMinAlpha=96
+FadeBuffMaxAlpha=255
+
+// gold text data
+GoldTextColor=255,255,220,0
+GoldTextVelocity=0,0.03,100
+GoldTextLifetime=2
+GoldTextFadeStart=1
+
+// lumber text data
+LumberTextColor=255,0,200,80
+LumberTextVelocity=0,0.03,100
+LumberTextLifetime=2
+LumberTextFadeStart=1
+
+// bounty text data
+BountyTextColor=255,255,220,0
+BountyTextVelocity=0,0.03,100
+BountyTextLifetime=3
+BountyTextFadeStart=2
+
+// lumber bounty text data
+LumberBountyTextColor=255,0,200,80
+LumberBountyTextVelocity=0,0.03,100
+LumberBountyTextLifetime=3
+LumberBountyTextFadeStart=2
+
+// XP text data
+XPTextColor=255,111,111,255
+XPTextVelocity=0,0.02,100
+XPTextLifetime=2
+XPTextFadeStart=1
+
+// missile 'miss' text tag data
+MissTextColor=255,255,0,0
+MissTextVelocity=0,0.03,100
+MissTextLifetime=3
+MissTextFadeStart=1
+
+// CriticalStrike text tag data
+CriticalStrikeTextColor=255,255,0,0
+CriticalStrikeTextVelocity=0,0.04,100
+CriticalStrikeTextLifetime=5
+CriticalStrikeTextFadeStart=2
+CriticalStrikeSpellTextColor=255,0,0,255
+CriticalStrikeHealTextColor=255,0,255,0
+
+// ShadowStrike text tag data
+ShadowStrikeTextColor=255,160,255,0
+ShadowStrikeTextVelocity=0,0.04,100
+ShadowStrikeTextLifetime=5
+ShadowStrikeTextFadeStart=2
+
+// ManaBurn text tag data
+ManaBurnTextColor=255,82,82,255
+ManaBurnTextVelocity=0,0.04,100
+ManaBurnTextLifetime=5
+ManaBurnTextFadeStart=2
+
+// CriticalStrike text tag data
+BashTextColor=255,0,0,255
+BashTextVelocity=0,0.04,100
+BashTextLifetime=5
+BashTextFadeStart=2
+
+// Lava Spawn Vertex Colors
+LavaSpawnColor=255,255,255,255,255,220,220,220,255,185,185,185
+
+ActiveButtonColor=255,75,150,255
+
+[Camera]
+// Update Listener section in bin\ui\soundinfo\miscdata.txt
+// if the number of camera zooms changes
+// game camera paramters
+AOA=304,311,318,325,332,339
+FOV=70,70,70,70,70,70
+Rotation=90,90,90,90,90,90,20,20,20,20,20,20,160,160,160,160,160,160
+Distance=1650,1600,1500,1400,1275,1100
+FarZ=5000,5000,5000,5000,5000,5000
+NearZ=100,100,100,100,100,100,60
+Height=0,0,0,0,0,0,0
+// Camera smoothing. 
+Smoothing=0.00
+SmoothMaxDist=1000
+SmoothScale=0.80
+SmoothBias=0.15
+SmoothMinFPS=10
+SmoothBeta=1.5
+
+[CameraRates]
+// game camera change rates
+AOA=20
+FOV=20
+Rotation=30
+Distance=1200
+Forward=3000
+Strafe=3000
+
+[QuestIndicatorTimeout]
+QuestIndicatorTimeout=10
+
+[CameraMargins]
+// Defines the distance (in cells) between the camera bounds and
+// the playable map edge
+left=4
+right=4
+top=2
+bottom=2
+
+[UnpathableMargins]
+// Defines the default number of unpathable cells to add to each map edge
+left=6
+right=6
+top=8
+bottom=4
+
+[DefaultZFog]
+Style=0
+Start=20000
+End=50000
+Density=0
+HeightStart=0
+HeightEnd=0
+LinearStart=10000
+LinearEnd=10000
+MaxLinearDensity=1
+DrawOverSky=0
+Color=0,0,0,0
+
+[TerrainZFog]
+Style=0
+Start=1400
+End=5400
+Density=0.8
+HeightStart=0
+HeightEnd=0
+LinearStart=10000
+LinearEnd=10000
+MaxLinearDensity=0.8
+DrawOverSky=0
+Color=255,185,200,215
+
+[MenuZFog]
+Style=0,0
+Start=100,0
+End=5500,7000
+Density=1,1
+HeightStart=0
+HeightEnd=0
+LinearStart=10000
+LinearEnd=10000
+MaxLinearDensity=1
+DrawOverSky=0
+Color=255,11,20,11,255,178,178,204
+
+[ReforgedMenuZFog]
+Style=0
+Start=0
+End=7000
+Density=0.4
+HeightStart=0
+HeightEnd=0
+LinearStart=10000
+LinearEnd=10000
+MaxLinearDensity=1
+DrawOverSky=0
+Color=255,255,255,255
+
+[ArthasIllidanFightZFog]
+Style=0
+Start=0
+End=6000
+Density=1
+HeightStart=0
+HeightEnd=0
+LinearStart=10000
+LinearEnd=10000
+MaxLinearDensity=1
+DrawOverSky=0
+Color=255,92,112,120
+
+[ArthasIllidanFightPrefetchList]
+File0="Sound\Ambient\DoodadEffects\FinalCinematic.flac"
+File1="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0001.mrf"
+File3="Doodads\Cinematic\ArthasIllidanFight\ArthasCloakFight.blp"
+File4="Doodads\Cinematic\ArthasIllidanFight\Arthas1.blp"
+File5="Doodads\Cinematic\ArthasIllidanFight\StoneTiledSnowTALLtrev.blp"
+File6="Doodads\Cinematic\ArthasIllidanFight\IllidanBlade.blp"
+File7="Doodads\Cinematic\ArthasIllidanFight\FrostMorne.blp"
+File8="Doodads\Cinematic\ArthasIllidanFight\BigAssSky.blp"
+File9="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0000.mrf"
+File10="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0002.mrf"
+File11="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0003.mrf"
+File12="Doodads\Cinematic\ArthasIllidanFight\SpeedLines1_solid.blp"
+File13="Doodads\Cinematic\ArthasIllidanFight\IllidanDeathShadowA.blp"
+File14="Doodads\Cinematic\ArthasIllidanFight\IllidanCineStuff.blp"
+File15="Doodads\Cinematic\ArthasIllidanFight\IllidanCine.blp"
+File16="Doodads\Cinematic\ArthasIllidanFight\IceCrownWalls.blp"
+File17="Doodads\Cinematic\ArthasIllidanFight\IceCrownDoodads0.blp"
+File18="Doodads\Cinematic\ArthasIllidanFight\Ice_Natural01.blp"
+File19="Doodads\Cinematic\ArthasIllidanFight\Clouds8x8.blp"
+File20="Doodads\Cinematic\ArthasIllidanFight\Ice_Natural01.blp"
+File21="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0004.mrf"
+File22="Doodads\Cinematic\ArthasIllidanFight\ArthasCape0005.mrf"
+File23="Doodads\Cinematic\ArthasIllidanFight\SacrificialAltarskull1.blp"
+File24="Doodads\Cinematic\ArthasIllidanFight\rockShadow.blp"
+File25="Doodads\Cinematic\ArthasIllidanFight\IronForgeSnow01solid1.blp"
+File26="Doodads\Cinematic\ArthasIllidanFight\furboots2.blp"
+File27="Doodads\Cinematic\ArthasIllidanFight\IllidanBlade.blp"
+
+[ArthasIllidanFightSounds]
+Scene1="FinalCinematic"
+
+[A0M1C020_ArthasArrivesPrefetchList]
+File0="Textures/Dust3x"
+File1="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleB_Diffuse"
+File2="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleB_Normal"
+File3="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleB_ORM"
+File4="Units/skeletons/Gore_Diffuse"
+File5="Units/skeletons/Gore_Normal"
+File6="Units/skeletons/Gore_ORM"
+File7="Units/Critters/VillagerKid1/Child02_Diffuse"
+File8="Units/Critters/VillagerKid1/Child02_Normal"
+File9="Units/Critters/VillagerKid1/Child02_ORM"
+File10="Textures/Gore_Diffuse"
+File11="Textures/Gore_Normal"
+File12="Textures/Gore_ORM"
+File13="Units/_skeletons/Gore_Diffuse"
+File14="Units/_skeletons/Gore_Normal"
+File15="Units/_skeletons/Gore_ORM"
+File16="Units/Critters/VillagerKid/Child01_Diffuse"
+File17="Units/Critters/VillagerKid/Child01_Normal"
+File18="Units/Critters/VillagerKid/Child01_ORM"
+File19="Units/Critters/VillagerKid/Child01B_Diffuse"
+File20="Units/Human/Rifleman/Rifleman_Diffuse"
+File21="Units/Human/Rifleman/Rifleman_Normal"
+File22="Units/Human/Rifleman/Rifleman_ORM"
+File23="Units/Human/Priest/Priest_Diffuse"
+File24="Units/Human/Priest/Priest_Normal"
+File25="Units/Human/Priest/Priest_ORM"
+File26="Units/Human/Priest/Priest_Emmissive"
+File27="Units/Critters/VillagerMan1/VillagerMan1_Diffuse"
+File28="Units/Critters/VillagerMan/Villager_Normal"
+File29="Units/Critters/VillagerMan/Villager_ORM"
+File30="Units/Critters/VillagerMan/Human_Peasant_Axe_Diffuse"
+File31="Units/Critters/VillagerMan/Human_Peasant_Axe_Normal"
+File32="Units/Critters/VillagerMan/Human_Peasant_Axe_ORM"
+File33="Units/Critters/VillagerMan/Villager_Diffuse"
+File34="Units/Critters/VillagerWoman/VillagerFemale01_Diffuse"
+File35="Units/Critters/VillagerWoman/VillagerFemale01_Normal"
+File36="Units/Critters/VillagerWoman/VillagerFemale01_ORM"
+File37="Units/Undead/HeroDeathKnight/Death Knight Horse_Diffuse"
+File38="Units/Undead/HeroDeathKnight/Death Knight Horse_Normal"
+File39="Units/Undead/HeroDeathKnight/Death Knight Horse_ORM"
+File40="Units/Undead/HeroDeathKnight/Death Knight_Cinematic_Diffuse"
+File41="Units/Undead/HeroDeathKnight/Death Knight_Normal"
+File42="Units/Undead/HeroDeathKnight/Death Knight_Cinematic_ORM"
+File43="Units/Human/HoodedArthas/ArthasDeathKnight_Diffuse"
+File44="Units/Human/HoodedArthas/ArthasDeathKnight_Normal"
+File45="Units/Human/HoodedArthas/ArthasDeathKnight_ORM"
+File46="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleC_Diffuse"
+File47="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleC_Normal"
+File48="Units/Critters/ElfVillagerWoman/VillagerFemaleNobleC_ORM"
+File49="Units/Human/Peasant/Peasant_Diffuse"
+File50="Units/Human/Peasant/Peasant_Normal"
+File51="Units/Human/Peasant/Peasant_ORM"
+File52="Textures/Bag_Diffuse"
+File53="Textures/Bag_Normal"
+File54="Textures/Bag_ORM"
+File55="Textures/Lumber_Diffuse"
+File56="Textures/Lumber_Normal"
+File57="Textures/Lumber_ORM"
+File58="Units/Human/Roderick/Rod_Blue_Diffuse"
+File59="Units/Human/Roderick/Rod_Normal"
+File60="Units/Human/Roderick/Rod_Blue_ORM"
+File61="Units/Human/Roderick/Rod_Diffuse"
+File62="Units/Human/Roderick/Rod_ORM"
+File63="Doodads/Cityscape/Props/EmptyCrates/CratesEmpty_low_Diffuse"
+File64="Doodads/Cityscape/Props/EmptyCrates/CratesEmpty_low_Normal"
+File65="Doodads/Cityscape/Props/EmptyCrates/CratesEmpty_low_ORM"
+File66="Doodads/LordaeronCapital/Structures/CapitalBridge/bridge_Diffuse"
+File67="Doodads/LordaeronCapital/Structures/CapitalBridge/bridge_Normal"
+File68="Doodads/LordaeronCapital/Structures/CapitalBridge/bridge_ORM"
+File69="Textures/Trim_01_Diffuse"
+File70="Textures/Trim_01_Normal"
+File71="Textures/Trim_01_ORM"
+File72="Cinematics/A0M1C020_ArthasArrives/vfx/Arthas_petal.mdl"
+File73="Cinematics/A0M1C020_ArthasArrives/vfx/Arthas_petal.pkfx"
+File74="Cinematics/A0M1C020_ArthasArrives/vfx/Arthas_petal_2.mdl"
+File75="Cinematics/A0M1C020_ArthasArrives/vfx/Arthas_petal_2.pkfx"
+File76="Cinematics/A0M1C020_ArthasArrives/vfx/Petals.mdl"
+File77="Cinematics/A0M1C020_ArthasArrives/vfx/Petals.pkfx"
+File78="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_2.mdl"
+File79="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_2.pkfx"
+File80="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_throw.mdl"
+File81="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_throw.pkfx"
+File82="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_throw_0.mdl"
+File83="Cinematics/A0M1C020_ArthasArrives/vfx/Petals_throw_0.pkfx"
+
+[A0M1C020_ArthasArrivesSounds]
+Scene1="CineArthasArrives"
+
+[A0M1C020_ArthasArrivesMusic]
+Music1="CineArthasArrivesMusic010"
+
+[A0M1C030_UtherPrefetchList]
+File0="Units/Human/Uther/Uther_Diffuse"
+File1="Units/Human/Uther/Uther_Normal"
+File2="Units/Human/Uther/Uther_ORM"
+File3="Units/Human/Uther/Uther_Blue_Diffuse"
+File4="Units/Human/Uther/Uther_Blue_ORM"
+File5="Units/Human/CityGuardCaptain/Captain_Blue_Diffuse"
+File6="Units/Human/CityGuardCaptain/Captain_Normal"
+File7="Units/Human/CityGuardCaptain/Captain_Blue_ORM"
+File8="Units/Human/CityGuardCaptain/Lordaeron Shield_Blue_Diffuse"
+File9="Units/Human/CityGuardCaptain/Lordaeron Shield_Normal"
+File10="Units/Human/CityGuardCaptain/Lordaeron Shield_Blue_ORM"
+File11="Units/Human/Roderick/Rod_Blue_Diffuse"
+File12="Units/Human/Roderick/Rod_Normal"
+File13="Units/Human/Roderick/Rod_Blue_ORM"
+File14="Units/Human/Roderick/Rod_Diffuse"
+File15="Units/Human/Roderick/Rod_ORM"
+File16="Units/Undead/Ghoul/Ghoul_Diffuse"
+File17="Units/Undead/Ghoul/Ghoul_Normal"
+File18="Units/Undead/Ghoul/Ghoul_ORM"
+File19="Units/Undead/Ghoul/ghoul_purple_Diffuse"
+File20="Units/Undead/Ghoul/ghoul_purple_ORM"
+File21="Textures/Lumber_Diffuse"
+File22="Textures/Lumber_Normal"
+File23="Textures/Lumber_ORM"
+File24="Textures/Human_Male_Corpse_Diffuse"
+File25="Textures/Human_Male_Corpse_Normal"
+File26="Textures/Human_Male_Corpse_ORM"
+File27="Units/Creeps/Zombie/Zombie_Diffuse"
+File28="Units/Creeps/Zombie/Zombie_Normal"
+File29="Units/Creeps/Zombie/Zombie_ORM"
+File30="Units/Undead/Acolyte/Acolyte_DE_Purple_Diffuse"
+File31="Units/Undead/Acolyte/Acolyte_DE_Normal"
+File32="Units/Undead/Acolyte/Acolyte_DE_Purple_ORM"
+File33="Units/Undead/Acolyte/Acolyte_Face_DE_Diffuse"
+File34="Units/Undead/Acolyte/Acolyte_Face_DE_Normal"
+File35="Units/Undead/Acolyte/Acolyte_Face_DE_ORM"
+File36="Units/Human/Terenas/Terenas_Diffuse"
+File37="Units/Human/Terenas/Terenas_Normal"
+File38="Units/Human/Terenas/Terenas_ORM"
+File39="Cinematics/A0M1C030_Uther/vfx/Book_Glow.mdl"
+File40="Cinematics/A0M1C030_Uther/vfx/Book_Glow.pkfx"
+File41="Cinematics/A0M1C030_Uther/vfx/Boss_Orb_Left.mdl"
+File42="Cinematics/A0M1C030_Uther/vfx/Boss_Orb_Left.pkfx"
+File43="Cinematics/A0M1C030_Uther/vfx/Boss_Orb_Right.mdl"
+File44="Cinematics/A0M1C030_Uther/vfx/Boss_Orb_Right.pkfx"
+File45="Cinematics/A0M1C030_Uther/vfx/Boss_burn.mdl"
+File46="Cinematics/A0M1C030_Uther/vfx/Boss_burn.pkfx"
+File47="Cinematics/A0M1C030_Uther/vfx/HolyLight_Target.mdl"
+File48="Cinematics/A0M1C030_Uther/vfx/HolyLight_Target.pkfx"
+File49="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_2.mdl"
+File50="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_2.pkfx"
+File51="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_3.mdl"
+File52="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_3.pkfx"
+File53="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_down.mdl"
+File54="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_down.pkfx"
+File55="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_down_2.mdl"
+File56="Cinematics/A0M1C030_Uther/vfx/Shield_Impact_down_2.pkfx"
+File57="Cinematics/A0M1C030_Uther/vfx/Uther_Cast.mdl"
+File58="Cinematics/A0M1C030_Uther/vfx/Uther_Cast.pkfx"
+File59="Cinematics/A0M1C030_Uther/vfx/Uther_HolyBlast.mdl"
+File60="Cinematics/A0M1C030_Uther/vfx/Uther_HolyBlast.pkfx"
+File61="Cinematics/A0M1C030_Uther/vfx/Uther_HolyBlast_2.mdl"
+File62="Cinematics/A0M1C030_Uther/vfx/Uther_HolyBlast_2.pkfx"
+File63="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight.mdl"
+File64="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight.pkfx"
+File65="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Cast.mdl"
+File66="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Cast.pkfx"
+File67="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_End.mdl"
+File68="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_End.pkfx"
+File69="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Target.mdl"
+File70="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Target.pkfx"
+File71="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Target_Ghoul.mdl"
+File72="Cinematics/A0M1C030_Uther/vfx/Uther_HolyLight_Target_Ghoul.pkfx"
+File73="Cinematics/A0M1C030_Uther/vfx/Uther_Slam.mdl"
+File74="Cinematics/A0M1C030_Uther/vfx/Uther_Slam.pkfx"
+
+[A0M1C030_UtherSounds]
+Scene1="CineUther"
+
+[A0M2C030_CaptainsSacrificePrefetchList]
+File0="Units/Human/Roderick/Rod_Blue_Diffuse"
+File1="Units/Human/Roderick/Rod_Normal"
+File2="Units/Human/Roderick/Rod_Blue_ORM"
+File3="Units/Human/Roderick/Rod_Diffuse"
+File4="Units/Human/Roderick/Rod_ORM"
+File5="Units/Human/CityGuardCaptain/Captain_Blue_Diffuse"
+File6="Units/Human/CityGuardCaptain/Captain_Normal"
+File7="Units/Human/CityGuardCaptain/Captain_Blue_ORM"
+File8="Units/Human/CityGuardCaptain/Captain_Diffuse"
+File9="Units/Human/CityGuardCaptain/Captain_ORM"
+File10="Units/Human/CityGuardCaptain/Lordaeron Shield_Blue_Diffuse"
+File11="Units/Human/CityGuardCaptain/Lordaeron Shield_Normal"
+File12="Units/Human/CityGuardCaptain/Lordaeron Shield_Blue_ORM"
+File13="Units/Human/BaronRivendare/Rivendare_Diffuse"
+File14="Units/Human/BaronRivendare/Rivendare_Normal"
+File15="Units/Human/BaronRivendare/Rivendare_ORM"
+File16="Cinematics/A0M2C030_CaptainsSacrifice/vfx/BrickDebris_Diffuse_2"
+File17="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand.mdl"
+File18="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand.pkfx"
+File19="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_1.mdl"
+File20="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_1.pkfx"
+File21="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_2.mdl"
+File22="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_2.pkfx"
+File23="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_3.mdl"
+File24="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_3.pkfx"
+File25="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock.mdl"
+File26="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock.pkfx"
+File27="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_1.mdl"
+File28="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_1.pkfx"
+File29="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_2.mdl"
+File30="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_2.pkfx"
+File31="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_3.mdl"
+File32="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Rock_3.pkfx"
+File33="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Trail.mdl"
+File34="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Energy_Hand_Trail.pkfx"
+File35="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Gareks_Target.mdl"
+File36="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Gareks_Target.pkfx"
+File37="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Magical_Barrier.mdl"
+File38="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Magical_Barrier.pkfx"
+File39="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Rocks.mdl"
+File40="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Rocks.pkfx"
+File41="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Shield_Impact.pkfx"
+File42="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Shield_Impact_Rock_1.mdl"
+File43="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Shield_Impact_Rock_1.pkfx"
+File44="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Shield_Impact_Rock_2.mdl"
+File45="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Shield_Impact_Rock_2.pkfx"
+File46="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Talisman_Energy.mdl"
+File47="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Talisman_Energy.pkfx"
+File48="Cinematics/A0M2C030_CaptainsSacrifice/vfx/Talisman_Glow.pkfx"
+
+[A0M2C030_CaptainsSacrificeSounds]
+Scene1="CineCaptainsSacrifice"
+
+[A0M2C030_CaptainsSacrificeMusic]
+Music1="CineCaptainsSacrificeMusic010"
+
+[A0M4C010_ShutUpPrefetchList]
+File0="Units/Human/BaronRivendare/Rivendare_Diffuse"
+File1="Units/Human/BaronRivendare/Rivendare_Normal"
+File2="Units/Human/BaronRivendare/Rivendare_ORM"
+File3="Units/Human/Roderick/UndeadGarrikBlueShoulder_Diffuse"
+File4="Units/Human/Roderick/UndeadGarrikBlueShoulder_Normal"
+File5="Units/Human/Roderick/UndeadGarrikBlueShoulder_ORM"
+File6="Units/Human/Roderick/GarrikBusted_Diffuse"
+File7="Units/Human/Roderick/GarrikBusted_Normal"
+File8="Units/Human/Roderick/GarrikBusted_ORM"
+File9="Units/Human/Ilastar/Ilastar_Campaign_Diffuse"
+File10="Units/Human/Ilastar/Ilastar_Normal"
+File11="Units/Human/Ilastar/Ilastar_Campaign_ORM"
+File12="Units/Human/Ilastar/Ilastar_Emmissive"
+File13="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Aura.mdl"
+File14="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Aura.pkfx"
+File15="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Cast.mdl"
+File16="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Cast.pkfx"
+File17="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Cast_0.mdl"
+File18="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Cast_0.pkfx"
+File19="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Energy.mdl"
+File20="Cinematics/A0M4C010_ShutUp/vfx/Ilastar_Hand_Energy.pkfx"
+File21="Cinematics/A0M4C010_ShutUp/vfx/Plague.pkfx"
+File22="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Shackles.mdl"
+File23="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Shackles.pkfx"
+File24="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Strike.mdl"
+File25="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Strike.pkfx"
+File26="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target.mdl"
+File27="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target.pkfx"
+File28="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target_2.mdl"
+File29="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target_2.pkfx"
+File30="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target_3.mdl"
+File31="Cinematics/A0M4C010_ShutUp/vfx/Rivensdare_Target_3.pkfx"
+File32="Cinematics/A0M4C010_ShutUp/vfx/Shackle_Cast_Ground.mdl"
+File33="Cinematics/A0M4C010_ShutUp/vfx/Shackle_Cast_Ground.pkfx"
+File34="Cinematics/A0M4C010_ShutUp/vfx/Shackle_left.mdl"
+File35="Cinematics/A0M4C010_ShutUp/vfx/Shackle_left.pkfx"
+File36="Cinematics/A0M4C010_ShutUp/vfx/Shackle_right.mdl"
+File37="Cinematics/A0M4C010_ShutUp/vfx/Shackle_right.pkfx"
+
+[A0M4C010_ShutUpSounds]
+Scene1="CineShutUp"
+
+[A0M4C010_ShutUpMusic]
+Music1="CineShutUpMusic010"
+
+[A1M1C010_RebirthPrefetchList]
+File0="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_Diffuse"
+File1="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Normal"
+File2="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_ORM"
+File3="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Emissive"
+File4="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Diffuse"
+File5="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Normal"
+File6="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_ORM"
+File7="Units/Forsaken/HeroAnya/Anya_Diffuse"
+File8="Units/Forsaken/HeroAnya/Anya_Normal"
+File9="Units/Forsaken/HeroAnya/Anya_ORM"
+File10="Units/Forsaken/HeroAnya/Anya_Emissive"
+File11="Units/Undead/Putress/Putris_Diffuse"
+File12="Units/Undead/Putress/Putris_Normal"
+File13="Units/Undead/Putress/Putris_ORM"
+File14="Units/Undead/Putress/Putris_Emissive"
+File15="Units/Forsaken/Hero_Putress/Putress_Diffuse"
+File16="Units/Forsaken/Hero_Putress/Putress_Normal"
+File17="Units/Forsaken/Hero_Putress/Putress_ORM"
+File18="Units/Forsaken/Hero_Putress/Putress_Emissive"
+File19="Doodads/Ashenvale/Props/ScorchedRemains/LS_Props_RemainsScorched_V1_Diffuse"
+File20="Doodads/Ashenvale/Props/ScorchedRemains/LS_Props_RemainsScorched_V1_Normal"
+File21="Doodads/Ashenvale/Props/ScorchedRemains/LS_Props_RemainsScorched_V1_ORM"
+File22="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_Diffuse"
+File23="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_Normal"
+File24="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_ORM"
+
+[A1M1C010_RebirthSounds]
+Scene1="CineRebirth"
+
+[A1M1C010_RebirthMusic]
+Music1="CineRebirthMusic010"
+
+[A1M1C020_SylvanasPrefetchList]
+File0="Units/Undead/EvilSylvanas/Sylvanas_Diffuse"
+File1="Units/Undead/EvilSylvanas/Sylvanas_Normal"
+File2="Units/Undead/EvilSylvanas/Sylvanas_ORM"
+File3="Units/Undead/EvilSylvanas/Sylvanas_Emissive"
+File4="Units/Undead/EvilSylvanas/Sylvanas_normal"
+File5="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_Diffuse"
+File6="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Normal"
+File7="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_ORM"
+File8="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Emissive"
+File9="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Diffuse"
+File10="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Normal"
+File11="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_ORM"
+File12="Units/Forsaken/HeroAnya/Anya_Diffuse"
+File13="Units/Forsaken/HeroAnya/Anya_Normal"
+File14="Units/Forsaken/HeroAnya/Anya_ORM"
+File15="Units/Forsaken/HeroAnya/Anya_Emissive"
+File16="Doodads/LordaeronCapital/Props/ShipyardCrane/t_shipyardkit2_Diffuse"
+File17="Doodads/LordaeronCapital/Props/ShipyardCrane/t_shipyardkit2_Normal"
+File18="Doodads/LordaeronCapital/Props/ShipyardCrane/t_shipyardkit2_ORM"
+
+[A1M1C020_SylvanasSounds]
+Scene1="CineSylvanas"
+
+[A1M1C020_SylvanasMusic]
+Music1="CineSylvanasMusic010"
+
+[A1M6C010_UthersBook]
+File0="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_Diffuse"
+File1="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Normal"
+File2="Units/Forsaken/Hero_ForsakenGarek/Garrik_Blue_ORM"
+File3="Units/Forsaken/Hero_ForsakenGarek/GarrikTC_Emissive"
+File4="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Diffuse"
+File5="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_Normal"
+File6="Units/Forsaken/Hero_ForsakenGarek/Broken Sword_ORM"
+File7="Units/Forsaken/HeroAnya/Anya_Diffuse"
+File8="Units/Forsaken/HeroAnya/Anya_Normal"
+File9="Units/Forsaken/HeroAnya/Anya_ORM"
+File10="Units/Forsaken/HeroAnya/Anya_Emissive"
+File11="Units/Forsaken/HeroAnya/Anya_Blue_Diffuse"
+File12="Units/Forsaken/HeroAnya/Anya_Blue_ORM"
+File13="Units/Human/HeroPaladinVariant/paladin 2_Diffuse"
+File14="Units/Human/HeroPaladinVariant/paladin 2_Normal"
+File15="Units/Human/HeroPaladinVariant/paladin 2_ORM"
+File16="Units/Human/HeroPaladinVariant/heropaladinvariant_cine_Diffuse"
+File17="Units/Human/HeroPaladinVariant/heropaladinvariant_cine_ORM"
+File18="Doodads/Cinematic/UtherTome/UthersTome_Diffuse"
+File19="Doodads/Cinematic/UtherTome/UthersTome_Normal"
+File20="Doodads/Cinematic/UtherTome/UthersTome_ORM"
+File21="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_default_Diffuse"
+File22="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_default_Normal"
+File23="Doodads/Ruins/Props/RuinsBloodyAltar/SR_Props_RuinsBloodyAltar_default_ORM"
+
+[A1M6C010_UthersBookSounds]
+Scene1="CineUthersBook"
+
+[Terrain]
+// terrain parameters
+
+// Maximum slope in degrees, (86+ will disable slope limits)
+MaxSlope=50
+
+// Global height limits
+// 0 = low ground, each cliff level = 128
+MaxHeight=1536
+MinHeight=-128
+
+[FlyerMap]
+// Radius, in pathing cells, to search for maximum height
+MaximizeRadius=6
+// Number of times to halve map size
+SmoothLevels=3
+
+[Light]
+// Vector from light to world
+Direction=0.3,0.3,-0.25
+PortraitAOStrength=5.0
+
+[SelectionCircle]
+// Defines different textures to be used based on selection circle size.
+// The Size## value defines the largest size which uses the given textures.
+// Note that the last size does not need a Size## value since anything bigger
+// than the next size down uses it.
+NumSizes=3
+Size00=100
+Texture00=ReplaceableTextures\Selection\SelectionCircleSmall
+TextureDotted00=ReplaceableTextures\Selection\SelectionCircleSmallDotted
+
+Size01=300
+Texture01=ReplaceableTextures\Selection\SelectionCircleMed
+TextureDotted01=ReplaceableTextures\Selection\SelectionCircleMedDotted
+
+Texture02=ReplaceableTextures\Selection\SelectionCircleLarge
+TextureDotted02=ReplaceableTextures\Selection\SelectionCircleLargeDotted
+
+// This value is multiplied by the SLK scale field to get the circle size
+ScaleFactor=72
+
+// This value is added to the selection circle height
+// when on walkable doodads.
+// Note: this is also applied to shadow images
+ImageWalkableZOffset=15
+
+// Colors
+ColorFriend=255,0,255,0
+ColorNeutral=255,255,255,0
+ColorEnemy=255,255,0,0
+AllyOffset=0.2
+
+[Blight]
+Texture=TerrainArt\Blight\Blight
+PuffModel=Environment\BlightDoodad\BlightDoodad.mdl
+PuffDuration=3000 // Duration of a puff, in milliseconds
+PuffInterval=2500 // Interval between checks for new puffs, in milliseconds
+PuffChance=0.7 // Chance for a vertex to create a puff (per interval), in percent
+
+// Dirt Chance Table
+// Specifies the chance (in percent) that a neighboring vertex will be changed to dirt
+// when a vertex is blighted.  Due to symmetry, only five unique values are needed
+// for a 2 vertex radius.  The the upper right quadrant of the table is:
+//
+//        s2 sd d2
+//        s1 d1 sd
+//        cn s1 s2
+//
+// where 'cn' is the center vertex, 's' means "straight", 'd' means "diagonal".
+// Note that the chance for 'cn' is always 100%, and not listed here.
+//
+
+DCT_s1=5
+DCT_s2=10
+DCT_sd=15
+DCT_d1=5
+DCT_d2=20
+
+[Water]
+// Depth-based colors
+// The water plane is vertex colored based on the water "depth": the distance
+// from the water plane to the ground.  These values define the colors for two
+// distinct ranges: "shallow" (MinDepth to DeepLevel) and "deep" (DeepLevel to MaxDepth).
+// where the color is found by interpolating between the corresponding colors given
+// in TerrainArt/Water.slk.
+//
+
+MinDepth=10
+DeepLevel=64
+MaxDepth=72
+
+// DeepLevelPathing defines the depth below which water
+// is considered "deep" for pathing and placement rules.
+
+DeepLevelPathing=52
+
+// WavesDepth defines the depth that terrain vertices need to be below the
+// water before they will be considered "under" water for wave generation
+
+WavesDepth=25
+
+[TeamColorFilter]
+ColorIndexPlayer=1
+ColorIndexAlly=2
+ColorIndexCreep=24
+ColorIndexEnemy=0
+
+[FogOfWar]
+FoggedTerrain=170,16,16,32
+BlackMaskedTerrain=255,0,0,0
+DarkMaskedTerrain=230,0,0,0
+BoundaryTerrain=230,0,0,0
+FoggedBoundaryTerrain=170,16,16,32
+FoggedObject=255,64,64,96
+BlackMaskedObject=255,0,0,0
+DarkMaskedObject=255,32,32,48
+BoundaryObject=255,0,0,0
+FoggedBoundaryObject=255,64,64,96
+ShadowImageColor=170,0,0,0
+
+FogColorPlayer=255,255,255,255
+FogColorAlly=255,0,255,210
+FogColorEnemy=255,255,0,0
+FogColorResource=255,32,128,128
+FogColorItem=255,240,240,0
+FogColorHero=255,255,255,128
+FogColorDestructable=255,0,160,128
+FogColorCreepAllied=255,0,0,50
+FogColorCreepNormal=255,0,0,50
+FogColorBlackMaskAlpha=0
+FogColorDarkMaskAlpha=96
+FogColorFogMaskAlpha=192
+FogColorVisibleAlpha=255
+FogColorBlightMask=0,63,63,64
+
+[Minimap]
+MinimapColorBorder=255,60,60,70
+MinimapMiddleCampThreshold=10
+MinimapToughCampThreshold=20
+MinimapMiddleCampScale=1.3
+MinimapWeakCampColor=255,0,200,0
+MinimapMiddleCampColor=255,255,128,0
+MinimapToughCampColor=255,220,0,0
+MinimapCampPulseScale=0.5
+
+[TargetingColors]
+TargetLightColor=180,0,255,0
+SelTargetColor=255,240,200,0
+
+[Glue]
+ControlFadeDuration=0.25
+ControlFadeDurationDebug=0.01
+CustomLoadTimerDuration=10.0
+
+[BattleNetCustomFilter]
+SmallMapRange=2,4
+MediumMapRange=5,8
+LargeMapRange=9,12
+
+[InfoPanel]
+MeleeRangeMax=128
+SpeedVerySlow=175   // lower bound, everything below this is "very slow"
+SpeedSlow=220
+SpeedAverage=280
+SpeedFast=350      // upper bound, everything above this is "very fast"
+AttackVerySlow=3   // upper bound, everything above this is "very slow"
+AttackSlow=2
+AttackAverage=1.5
+AttackFast=1       // lower bound, everything below this is "very fast"
+
+[Occlusion]
+MarkImage=ReplaceableTextures\Occlusion\OcclusionMark
+MarkColor=255,255,0,255
+OccluderColor=128,255,255,255
+OccluderFadeTime=300 // Time to fade to OccluderColor, in milliseconds
+BuildingsOcclude=0
+
+[Placement]
+PaidStructureColor=96,128,128,255
+UnpaidStructureColor=96,255,128,128
+
+[PingColor]
+PingColor=255,0,255,0
+PingAttackColor=255,255,0,0
+PingAdvisorColor=255,255,255,0
+PingWaypointColor=255,255,255,255
+
+[Cinematics]
+CinematicPanelAddedShowTime=0.75

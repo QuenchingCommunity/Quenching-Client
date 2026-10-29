@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'node:path';
 import { extractZipArchive } from './zip-extraction';
+import { resourceArchiveExists } from './bundled-packages';
 
 const TEXTURE_DIRS = ['lordaerontree', 'ashenvaletree'] as const;
 const TEXTURE_DIR_SET = new Set<string>(TEXTURE_DIRS);
@@ -60,7 +61,7 @@ export async function syncDecisiveTerrainTreeTextures(
   }
 
   const archive = path.join(quenchingAssetsDir, 'lordaerontree.zip');
-  if (!(await fs.pathExists(archive))) throw new Error(`缺少决定版地形树木纹理包: ${archive}`);
+  if (!(await resourceArchiveExists(archive))) throw new Error(`缺少决定版地形树木纹理包: ${archive}`);
   const staging = await fs.mkdtemp(path.join(buildDir, '.quenching-de-tree-textures-'));
   try {
     await extractZipArchive(archive, staging, {

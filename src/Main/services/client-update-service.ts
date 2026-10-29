@@ -1,7 +1,5 @@
 import { app } from 'electron';
 import crypto from 'node:crypto';
-import http from 'node:http';
-import https from 'node:https';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
@@ -11,6 +9,8 @@ import { FileSnapshot, FileSyncDescriptor, SyncArtifact, planFileSync, syncFileA
 import { decodeSnapshot, encodeSnapshot } from './file-sync-snapshot';
 import { downloadUpdateFile, rememberUpdateDownloadSource, updateDownloadSources } from './update-download';
 import { updateTestEnabled, updateTestUrls } from './update-channel';
+import { fetchUpdateMetadata, requestUpdateMetadata } from './update-metadata';
+import { updateMetadataUrls } from './update-metadata-urls';
 
 // Read app.asar as an update file without disabling ASAR module loading in the UI process.
 const fs: typeof import('node:fs') = require('original-fs');
@@ -20,12 +20,7 @@ const { statfs } = fsp;
 function defaultManifestUrls(version: string): string[] {
   // Prefer one latest file-sync release; retain old per-version binary patches for compatibility.
   if (!VERSION.test(version)) return [];
-  return [
-    'https://qm.txzy.net/api/quenching/client-manifests/latest.json',
-    'https://qm.txzy.net/quenching/client-manifests/latest.json',
-    `https://qm.txzy.net/api/quenching/client-manifests/${version}.json`,
-    `https://qm.txzy.net/quenching/client-manifests/${version}.json`,
-  ];
+  return updateMetadataUrls(['client-manifests/latest.json', `client-manifests/${version}.json`]);
 }
 const MAX_MANIFEST = 1024 * 1024;
 const HASH = /^[a-f0-9]{64}$/;
@@ -129,30 +124,6 @@ export function validateClientUpdateManifest(raw: any, publicKey: string): Clien
 function safeDownloadUrl(url: string): boolean {
   return /^https:\/\//.test(url) || ((updateTestEnabled() || process.env.QUENCHING_CLIENT_UPDATE_TEST === '1') && /^http:\/\/127\.0\.0\.1:\d+\//.test(url));
 }
-function request(url: string, limit: number, redirects = 0): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    if (redirects > 5) return reject(new Error('too many redirects'));
-    if (!safeDownloadUrl(url)) return reject(new Error('unsafe update URL'));
-    const transport = url.startsWith('https:') ? https : http;
-    const req = transport.get(url, { headers: { 'User-Agent': 'QMClient-Updater/1' } }, res => {
-      if (res.statusCode && [301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
-        res.resume(); return request(new URL(res.headers.location, url).toString(), limit, redirects + 1).then(resolve, reject);
-      }
-      if (res.statusCode !== 200) { res.resume(); return reject(new Error(`HTTP ${res.statusCode || 0}`)); }
-      const chunks: Buffer[] = [];
-      let bytes = 0;
-      res.on('data', (chunk: Buffer) => {
-        bytes += chunk.length;
-        if (bytes > limit) req.destroy(new Error('download exceeds declared limit'));
-        else chunks.push(chunk);
-      });
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-      res.on('error', reject);
-    });
-    req.setTimeout(30000, () => req.destroy(new Error('update download timed out')));
-    req.on('error', reject);
-  });
-}
 async function hashFile(file: string): Promise<string> {
   const hash = crypto.createHash('sha256');
   await pipeline(fs.createReadStream(file), hash);
@@ -168,12 +139,9 @@ async function fetchManifest(): Promise<ClientUpdateManifest> {
   const key = await publicKey();
   const override = process.env.QUENCHING_CLIENT_MANIFEST_URL?.trim();
   const urls = updateTestUrls('client-manifests/latest.json') || [...new Set([...(override ? [override] : []), ...defaultManifestUrls(app.getVersion())])];
-  const errors: string[] = [];
-  for (const url of urls) {
-    try { return validateClientUpdateManifest(JSON.parse((await request(url, MAX_MANIFEST)).toString('utf8')), key); }
-    catch (error: any) { errors.push(`${url}: ${error?.message || String(error)}`); }
-  }
-  throw new Error(errors.join('; '));
+  return fetchUpdateMetadata(urls, async (url, timeoutMs) => validateClientUpdateManifest(JSON.parse((await requestUpdateMetadata(url, {
+    limit: MAX_MANIFEST, timeoutMs, allowHttpLoopback: updateTestEnabled() || process.env.QUENCHING_CLIENT_UPDATE_TEST === '1',
+  })).toString('utf8')), key));
 }
 async function gateAllows(): Promise<boolean> {
   const { gate } = await fetchReleaseGate();

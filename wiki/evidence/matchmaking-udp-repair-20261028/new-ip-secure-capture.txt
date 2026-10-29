@@ -1,0 +1,22 @@
+2026-10-28T01:24:40+00:00 RainYun-jskHCafV systemd[1]: Started quenching-newip-secure-20261028.service - /usr/bin/timeout 25 /usr/bin/tcpdump -l -nn -tttt -i ens18 -c 80 "udp and host 191.40.44.138 and port 443".
+2026-10-28T01:24:40+00:00 RainYun-jskHCafV timeout[120520]: tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+2026-10-28T01:24:40+00:00 RainYun-jskHCafV timeout[120520]: listening on ens18, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.579555 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.580993 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.584359 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.584392 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.584402 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.584486 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 1227
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.584504 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 91
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.728120 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 1280
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.729615 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 31
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.729615 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 120
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.731889 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 308
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.735779 IP 191.40.44.138.443 > 171.212.114.209.55346: UDP, length 116
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.796073 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 28
+2026-10-28T01:24:41+00:00 RainYun-jskHCafV timeout[120520]: 2026-10-28 01:24:41.797126 IP 171.212.114.209.55346 > 191.40.44.138.443: UDP, length 45
+2026-10-28T01:25:05+00:00 RainYun-jskHCafV timeout[120520]: 14 packets captured
+2026-10-28T01:25:05+00:00 RainYun-jskHCafV timeout[120520]: 14 packets received by filter
+2026-10-28T01:25:05+00:00 RainYun-jskHCafV timeout[120520]: 0 packets dropped by kernel
+2026-10-28T01:25:05+00:00 RainYun-jskHCafV systemd[1]: quenching-newip-secure-20261028.service: Main process exited, code=exited, status=124/n/a
+2026-10-28T01:25:05+00:00 RainYun-jskHCafV systemd[1]: quenching-newip-secure-20261028.service: Failed with result 'exit-code'.

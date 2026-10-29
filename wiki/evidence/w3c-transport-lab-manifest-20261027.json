@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-27",
+  "experimental": true,
+  "productionEnabled": false,
+  "realWarcraftTested": false,
+  "networkLabCases": 9,
+  "messagesPerCase": 600,
+  "orderedIntegrityAllCases": true,
+  "unitTests": 3,
+  "goVersion": "1.25.6",
+  "quicGoVersion": "0.59.0",
+  "files": {
+    "experiments/war3-core-launch/transport-lab/main.go": "0b7a24e7747d6db259891e55c9dd53ecee685b896b25122245c8427d8fdd97ba",
+    "experiments/war3-core-launch/transport-lab/main_test.go": "6637a5dfde1d35b75342595b89ed54b039cabf478bc8b0ee5250b1a92749a52d",
+    "experiments/war3-core-launch/transport-lab/go.mod": "c23e6a27c67c2d98f28446d413bd592c6c5d97858177ab3480e639cb215e85f0",
+    "experiments/war3-core-launch/transport-lab/go.sum": "d4d673fd332726ceec8628a97de834abca55782e9a3642cc85dea19fbc0810ba",
+    "experiments/war3-core-launch/transport-lab/run-netem.py": "18af2e01efcdf437afb4293ad1f5db25d4631dd5a98ba7977b22c634b2f2def7",
+    "experiments/war3-core-launch/transport-lab/README.md": "ec67b67f4bd635e5d2cb9f6f66cd31334c2548f46de79a1ab1d1383b1d1f2c3f",
+    "wiki/w3c-latest-transport-research-20261027.md": "6c672a0e423897fd537644b962f09b4acbb41860f4cd4d327f3fa7b5dcfbb05a",
+    "wiki/evidence/w3c-latest-20261027.json": "b28c8fd2f50caad4d9661a9f67c1ff52ce931253b9fc9ab96827c00706340fed",
+    "wiki/evidence/w3c-quic-copies-netem-20261027.json": "17d0afc9f7561968ed52a5b09407489a7eeb785c125bc5af1cf2001b81c6fefb"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "artifacts": {
+    "analysis_outputs/archives/Quenching-Match-Wire-20261027-source.zip": {
+      "bytes": 513903,
+      "sha256": "fc8de9598fda6cbbb65662ca95d42dd0c41fcab7a7cdf1ac1203993a55d08639"
+    },
+    "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261027-r9.3-transport-preview.zip": {
+      "bytes": 38816263,
+      "sha256": "fb36084aae3d0dafc4cbc7252e06d181dc43de7e836c6040163d0729470ec946"
+    },
+    "analysis_outputs/Quenching-Matchmaking-Lite-GUI-20261027-r9.3-transport-preview-update.zip": {
+      "bytes": 4333953,
+      "sha256": "bdcef1ebee854a9bc192a0c770f379adedefb093c71899c6f8e4f586de422fb0"
+    }
+  },
+  "snapshotSourceFiles": 205,
+  "runtimeBundled": true,
+  "startupDownloadRequired": false,
+  "defaultGameTransport": "wss",
+  "quicMode": "probe-only",
+  "latencyAcceptancePassed": false,
+  "publicQuicVerified": false,
+  "realWarcraftQuicTested": false,
+  "helperWindowsSha256": "bc74a463de5815f5572d3767f074807445bb7a3d7bb48a77dcb711366b12637f",
+  "helperLinuxSha256": "63501c052218083b0336250798fc50fd78f7275e66faca91d34bd642259b0881"
+}

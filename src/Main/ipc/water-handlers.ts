@@ -18,7 +18,7 @@ export async function applyWaterSettings(war3Path: string, waterMode: string): P
         graphicsSelection: modSettings.graphicsSelection,
         classicMode: modSettings.classicMode === true,
     });
-    const assetsDir = await AssetSyncService.getAssetsDir();
+    const assetsDir = await AssetSyncService.getAssetsDir(["water","tile"]);
 
     // DE cannot adjust water — keep textures/slk stripped.
     if (profile.graphics === 'de') {

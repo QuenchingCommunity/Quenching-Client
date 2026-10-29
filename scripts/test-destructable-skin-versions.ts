@@ -1,3 +1,4 @@
+import { resourcePath } from '../src/shared/bundled-resource-paths.mjs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
@@ -16,7 +17,7 @@ const mocks: Record<string, string> = {
   electron: 'export const app={getAppPath:()=>process.cwd()}; export const ipcMain={handle:(key,handler)=>f.handlers[key]=handler};',
   'config-manager': 'export const configManager={get:key=>f.config[key],set:(key,value)=>f.config[key]=value};',
   'game-channel': 'export const getSelectedGameChannel=()=>f.channel,getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_",getChannelModEnabled=()=>true,hasGameChannelDirectory=async()=>true;',
-  'war3-version': 'export const detectWar3Version=async()=>({parts:f.parts});',
+  'war3-version': 'export const detectWar3Version=async()=>({parts:f.parts,source:"fixture"});',
   'full-package-service': 'export const resolveRetailDir=async root=>root+"/"+(f.channel==="ptr"?"_ptr_":"_retail_"),isFullPackageInstalled=async()=>true,assertTreeModeAvailable=async()=>{};',
   'mod-integrity-service': 'export const readCurrentModVersion=async()=>"3.5";',
   'mod-update-service': 'export const getInstalledModState=async()=>null;',
@@ -59,14 +60,14 @@ const contents = async () => parseSkinSections(await read(target()));
 try {
   await fs.ensureDir(retail);
   await fs.ensureDir(ptr);
-  await fs.copy(path.resolve('assets/quenching/skin'), path.join(quenching, 'skin'));
+  await fs.copy(path.resolve('assets/unpacked/skin'), resourcePath(quenching, 'skin'));
   for (const name of ['dnc/dnc20', 'dnc/dnc30-hd', 'dnc/dnc30-de', 'shaders/shaders203',
     'shaders/shaders-300-legacy-hd/vs', 'shaders/shaders-300-legacy-hd/ps/standard', 'shaders/shaders-300-legacy-de',
     'shaders/shaders-300-hd/vs', 'shaders/shaders-300-hd/ps/standard', 'shaders/shaders-300-de',
     'shaders/shaders-ptr-hd/vs', 'shaders/shaders-ptr-hd/ps/standard']) {
     await fs.outputFile(path.join(quenching, name, 'fixture-resource.txt'), name);
   }
-  const baseline = await read(path.join(quenching, 'skin', 'destructableskin.txt'));
+  const baseline = await read(resourcePath(quenching, 'skin', 'destructableskin.txt'));
   const original = parseSkinSections(baseline);
   const shortOverrides: Array<{ section: string; field: string; value: string }> =
     (await fs.readJson(path.resolve('scripts/fixtures/destructable-short-overrides.json'))).overrides;
@@ -79,9 +80,9 @@ try {
   assert.equal(original.Yts1.texFile, undefined);
   assert.match(original.Yts1['texFile:sd'], /LordaeronSummerTree/);
   for (const name of ['destructableskin-org.txt', 'destructableskin-de.txt']) {
-    assert.equal(await read(path.join(quenching, 'skin', name)), baseline);
+    assert.equal(await read(resourcePath(quenching, 'skin', name)), baseline);
   }
-  const legacy = parseSkinSections(await read(path.join(quenching, 'skin', 'legacy', 'destructableskin.txt')));
+  const legacy = parseSkinSections(await read(resourcePath(quenching, 'skin', 'legacy', 'destructableskin.txt')));
   assert.equal(Object.keys(legacy).length, 340);
   assert(legacy.YTsc && !legacy.Ytsc && !legacy.UB01);
 
@@ -120,7 +121,7 @@ try {
   }
   fixture.parts = [2, 0, 4];
   await choose('original');
-  assert.equal(await read(target()), await read(path.join(quenching, 'skin', 'legacy', 'destructableskin.txt')));
+  assert.equal(await read(target()), await read(resourcePath(quenching, 'skin', 'legacy', 'destructableskin.txt')));
   await choose('v16');
   assert.equal(Object.keys(await contents()).length, 340);
   assert((await contents()).Yts1.texFile.includes('/tree/t16/'));
@@ -128,7 +129,7 @@ try {
 
   // Profile sync must replace an old table even when graphics remain HD, and keep the chosen trees.
   fixture.parts = [3, 0, 0];
-  fixture.config.modSettings = { versionSelection: 'auto', graphicsSelection: 'hd', tree: 'v16', resolvedVersion: 'v203', resolvedGraphics: 'hd' };
+  fixture.config.modSettings = { versionSelection: 'auto', graphicsSelection: 'hd', tree: 'v16', resolvedVersion: 'v204', resolvedGraphics: 'hd' };
   await syncProfileResources(root, quenching, fixture.config.modSettings);
   assert.equal(Object.keys(await contents()).length, 348);
   assert((await contents()).LTlt.file.includes('/d16/'));
@@ -154,6 +155,7 @@ try {
   assert.equal(await read(target()), beforeSd, 'SD skin-only sync does not install destructable overrides');
 
   fixture.channel = 'ptr';
+  fixture.parts = [3, 0, 1, 24368];
   fixture.config.modSettings.graphicsSelection = 'hd';
   fixture.config.modSettings.tree = 'original';
   await syncProfileResources(root, quenching, fixture.config.modSettings);

@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 const parent=path.resolve('_irys/work');await fs.ensureDir(parent);const work=await fs.mkdtemp(path.join(parent,'battle-version-'));
 const f={channel:'retail'};(globalThis as any).__battleVersionFixture=f;
 const compiled=await build({entryPoints:['src/Main/services/war3-version.ts'],bundle:true,platform:'node',format:'cjs',packages:'external',write:false,
-  plugins:[{name:'selected-branch',setup(p){p.onResolve({filter:/\/game-channel$/},a=>({path:a.path,namespace:'fixture'}));p.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:'const f=globalThis.__battleVersionFixture;export const getSelectedGameChannel=()=>f.channel,getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_";'}));}}],
+  plugins:[{name:'selected-branch',setup(p){p.onResolve({filter:/\/game-channel$/},a=>a.path.includes('shared/')?undefined:({path:a.path,namespace:'fixture'}));p.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:'const f=globalThis.__battleVersionFixture;export const getSelectedGameChannel=()=>f.channel,getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_";'}));}}],
 });
 const module={exports:{} as any};new Function('require','module','exports',compiled.outputFiles[0].text)(createRequire(import.meta.url),module,module.exports);
 try {

@@ -1,0 +1,80 @@
+{
+  "build": "2026.10.29-replay-quic-seed",
+  "testId": "0bf14867-a20f-447e-82e3-a26eae2396f6",
+  "statusPhase": "failed",
+  "gameId": null,
+  "playerId": null,
+  "events": [
+    {
+      "at": "2026-10-28T18:08:07.967Z",
+      "event": "requested-operation",
+      "data": {
+        "mode": "duel"
+      }
+    },
+    {
+      "at": "2026-10-28T18:09:42.922Z",
+      "event": "wire-transport",
+      "data": {
+        "transport": "quic-copies-v2",
+        "state": "preflight-ready"
+      }
+    },
+    {
+      "at": "2026-10-28T18:09:42.927Z",
+      "event": "selected-transport",
+      "data": {
+        "transport": "quic-copies-v2"
+      }
+    },
+    {
+      "at": "2026-10-28T18:09:47.375Z",
+      "event": "wire-transport",
+      "data": {
+        "transport": "wss-connected"
+      }
+    },
+    {
+      "at": "2026-10-28T18:09:47.435Z",
+      "event": "wire-transport",
+      "data": {
+        "transport": "quic-copies-v2",
+        "state": "connected"
+      }
+    },
+    {
+      "at": "2026-10-28T18:38:52.857Z",
+      "event": "wire-transport",
+      "data": {
+        "transport": "quic-copies-v2",
+        "stats": {
+          "sentFrames": 77807,
+          "duplicateCopies": 45542,
+          "fastCopiesWon": 164,
+          "copyBytes": 3155955,
+          "copyBudgetSkips": 41924,
+          "copyCoalesced": 77062,
+          "copyBlockMaxUs": 5110,
+          "lockWaitMaxUs": 8444,
+          "frameSendMaxUs": 8444
+        }
+      }
+    },
+    {
+      "at": "2026-10-28T18:38:52.868Z",
+      "event": "wire-transport",
+      "data": {
+        "transport": "quic-copies-v2",
+        "state": "closed"
+      }
+    },
+    {
+      "at": "2026-10-28T18:38:55.585Z",
+      "event": "operation-failed",
+      "data": {
+        "code": "game-disconnected",
+        "localCode": "game-disconnected"
+      }
+    }
+  ]
+}

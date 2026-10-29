@@ -22,6 +22,8 @@ interface StartupRenderingResult {
   error?: string;
 }
 
+type BundledResourceStartupStatus = import('../shared/resource-startup').ResourceStartupStatus;
+
 interface ModUpdateProgress {
   phase: 'preparing' | 'downloading' | 'verifying' | 'extracting' | 'installing' | 'finalizing' | 'complete';
   percent: number;
@@ -70,6 +72,7 @@ interface ElectronAPI {
   getCurrentDirectory: () => Promise<string>;
   copyFiles: (sourcePattern: string, targetDir: string) => Promise<boolean>;
   extractZip: (zipPath: string, extractPath: string) => Promise<boolean>;
+  extractArchive: (archivePath: string, extractPath: string) => Promise<boolean>;
   createZip: (sourceDir: string, outputPath: string) => Promise<boolean>;
   launchExecutable: (executablePath: string, args?: string[]) => Promise<boolean>;
   downloadFile: (url: string, outputPath: string) => Promise<boolean>;
@@ -117,7 +120,10 @@ interface ElectronAPI {
 
   // 游戏启动
   launchGame: (executablePath?: string) => Promise<boolean>;
+  launchOfflineStarterMap?: () => Promise<boolean>;
   ensureLocalFiles: () => Promise<boolean>;
+  startBundledResourcePreparation: () => Promise<BundledResourceStartupStatus>;
+  onBundledResourceProgress: (callback:(status:BundledResourceStartupStatus)=>void) => () => void;
   onStartupRenderingResult: (callback: (result: StartupRenderingResult) => void) => () => void;
   launchMap: (mapPath: string, difficulty: number) => Promise<boolean>;
   unlockCampaign: (mapName?: string) => Promise<boolean>;
@@ -152,18 +158,24 @@ interface ElectronAPI {
     lightingMode: string,
     lightingBrightness?: number,
     previousLightingMode?: string,
-    previousLightingBrightness?: number
+    previousLightingBrightness?: number,
+    requestId?: string,
   ) => Promise<boolean>;
   updateUISettings: (war3Path: string, uiMode: string) => Promise<boolean>;
+  updateAtmosphericLight: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updateRotatingLighting: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updateLightingAngle: (war3Path: string, angle: number) => Promise<boolean>;
   syncUISettings: (war3Path: string) => Promise<boolean>;
-  updateTerrainSettings: (war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string) => Promise<boolean>;
+  updateTerrainSettings: (war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string, requestId?: string) => Promise<boolean>;
   updateTreeSettings: (war3Path: string, treeMode: string) => Promise<boolean>;
   updateWaterSettings: (war3Path: string, waterMode: string) => Promise<boolean>;
-  updateFoliageSettings: (war3Path: string, enabled: boolean, terrainMode?: string) => Promise<boolean>;
+  updateFoliageSettings: (war3Path: string, enabled: boolean, terrainMode?: string, requestId?: string) => Promise<boolean>;
   updateBlightSettings: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updateObjectShader: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updatePostProcessing: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updatePostProcessingGlow: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updateHdr: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updatePostProcessingOutline: (war3Path: string, enabled: boolean) => Promise<boolean>;
   /** @deprecated Always auto-syncs from War3 version; `enabled` ignored. */
   updateLegacyWar3Shader: (war3Path: string, enabled?: boolean) => Promise<boolean>;
   syncVersionedShaders: (war3Path?: string) => Promise<{
@@ -173,20 +185,14 @@ interface ElectronAPI {
       version: string;
       parts: number[];
       source: string;
-      useLegacyShaders: boolean;
-      usePre200Shaders: boolean;
-      shaderZip: string;
     };
   }>;
   detectWar3Version: (war3Path?: string) => Promise<{
     version: string;
     parts: number[];
     source: string;
-    useLegacyShaders: boolean;
-    usePre200Shaders: boolean;
-    shaderZip: string;
   }>;
-  updateIntelAmdShaderFix: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updateReadability: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updateGlowSettings: (war3Path: string, enabled: boolean) => Promise<boolean>;
   getAntiHarmonyStatus: (war3Path?: string) => Promise<boolean>;
   setAntiHarmonyEnabled: (

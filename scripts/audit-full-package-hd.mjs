@@ -86,6 +86,7 @@ async function verifyPublicEnvironment(zipPath, environmentDir) {
 }
 
 for (const relative of [
+  '_manual',
   'replaceabletextures/water', 'terrainart/water.slk',
   'textures/shoreline1.dds', 'textures/shorelineparticlexy.dds',
 ]) assert.equal(await exists(path.join(root, relative)), false, `Unexpected active override: ${relative}`);
@@ -102,6 +103,9 @@ for (const name of ['shoreline1.dds', 'shorelineparticlexy.dds']) {
 }
 
 await same(path.join(root, 'units/unitskin.txt'), path.join(assets, 'skin/unitskin-new.txt'));
+await same(path.join(root, 'PostProcessingConfig.txt'), path.join(assets, 'PostProcessingConfig.txt'));
+await same(path.join(root, 'webui/index.html'), path.join(assets, 'index.html'));
+await same(path.join(root, 'webui/QuenchingOn.png'), path.join(assets, 'tx/QuenchingOnCN.png'));
 assert.equal(await exists(path.join(root, 'units/unitskin2.txt')), false, 'Obsolete unitskin2.txt is still present');
 const treeSkin = (await fs.readFile(path.join(root, 'units/destructableskin.txt'), 'utf8')).replaceAll('\\', '/').toLowerCase();
 assert.match(treeSkin, /replaceabletextures\/tree\/t20\//);
@@ -142,16 +146,10 @@ for (const name of ['ashenvale', 'cityscape', 'cityscaperuins', 'felwood', 'lord
 }
 
 const dnc = await sameTree(path.join(root, 'environment/dnc'), path.join(assets, 'dnc/dnc30-hd'));
-const manual20Dnc = await sameTree(path.join(root, '_manual/_20/environment/dnc'), path.join(assets, 'dnc/dnc20'));
-const manualHdDnc = await sameTree(path.join(root, '_manual/_30/env-hd/dnc'), path.join(assets, 'dnc/dnc30-hd'));
-const manualDeDnc = await sameTree(path.join(root, '_manual/_30/env-de/dnc'), path.join(assets, 'dnc/dnc30-de'));
 const activeShaders = await sameComposedTree(path.join(root, 'shaders'), [
   { root: path.join(assets, 'shaders/shaders-300-hd/vs'), prefix: 'vs' },
   { root: path.join(assets, 'shaders/shaders-300-hd/ps/standard'), prefix: 'ps' },
 ]);
-const manual20Shaders = await sameTree(path.join(root, '_manual/_20/shaders'), path.join(assets, 'shaders/shaders203'));
-const manualHdShaders = await sameTree(path.join(root, '_manual/_30/shaders-hd'), path.join(assets, 'shaders/shaders-300-hd'));
-const manualDeShaders = await sameTree(path.join(root, '_manual/_30/shaders-de'), path.join(assets, 'shaders/shaders-300-de'));
 const publicEnvironment = await verifyPublicEnvironment(path.join(assets, 'env-20-30-public.zip'), path.join(root, 'environment'));
 
-console.log(JSON.stringify({ result: 'HD full-package audit passed', dncFiles: dnc, manual20DncFiles: manual20Dnc, manualHdDncFiles: manualHdDnc, manualDeDncFiles: manualDeDnc, activeShaderFiles: activeShaders, manual20ShaderFiles: manual20Shaders, hdShaderFiles: manualHdShaders, deShaderFiles: manualDeShaders, publicEnvironmentFiles: publicEnvironment, destructables: packageDestructables.size, preservedOverrides: expectedOverrides.size, water: 'Warcraft default', terrain: 't20/HD', units: 'unitskin/HD', t30: 'parked' }, null, 2));
+console.log(JSON.stringify({ result: 'HD full-package audit passed', baseline: { gameVersion: '3.01', graphics: 'HD', lighting: 'standard', brightness: 3 }, manualResources: 'removed', dncFiles: dnc, activeShaderFiles: activeShaders, publicEnvironmentFiles: publicEnvironment, destructables: packageDestructables.size, preservedOverrides: expectedOverrides.size, water: 'Warcraft default', terrain: 't20/HD', units: 'unitskin/HD', t30: 'parked' }, null, 2));

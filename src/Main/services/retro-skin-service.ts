@@ -1,3 +1,4 @@
+import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import { getSelectedGameFolder } from './game-channel';
 import fs from 'fs-extra';
 
@@ -11,6 +12,7 @@ import { skinService } from './skin-service';
 import { AssetSyncService } from './asset-sync';
 import { assertFullPackageInstalled } from './full-package-service';
 import { preserveVersionSkins } from '../../shared/skin-versions';
+import { applyBattleUnitScales, battleUnitScalesEnabled } from '../../shared/battle-unit-scale';
 import { installBundledResourceFile } from './managed-resource-files';
 import { activeSkinEra, storedSkinPath, switchUnitSkinProfile, unitSkinTemplate } from './unit-skin-profile';
 
@@ -286,9 +288,9 @@ export class RetroSkinService {
 
   private async readAssetTemplate(fileName: string): Promise<string> {
 
-    const assetsDir = await AssetSyncService.getAssetsDir();
+    const assetsDir = await AssetSyncService.getAssetsDir(["skin"]);
 
-    const templatePath = path.join(assetsDir, 'quenching', fileName);
+    const templatePath = path.isAbsolute(fileName) ? fileName : resourcePath(path.join(assetsDir, 'quenching'), fileName);
 
 
 
@@ -424,26 +426,28 @@ export class RetroSkinService {
 
     const disabledPath = path.join(baseDir, 'units', 'unitskin-dis.txt');
 
-    const assetsDir = await AssetSyncService.getAssetsDir();
+    const assetsDir = await AssetSyncService.getAssetsDir(["skin"]);
     const selectedProfile = unitsEnabled || buildingsEnabled ? 'hd-retro' : 'hd';
     const era = await activeSkinEra(baseDir, configManager.get('modSettings')?.resolvedVersion);
-    await switchUnitSkinProfile(baseDir, path.join(assetsDir, 'quenching'), selectedProfile, era);
+    const selections = (configManager.get('skinSelections') || {})[path.resolve(configManager.get('war3Path')).toLowerCase()] || {};
+    await switchUnitSkinProfile(baseDir, path.join(assetsDir, 'quenching'), selectedProfile, era, { selections });
     const parkedDisabled = storedSkinPath(baseDir, selectedProfile, true, era);
     const skinIsDisabled = !(await fs.pathExists(unitskinPath)) && await fs.pathExists(parkedDisabled);
     const previousPath = skinIsDisabled ? parkedDisabled
       : await fs.pathExists(unitskinPath) ? unitskinPath : disabledPath;
     const previous = await fs.pathExists(previousPath) ? await fs.readFile(previousPath, 'utf8') : '';
-    const selections = (configManager.get('skinSelections') || {})[path.resolve(configManager.get('war3Path')).toLowerCase()] || {};
     const unitsDir = path.dirname(unitskinPath);
     const normalSource = unitSkinTemplate(path.join(assetsDir, 'quenching'), 'hd', era);
     const retroSource = unitSkinTemplate(path.join(assetsDir, 'quenching'), 'hd-retro', era);
-    const normalTemplate = await this.readAssetTemplate(path.relative(path.join(assetsDir, 'quenching'), normalSource));
+    const normalTemplate = await this.readAssetTemplate(normalSource);
 
     if (await fs.pathExists(disabledPath) && !(await fs.pathExists(unitskinPath))) {
       await skinService.enableSkins();
     }
 
     const writeGeneratedSkin = async (content: string): Promise<void> => {
+      content = applyBattleUnitScales(content,
+        battleUnitScalesEnabled(selectedProfile, era, configManager.get('modSettings')));
       if (skinIsDisabled) {
         await fs.outputFile(parkedDisabled, content, 'utf8');
         return;

@@ -1,3 +1,4 @@
+import { resourceArchiveExists } from './bundled-packages';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder } from './game-channel';
 import path from 'path';
 import fs from 'fs-extra';
@@ -6,9 +7,22 @@ import { resolveUiZipName } from './war3-version';
 import { syncBundledResourceFiles } from './managed-resource-files';
 import { isFullPackageInstalled } from './full-package-service';
 import { isThirdPartyQuenchingPaused } from './third-party-resources';
+import { LOCAL_RELEASE_LABEL } from '../../shared/local-release';
+import { syncAtmosphericLight } from './atmospheric-light';
 
 const UI_MARKER = '.quenching-managed-ui.json';
 const UI_STYLE_MARKER = '.quenching-ui-style';
+const UI_PUBLIC_ZIP = 'zip-ui-pub.zip';
+// Refresh same-version installs once for the shared assets + versioned FDF layout.
+const UI_LAYOUT_REVISION = 3;
+
+async function extractUiPackages(assetsDir: string, zipName: string, stagingPath: string): Promise<void> {
+    const { AssetSyncService } = require('./asset-sync');
+    for (const name of [UI_PUBLIC_ZIP, zipName]) {
+        console.log(`[UIService] Extracting ${name} to staging...`);
+        await AssetSyncService.extractZip(path.join(assetsDir, 'quenching', name), stagingPath);
+    }
+}
 
 function knownUiRoots(stagingPath: string) {
     return [
@@ -58,18 +72,19 @@ export class UIService {
 
         const { AssetSyncService } = require('./asset-sync');
         const assetsDir = await AssetSyncService.getAssetsDir();
-        const zipName = await resolveUiZipName(war3Path);
-        const zipPath = path.join(assetsDir, 'quenching', zipName);
-
-        if (!(await fs.pathExists(zipPath))) {
-            console.warn(`[UIService] ${zipName} not found at ${zipPath}, skip classic feedback patch`);
-            return;
+        const zipName = await resolveUiZipName(war3Path, configManager.get('modSettings')?.versionSelection);
+        for (const name of [UI_PUBLIC_ZIP, zipName]) {
+            const zipPath = path.join(assetsDir, 'quenching', name);
+            if (!(await resourceArchiveExists(zipPath))) {
+                console.warn(`[UIService] ${name} not found at ${zipPath}, skip classic feedback patch`);
+                return;
+            }
         }
 
         let stagingPath = '';
         try {
             stagingPath = await fs.mkdtemp(path.join(baseDir, '.ui-classic-feedback-'));
-            await AssetSyncService.extractZip(zipPath, stagingPath);
+            await extractUiPackages(assetsDir, zipName, stagingPath);
             await this.applyClassicFeedbackCompat(stagingPath);
 
             const patchedFeedback = path.join(stagingPath, 'feedback');
@@ -121,22 +136,22 @@ export class UIService {
 
             const { AssetSyncService } = require('./asset-sync');
             const assetsDir = await AssetSyncService.getAssetsDir();
-            const zipName = await resolveUiZipName(war3Path);
-            const zipPath = path.join(assetsDir, 'quenching', zipName);
+            const zipName = await resolveUiZipName(war3Path, configManager.get('modSettings')?.versionSelection);
             const styleMarker = path.join(uiPath, UI_STYLE_MARKER);
-            const style = `${zipName}:${uiMode}`;
+            // A new release must refresh UIQUE's version even if the UI choice is unchanged.
+            const style = `${UI_PUBLIC_ZIP}+${zipName}:${uiMode}:${LOCAL_RELEASE_LABEL}:layout-${UI_LAYOUT_REVISION}`;
             if (!force && await fs.pathExists(styleMarker) && (await fs.readFile(styleMarker, 'utf8')).trim() === style) return true;
             console.log(`[UIService] Updating UI to mode: ${uiMode}`);
 
-            if (!(await fs.pathExists(zipPath))) {
-                throw new Error(`${zipName} not found at ${zipPath}`);
+            for (const name of [UI_PUBLIC_ZIP, zipName]) {
+                const zipPath = path.join(assetsDir, 'quenching', name);
+                if (!(await resourceArchiveExists(zipPath))) throw new Error(`${name} not found at ${zipPath}`);
             }
 
             await fs.ensureDir(baseDir);
             stagingPath = await fs.mkdtemp(path.join(baseDir, '.ui-staging-'));
 
-            console.log(`[UIService] Extracting clean ${zipName} from ${zipPath} to staging...`);
-            await AssetSyncService.extractZip(zipPath, stagingPath);
+            await extractUiPackages(assetsDir, zipName, stagingPath);
 
             const sourceRoot = path.join(stagingPath, sourceDirName);
             if (!(await fs.pathExists(sourceRoot))) {
@@ -168,6 +183,7 @@ export class UIService {
             await fs.remove(uiPath);
             await fs.copy(stagingPath, uiPath);
             await fs.writeFile(styleMarker, `${style}\n`, 'utf8');
+            await syncAtmosphericLight(baseDir,path.join(assetsDir,'quenching'),modSettings.atmosphericLight===true);
 
             console.log(`[UIService] Successfully updated UI to ${uiMode}`);
             return true;

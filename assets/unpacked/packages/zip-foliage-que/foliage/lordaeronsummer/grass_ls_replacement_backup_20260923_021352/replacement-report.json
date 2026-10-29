@@ -1,0 +1,51 @@
+{
+  "target_dir": "D:\\Quenching\\War3Reforged\\Warcraft III\\_retail_\\environment\\foliage\\lordaeronsummer\\grass",
+  "backup_dir": "D:\\Quenching\\War3Reforged\\Warcraft III\\_retail_\\environment\\foliage\\lordaeronsummer\\grass_ls_replacement_backup_20260923_021352",
+  "files": [
+    {
+      "source": "foliage_ls_grass_00.mdx",
+      "destination": "s_00.mdx",
+      "source_size": 5725,
+      "destination_size": 5725,
+      "diffuse_replaced": true,
+      "normal_and_orm_bytes_unchanged_from_source": true,
+      "previous_target_size": 5785
+    },
+    {
+      "source": "foliage_ls_grass_01.mdx",
+      "destination": "s_01.mdx",
+      "source_size": 5725,
+      "destination_size": 5725,
+      "diffuse_replaced": true,
+      "normal_and_orm_bytes_unchanged_from_source": true,
+      "previous_target_size": 5785
+    },
+    {
+      "source": "foliage_ls_grass_02.mdx",
+      "destination": "s_02.mdx",
+      "source_size": 5725,
+      "destination_size": 5725,
+      "diffuse_replaced": true,
+      "normal_and_orm_bytes_unchanged_from_source": true,
+      "previous_target_size": 5785
+    },
+    {
+      "source": "foliage_ls_grass_03.mdx",
+      "destination": "s_03.mdx",
+      "source_size": 5725,
+      "destination_size": 5725,
+      "diffuse_replaced": true,
+      "normal_and_orm_bytes_unchanged_from_source": true,
+      "previous_target_size": 5785
+    },
+    {
+      "source": "foliage_ls_grass_04.mdx",
+      "destination": "s_04.mdx",
+      "source_size": 5725,
+      "destination_size": 5725,
+      "diffuse_replaced": true,
+      "normal_and_orm_bytes_unchanged_from_source": true,
+      "previous_target_size": 5785
+    }
+  ]
+}

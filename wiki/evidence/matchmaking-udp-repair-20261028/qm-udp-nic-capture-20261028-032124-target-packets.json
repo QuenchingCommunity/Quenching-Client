@@ -1,0 +1,89 @@
+{
+  "xml": "qm-udp-nic-capture-20261028-032124.xml",
+  "targetOnly": true,
+  "packetBodyStored": false,
+  "outboundByDestinationPort": {
+    "443": 3,
+    "53": 3
+  },
+  "records": [
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.833159800+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 65206,
+      "destinationPort": 443,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    },
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.837480100+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 65206,
+      "destinationPort": 443,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    },
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.837635800+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 65206,
+      "destinationPort": 443,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    },
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.970281200+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 64482,
+      "destinationPort": 53,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    },
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.970395300+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 64482,
+      "destinationPort": 53,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    },
+    {
+      "timeAsRendered": "2026-10-28T03:21:30.970444900+07:59",
+      "src": "192.168.0.100",
+      "dst": "191.40.41.124",
+      "sourcePort": 64482,
+      "destinationPort": 53,
+      "udpBytes": 43,
+      "ipTotalBytes": 63,
+      "miniportIfIndex": "17",
+      "lowerIfIndex": "17",
+      "capturedBytes": 95,
+      "ipv4Offset": 32
+    }
+  ]
+}

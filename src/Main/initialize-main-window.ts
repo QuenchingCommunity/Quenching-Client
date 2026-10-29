@@ -8,8 +8,8 @@ import { BrowserWindow, BrowserWindowConstructorOptions, screen } from 'electron
 import path from 'path';
 import net from 'node:net';
 import { startupTelemetry } from './services/startup-telemetry';
-import { scheduleStartupRendering } from './services/startup-rendering';
-import { acknowledgeClientUpdate } from './services/client-update-service';
+import { LOCAL_APP_TITLE } from '../shared/local-release';
+import { installBundledResourceStartup } from './services/bundled-resource-startup';
 
 
 const { runInExcutable, absAppRunningPath, absAssetsPath } = reaxel_ElectronENV();
@@ -47,6 +47,7 @@ export const initializeMainWindow = async (
 	const { calcActualAppSize } = reaxel_ScreenAdapter();
 	const actualAppSize = await calcActualAppSize();
 	const defaultOptions: BrowserWindowConstructorOptions = {
+		title: LOCAL_APP_TITLE,
 		// Isolated settings are also used by interactive portable test clients.
 		// Only explicitly headless automation may suppress the visible window.
 		show: process.env.QUENCHING_AUTOMATED_TEST_HEADLESS !== '1',
@@ -73,6 +74,8 @@ export const initializeMainWindow = async (
 	}
 	// console.trace( options );
 	const mainWindow = new BrowserWindow(options);
+	installBundledResourceStartup(mainWindow);
+	mainWindow.on('page-title-updated', event => event.preventDefault());
 	// console.log('screen.getPrimaryDisplay().scaleFactor:',screen.getPrimaryDisplay().scaleFactor);
 	// 加载 index.html
 	try {
@@ -90,9 +93,7 @@ export const initializeMainWindow = async (
 		} else {
 			await mainWindow.loadFile("dist/renderer/index.html");
 		}
-		await acknowledgeClientUpdate();
-		startupTelemetry.markStartupSuccess();
-        scheduleStartupRendering(mainWindow);
+		// Resource preparation starts only after the renderer's first paint/IPC handshake.
 	} catch (error) {
 		startupTelemetry.recordStartupFailure(error);
 		throw error;

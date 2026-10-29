@@ -1,0 +1,48 @@
+{
+  "target_dir": "D:\\Quenching\\War3Reforged\\Warcraft III\\_retail_\\environment\\foliage\\lordaeronsummer\\grass",
+  "backup_dir": "D:\\Quenching\\War3Reforged\\Warcraft III\\_retail_\\environment\\foliage\\lordaeronsummer\\grass_s_black_fix_backup_20260923_015041",
+  "old_reference": "Foliage_LS_GrassDark_Normal.tif",
+  "new_reference": "Foliage_LS_GrassDark_Normal.dds",
+  "files": [
+    {
+      "name": "s_00.mdx",
+      "size": 5785,
+      "sha256_before": "632ec7c8c77207fc7f843b8904f52dc05903f47c789d30548ed6d57af1779508",
+      "sha256_after": "299ae8b38a877ba1c3d880c1436c30ba6ab2c5254ca3e592e3bbe21fd21d9eb0",
+      "old_reference_count": 0,
+      "new_reference_count": 1
+    },
+    {
+      "name": "s_01.mdx",
+      "size": 5785,
+      "sha256_before": "632ec7c8c77207fc7f843b8904f52dc05903f47c789d30548ed6d57af1779508",
+      "sha256_after": "299ae8b38a877ba1c3d880c1436c30ba6ab2c5254ca3e592e3bbe21fd21d9eb0",
+      "old_reference_count": 0,
+      "new_reference_count": 1
+    },
+    {
+      "name": "s_02.mdx",
+      "size": 5785,
+      "sha256_before": "632ec7c8c77207fc7f843b8904f52dc05903f47c789d30548ed6d57af1779508",
+      "sha256_after": "299ae8b38a877ba1c3d880c1436c30ba6ab2c5254ca3e592e3bbe21fd21d9eb0",
+      "old_reference_count": 0,
+      "new_reference_count": 1
+    },
+    {
+      "name": "s_03.mdx",
+      "size": 5785,
+      "sha256_before": "632ec7c8c77207fc7f843b8904f52dc05903f47c789d30548ed6d57af1779508",
+      "sha256_after": "299ae8b38a877ba1c3d880c1436c30ba6ab2c5254ca3e592e3bbe21fd21d9eb0",
+      "old_reference_count": 0,
+      "new_reference_count": 1
+    },
+    {
+      "name": "s_04.mdx",
+      "size": 5785,
+      "sha256_before": "632ec7c8c77207fc7f843b8904f52dc05903f47c789d30548ed6d57af1779508",
+      "sha256_after": "299ae8b38a877ba1c3d880c1436c30ba6ab2c5254ca3e592e3bbe21fd21d9eb0",
+      "old_reference_count": 0,
+      "new_reference_count": 1
+    }
+  ]
+}

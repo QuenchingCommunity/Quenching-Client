@@ -1,0 +1,5 @@
+--- FAIL: TestFastRepairIsAvailableWhileReliableWriteIsBlocked (0.25s)
+    blocked_write_test.go:30: repair waited for the blocked reliable write
+FAIL
+FAIL	quenching/match-wire/internal/gamewire	1.352s
+FAIL
