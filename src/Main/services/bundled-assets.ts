@@ -16,7 +16,7 @@ export interface BundleManifest {
 interface CacheState { schema: number; id: string; legacyId?: string; files: Record<string, { size: number; mtimeMs: number; ctimeMs?: number; sha256?: string }> }
 interface PrepareOptions {
   cacheBase: string; preferLoose?: boolean; required?: boolean; selections?: string[];
-  sharedCache?: boolean; verification?: 'strict' | 'light';
+  sharedCache?: boolean; flatCache?: boolean; verification?: 'strict' | 'light';
   startup?: boolean;
   onPreparation?: (firstRun: boolean) => void;
   onProgress?: (percent: number) => void;
@@ -172,7 +172,8 @@ async function prepare(assets: string, options: PrepareOptions): Promise<string 
   const base = path.resolve(options.cacheBase);
   await ordinaryDirectory(base);
   await ordinaryDirectory(path.join(base, 'unpacked'));
-  const destination = options.sharedCache ? await sharedDestination(base,manifest.id) : path.join(base, 'unpacked', manifest.id);
+  const destination = options.flatCache ? path.join(base, 'unpacked') :
+    options.sharedCache ? await sharedDestination(base,manifest.id) : path.join(base, 'unpacked', manifest.id);
   await ordinaryDirectory(destination);
   if(options.onPreparation)options.onPreparation(!await hasPayload(destination));
   const previous = await fs.readJson(path.join(destination, '.ready.json')).catch(() => null) as CacheState | null;

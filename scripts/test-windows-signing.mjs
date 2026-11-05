@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import fs from 'fs-extra';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import asar from '@electron/asar';
+import {configureWindowsSigning,signingConfigured} from './windows-signing.mjs';
+import {checkClientPackage} from './check-client-package.mjs';
+const require=createRequire(import.meta.url),hook=require('./windows-native-signing.cjs');
+const parent=path.resolve('_tmp/windows-trust-20261029');await fs.ensureDir(parent);const root=await fs.mkdtemp(path.join(parent,'sign-test-'));
+try{
+ const win={},config={},context={packager:{config,platformSpecificBuildOptions:win,info:{projectDir:root},appInfo:{productFilename:'Fixture'}},electronPlatformName:'win32',appOutDir:path.join(root,'out')};
+ await fs.outputJson(path.join(root,'release-version.json'),{channel:'production'});
+ await assert.rejects(configureWindowsSigning(context),/需要可信 Authenticode/);
+ assert.equal(win.forceCodeSigning,true);assert(win.signExts.includes('.node'));
+ assert(!signingConfigured({},{}));assert(signingConfigured({signtoolOptions:{certificateSha1:'test'}},{}));assert(signingConfigured({},{WIN_CSC_LINK:'not-a-secret-test-path'}));
+ context.packager.platformSpecificBuildOptions={signtoolOptions:{sign:()=>{}}};await configureWindowsSigning(context);
+ const source=path.join(root,'source'),archive=path.join(context.appOutDir,'resources/app.asar');
+ await fs.outputJson(path.join(source,'package.json'),{version:'0.0.0'});
+ await fs.outputFile(path.join(source,'dist/main.js'),'module.exports=42');
+ await fs.outputFile(path.join(source,'native/addon.node'),'original-native');
+ await fs.outputFile(path.join(source,'native/readme.txt'),'keep-unpacked-text');
+ await fs.ensureDir(path.dirname(archive));await asar.createPackageWithOptions(source,archive,{unpack:'**/native/*'});
+ await fs.copyFile(require('7zip-bin-full').path7z,path.join(context.appOutDir,'Fixture.exe'));
+ let count=0;const sign=async file=>{count++;await fs.appendFile(file,'-fake-certificate-overlay');return true;};context.packager.sign=sign;
+ await hook(context);
+ const signed=path.join(archive+'.unpacked','native/addon.node');assert.equal(count,1);
+ assert.equal(await fs.readFile(signed,'utf8'),'original-native-fake-certificate-overlay');
+ await checkClientPackage(context.appOutDir,{loadNativeModules:false});
+ assert.equal(asar.extractFile(archive,'dist/main.js').toString(),'module.exports=42');
+ assert.equal(await fs.readFile(path.join(source,'native/addon.node'),'utf8'),'original-native','never sign node_modules/source inputs');
+ await context.packager.sign(signed);assert.equal(count,1,'builder must not append another signature after ASAR was refreshed');
+ hook.restore(context.packager);assert.equal(context.packager.sign,sign);
+ await assert.rejects(require('./check-windows-signatures.cjs')(context),error=>{console.log('Trust-negative result: '+error.message.slice(-1800));return /audit failed/.test(error.message);},'a fake certificate overlay must not pass Windows trust verification');
+ console.log('PASS: production signer gate, native addon signing selection, ASAR full size/hash refresh, packed content preserved, source inputs unchanged, duplicate signing prevented. Fake overlay tests mechanics only; no trusted signature claimed.');
+}finally{assert.equal(path.dirname(root),parent);await fs.remove(root);}

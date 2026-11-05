@@ -346,10 +346,11 @@ export function registerLaunchHandlers() {
             }
             configManager.set('lastFullPackageBytes', archiveBytes);
             setChannelModEnabled(channel, modEnabled);
-            const warnings = modEnabled ? await applyInstalledProfile(normalizedWar3Path, {
+            const warnings = await applyInstalledProfile(normalizedWar3Path, {
                 forceUnitSkinBaseline: true,
+                restoreSkinsOnly: !modEnabled,
                 onProgress: (message) => event.sender.send('mod:install-progress', { percent: 99, message }),
-            }) : [];
+            });
             event.sender.send('mod:install-progress', { percent: 100, message: '安装完成' });
             return {
                 success: true,

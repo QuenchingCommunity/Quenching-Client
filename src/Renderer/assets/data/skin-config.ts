@@ -841,7 +841,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
           { unitId: 'uabo', field: 'modelScale:hd', value: '1.15' },
           { unitId: 'umtw', field: 'file', value: 'cos\\ud2\\2' },
           { unitId: 'ugho', field: 'file', value: 'cos\\ud2\\3' },
-          { unitId: 'ugho', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNud2.blp' },
+          { unitId: 'ugho', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNZombie.blp' },
           { unitId: 'unec', field: 'file', value: 'units\\Undead\\Deceiver\\Deceiver' },
           { unitId: 'unec', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNDeceiver.blp' },
           { unitId: 'uske', field: 'file', value: 'units\\creeps\\Zombie\\Zombie' },

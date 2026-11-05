@@ -21,6 +21,7 @@
 		"test:atmospheric-light": "tsx scripts/test-atmospheric-light.ts",
 		"test:theme-media": "tsx scripts/test-theme-media.ts",
 		"test:offline-starter": "tsx scripts/test-offline-starter.ts",
+		"test:windows-signing": "node scripts/test-windows-signing.mjs",
 		"test:startup-rendering": "tsx scripts/test-startup-rendering.ts",
 		"test:startup-rendering-files": "tsx scripts/test-startup-rendering-files.ts",
 		"test:terrain-profile-water": "tsx scripts/test-terrain-profile-water.ts",

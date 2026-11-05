@@ -2,20 +2,22 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 import fs from 'fs-extra';
-import os from 'node:os';
 import path from 'node:path';
 
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-package-switch-'));
+const fixtureParent = path.resolve('_tmp/skin-experience');
+await fs.ensureDir(fixtureParent);
+const root = await fs.mkdtemp(path.join(fixtureParent, 'quenching-package-switch-'));
 const retail = path.join(root, '_retail_');
 const resource = path.join(retail, 'units', 'unitskin.txt');
 const source = path.join(root, 'package.zip');
-const fixture: any = { handlers: {}, config: { war3Path: root, gameChannel: 'retail', channelModEnabled: { retail: true } }, profiles: 0, fail: false };
+const fixture: any = { handlers: {}, config: { war3Path: root, gameChannel: 'retail', channelModEnabled: { retail: true } }, profiles: 0, restores: 0, fail: false };
 (globalThis as any).__packageSwitchFixture = fixture;
 const mocks: Record<string, string> = {
   electron: 'export const ipcMain={handle:(key,handler)=>f.handlers[key]=handler};export const dialog={};',
   'config-manager': 'export const configManager={get:key=>f.config[key],set:(key,value)=>f.config[key]=value};',
   'asset-sync': 'export const AssetSyncService={getAssetsDir:async()=>"unused-assets",ensurePostProcessingConfig:async()=>{}};',
   'game-launcher': 'export const GameLauncher={};',
+  'offline-test-launcher': 'export const registerOfflineTestLauncher=()=>{};',
   'theme-service': 'export const themeService={};',
   'campaign-w3n-merge': 'export const extractCampaignW3nMerged=async()=>{};',
   'campaign-metadata': 'export const readInstalledCampaignMetadata=async()=>null;',
@@ -28,7 +30,7 @@ const mocks: Record<string, string> = {
   'client-mod-files': 'import fs from "fs-extra";import path from "node:path";export const enumerateClientModFiles=async(build,parked)=>await fs.pathExists(path.join(build,...(parked?["QMoff"]:[]),"units","unitskin.txt"))?["units/unitskin.txt"]:[];',
   'full-package-install': 'export const installPackageSources=(...args)=>f.install(...args);',
   'mod-update-service': 'export const assertWarcraftNotRunning=async()=>{};',
-  'post-install-profile': 'export const applyInstalledProfile=async()=>{f.profiles++;return[];};',
+  'post-install-profile': 'export const applyInstalledProfile=async(_,options={})=>{if(options.restoreSkinsOnly)f.restores++;else f.profiles++;return[];};',
 };
 try {
   const bundle = await build({ stdin: { contents: 'export { registerLaunchHandlers } from "./src/Main/ipc/launch-handlers";', resolveDir: process.cwd(), loader: 'ts' },
@@ -69,6 +71,7 @@ try {
   assert.equal(await fs.pathExists(resource), false, 'installed resources remain parked while MOD is off');
   assert.equal(await fs.readFile(path.join(retail, 'QMoff', 'units', 'unitskin.txt'), 'utf8'), 'new package skin');
   assert.equal(fixture.profiles, 1, 'off installation does not apply active profiles');
+  assert.equal(fixture.restores, 1, 'off installation still restores saved skins into the disabled profile');
   const before = await fs.readFile(path.join(retail, '.quenching', 'branch-toggle.json'), 'utf8');
   fixture.fail = true;
   const originalError = console.error;
@@ -106,6 +109,6 @@ try {
   console.log('PASS: installing retains MOD on/off, off resources stay in QMoff, failed extraction leaves the switch unchanged, explicit enabling applies resources');
 } finally {
   delete (globalThis as any).__packageSwitchFixture;
-  assert(path.resolve(root).startsWith(path.resolve(os.tmpdir()) + path.sep));
+  assert(path.dirname(root) === fixtureParent && path.basename(root).startsWith('quenching-package-switch-'));
   await fs.remove(root);
 }

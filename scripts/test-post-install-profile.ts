@@ -19,6 +19,7 @@ const fixture = {
   async skin(_path: string, options: { force?: boolean }) {
     calls.push(`skin:${options.force === true}`);
   },
+  restore() { calls.push('restore'); },
 };
 (globalThis as any).__postInstallProfileFixture = fixture;
 
@@ -30,11 +31,13 @@ const bundled = await build({
   },
   platform: 'node', format: 'cjs', packages: 'external', bundle: true, write: false,
   plugins: [{ name: 'post-install-fixture', setup(plugin) {
-    plugin.onResolve({ filter: /(?:asset-sync|blight-service|config-manager)$/ },
+    plugin.onResolve({ filter: /(?:asset-sync|blight-service|config-manager|version-skin-service)$/ },
       (args) => ({ path: args.path, namespace: 'fixture' }));
     plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, (args) => ({
       contents: args.path.endsWith('asset-sync')
         ? 'export const AssetSyncService = { syncConfiguredAssets: (...args) => globalThis.__postInstallProfileFixture.sync(...args), refreshUnitSkinBaseline: (...args) => globalThis.__postInstallProfileFixture.skin(...args) };'
+        : args.path.endsWith('version-skin-service')
+          ? 'export const versionSkinService = { restoreSelections: async () => { globalThis.__postInstallProfileFixture.restore(); return []; } };'
         : args.path.endsWith('blight-service')
           ? 'export const syncBlightOnStartup = (...args) => globalThis.__postInstallProfileFixture.blight(...args);'
           : 'export const configManager = { get: () => ({ lighting: "rpg" }) };',
@@ -48,14 +51,14 @@ new Function('require', 'module', 'exports', bundled.outputFiles[0].text)(
 const { applyInstalledProfile } = module.exports;
 
 assert.deepEqual(await applyInstalledProfile('game', { forceUnitSkinBaseline: true }), []);
-assert.deepEqual(calls, ['profile', 'blight', 'skin:true']);
+assert.deepEqual(calls, ['profile', 'blight', 'skin:true', 'restore']);
 
 calls.length = 0;
 fixture.failSync = true;
 const warnings = await applyInstalledProfile('game');
 assert.equal(warnings.length, 1);
 assert.match(warnings[0], /missing shader pack/);
-assert.deepEqual(calls, ['profile', 'blight', 'skin:false']);
+assert.deepEqual(calls, ['profile', 'blight', 'skin:false', 'restore']);
 
 calls.length = 0;
 fixture.failSync = false;
@@ -63,4 +66,7 @@ fixture.syncOutcome = 'package-missing';
 const skippedWarnings = await applyInstalledProfile('game');
 assert.match(skippedWarnings[0], /未识别到完整资源包/);
 assert.deepEqual(calls, ['profile']);
+calls.length = 0;
+assert.deepEqual(await applyInstalledProfile('game', { restoreSkinsOnly: true }), []);
+assert.deepEqual(calls, ['restore'], 'MOD-off installation restores parked choices without running rendering/profile changes');
 console.log('PASS: installed profile is reapplied, and partial failures are reported without skipping other settings');

@@ -52,6 +52,11 @@ for (const race of Object.keys(SKIN_CONFIG)) {
   }
 }
 assert.equal(sdCount, LEGACY_SD_SKINS.size);
+const elves = warbandChoices('hum', 'h_u3');
+assert.equal(scopedSkin(elves.find(c => c.unitId === 'hsor')!.changes, 'hd').find(c => c.field === 'fileVerFlags:hd')?.value, '0',
+  'high elf Sorceress must not inherit the standard Sorceress variant flags');
+assert.equal(scopedSkin(elves.find(c => c.unitId === 'hmtt')!.changes, 'hd').find(c => c.field === 'fileVerFlags:hd')?.value, '2',
+  'explicit steam engine variant flags are preserved');
 assert.equal(skinTargets('neutral', 'hero').length, 9);
 assert(skinTargets('neutral', 'hero').some(hero => hero.unitId === 'Npal'));
 assert.equal(skinTargets('neutral', 'unit').length, 0);

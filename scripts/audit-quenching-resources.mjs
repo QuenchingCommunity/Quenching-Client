@@ -73,7 +73,7 @@ const doc = [
   '`dnc30-de-rpg` 和 `zip-blight-retro` 属于兼容清理资料：当前视觉选择器不启用，但仍用于识别客户端已知路径，因此未直接删除。`.vs` 等开发目录不进入资源包。', '',
   '## 命令与运行期', '',
   '`yarn run electron`、`start`、`build`、`pack` 共享 `scripts/prepare-client-assets.mjs`；所有 `dist:*` 经公共构建入口，直接 electron-builder 也有 beforePack 检查。并发 dev 命令共用跨进程锁；中断后可恢复过期锁。旧 `prepare-shader-bundles.mjs` 仅转发统一入口，不再生成独立 shader ZIP。', '',
-  '先显示窗口，首屏绘制后再准备资源。没有展开文件时完整展开并显示现有全局进度弹窗；已有文件时后台静默检查，按内容替换不同文件。缓存位于当前用户数据目录的 `resources/unpacked/current/`，跨版本复用未变化文件，与客户端安装文件及自动更新官方快照分离；暂存后提交，失败恢复旧缓存。正常启动不重复读取整包和整棵缓存树计算 SHA；只检查内容记录及文件元信息，未知或外部改动文件才单独算摘要。旧客户端遗留 ZIP 不覆盖新清单中的资源组。', '',
+  '先显示窗口，首屏绘制后再准备资源。没有展开文件时完整展开并显示现有全局进度弹窗；已有文件时后台静默检查，按内容替换不同文件。Windows 缓存位于 EXE 同级 `unpacked/`，macOS 位于 .app 同级；跨版本复用未变化文件，不进入自动更新官方快照和便携导出包；同卷 `_tmp` 暂存后提交，失败恢复旧缓存。正常启动不重复读取整包和整棵缓存树计算 SHA；只检查内容记录及文件元信息，未知或外部改动文件才单独算摘要。旧客户端遗留 ZIP 不覆盖新清单中的资源组。', '',
   'Windows 和 Mac 分发规则均排除整个 `assets/unpacked`、原始资源目录和独立旧 ZIP，只带五个 `resources-*.7z`、清单及启动必需小文件。本次没有生成客户端便携包、上传或发布。', '',
   '完整逐文件盘点见 [CSV](evidence/quenching-resource-files-20261028.csv)，内容 ID／大小／SHA-256 见 [元数据](evidence/resource-bundle-20261028.json)。原资源迁移及旧版备份记录在 `_tmp/resource-bundle-20261028/relocated.json`。', '',
 ];

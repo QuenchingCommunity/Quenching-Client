@@ -1,14 +1,18 @@
 import assert from 'node:assert/strict';
 import fs from 'fs-extra';
 import path from 'node:path';
-import os from 'node:os';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 import { parseSkinSections } from '../src/shared/skin-versions';
 import { resolveBranchModFile, setBranchModEnabledOnDisk } from '../src/Main/services/branch-mod-toggle';
 import { syncUnitSkinBattleMode } from '../src/Main/services/unit-skin-profile';
+import { SKIN_CONFIG } from '../src/Renderer/assets/data/skin-config';
+import { warbandChoices } from '../src/Renderer/assets/data/skin-panel-catalog';
+import { scopedSkin } from '../src/shared/skin-versions';
 
-const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-version-skins-'));
+const fixtureParent = path.resolve('_tmp/skin-experience');
+await fs.ensureDir(fixtureParent);
+const fixture = await fs.mkdtemp(path.join(fixtureParent, 'quenching-version-skins-'));
 const retail = path.join(fixture, '_retail_');
 const target = path.join(retail, 'units', 'unitskin.txt');
 const before = '[Hamg]\nfile=existing\nfile:hd=keep-hd\nfile:de=keep-de\n[Hpal]\nfile=paladin\n';
@@ -158,7 +162,7 @@ try {
   offRecord.config = offRecord.config.map((change: any) => change.field === 'Art' ? { field: 'Art', value: oldArt } : change);
   await fs.writeFile(target, (await fs.readFile(target, 'utf8')).replace(offArt, oldArt));
   await fs.remove(path.join(retail, offDisabledArt));
-  await setBranchModEnabledOnDisk(retail, false);
+  await setBranchModEnabledOnDisk(retail, false, { quenchingDir: path.join(fixture, 'empty-assets') });
   await custom.repairImportedModels();
   assert.equal(await fs.pathExists(target), false, 'legacy icon migration must not enable MOD or skins');
   const parkedTable = await resolveBranchModFile(retail, 'units/unitskin.txt');
@@ -168,7 +172,7 @@ try {
   await service.apply('hd', [{ unitId: 'Hamg', skinId: offSkin.id, changes: offSkin.config }]);
   assert.equal(await fs.pathExists(target), false, 'choosing a skin while the main MOD switch is off only writes its parked table');
   assert.equal(parseSkinSections(await fs.readFile(parkedTable, 'utf8')).Hamg['portrait:hd'], offPortrait);
-  await setBranchModEnabledOnDisk(retail, true);
+  await setBranchModEnabledOnDisk(retail, true, { quenchingDir: path.join(fixture, 'empty-assets') });
   assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).Hamg['Art:hd'], offArt);
   assert.equal(await fs.readFile(path.join(retail, offDisabledArt), 'utf8'), 'fixture icon');
   assert.equal(await fs.pathExists(path.join(retail, offPortrait)), true, 'portrait restores with the branch');
@@ -224,6 +228,63 @@ try {
   assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).hmtt['modelScale:hd'], '0.77');
   await service.apply('hd', [{ unitId: 'Hamg', skinId: 'fixture-hero', changes: [{ field: 'modelScale', value: '1.3' }] }]);
   assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).Hamg['modelScale:hd'], '1.3');
+  // Apply every preset through the real service, rather than just checking paths.
+  config.modSettings = { resolvedVersion: 'v301', improveReadability: false };
+  for (const [race, catalog] of Object.entries(SKIN_CONFIG)) for (const preset of catalog.warbands.slice(1)) {
+    const choices = warbandChoices(race, preset.id);
+    await service.apply('hd', choices);
+    const written = parseSkinSections(await fs.readFile(target, 'utf8'));
+    for (const choice of choices) for (const change of scopedSkin(choice.changes, 'hd')) {
+      assert.equal(written[choice.unitId][change.field], change.value, `${preset.id}/${choice.unitId}/${change.field} applies`);
+    }
+  }
+  const elfChoices = warbandChoices('hum', 'h_u3');
+  assert.equal(elfChoices.length, 8);
+  await service.apply('hd', elfChoices);
+  const retained = await custom.create({ artSet: 'de', targetId: 'Npal', category: 'hero', source: 'game-paths', name: 'Reinstall persistence', modelPath: 'custom/de/retained' });
+  await service.apply('de', [{ unitId: retained.targetId, skinId: retained.id, changes: retained.config }]);
+  const retainedExternal = await custom.create({ artSet: 'sd', targetId: 'Hamg', category: 'hero', source: 'external', name: 'External reinstall persistence',
+    modelPath: optionalModel, portraitPath: manualPortrait, iconPath: path.join(importDir, 'btn.blp'), disabledIconPath: path.join(importDir, 'btn.blp') });
+  await service.apply('sd', [{ unitId: retainedExternal.targetId, skinId: retainedExternal.id, changes: retainedExternal.config }]);
+  // A reinstall destroys the previously deployed overrides. Recovery must use
+  // persisted IDs/catalog/custom records, not copy the overwritten file back.
+  const rootKey = path.resolve(fixture).toLowerCase();
+  config.skinSelections[rootKey] = { hd: Object.fromEntries(elfChoices.map(c => [c.unitId, c.skinId])), de: { Npal: retained.id }, sd: { Hamg: retainedExternal.id, hfoo: 'original' } };
+  const savedSelections = JSON.stringify(config.skinSelections);
+  const unselectedBranch = path.join(fixture, '_ptr_/units/unitskin.txt');
+  await fs.outputFile(unselectedBranch, 'other branch: untouched');
+  await fs.writeFile(target, '[hfoo]\nfile=package-default\nfile:hd:melee,V0=package-masked\n');
+  await fs.remove(deTarget); // inactive profiles may have been removed by a reinstall
+  await fs.writeFile(disabledSd, '[Hamg]\nfile=package-default\n');
+  assert.deepEqual(await service.restoreSelections(), []);
+  const recovered = parseSkinSections(await fs.readFile(target, 'utf8'));
+  for (const choice of elfChoices) for (const change of scopedSkin(choice.changes, 'hd')) {
+    assert.equal(recovered[choice.unitId][change.field], change.value, `restore ${choice.unitId}/${change.field}`);
+  }
+  assert.equal(recovered.hfoo['file:hd:melee,V0'], undefined, 'no package qualifier can mask the restored skin');
+  assert.equal(parseSkinSections(await fs.readFile(deTarget, 'utf8')).Npal['file:de'], 'custom/de/retained');
+  const recoveredExternal = parseSkinSections(await fs.readFile(disabledSd, 'utf8')).Hamg;
+  for (const field of ['file', 'Art', 'portrait']) {
+    assert.equal(recoveredExternal[`${field}:sd`], retainedExternal.config.find((c: any) => c.field === field).value, `external ${field} association survives reinstall`);
+  }
+  assert.equal(await fs.pathExists(sdTarget), false, 'restoration keeps the disabled SD profile parked');
+  assert.equal(await fs.readFile(unselectedBranch, 'utf8'), 'other branch: untouched');
+  assert.equal(JSON.stringify(config.skinSelections), savedSelections);
+  await fs.move(target, path.join(retail, 'units/unitskin-dis.txt'));
+  assert.deepEqual(await service.restoreSelections(), []);
+  assert.equal(await fs.pathExists(target), false, 'restoring a disabled skin must keep it disabled');
+  await fs.move(path.join(retail, 'units/unitskin-dis.txt'), target);
+  config.customSkins.push({ id: 'damaged-import', targetId: 'Obla', artSet: 'de', source: 'game-paths', config: [
+    { field: 'file', value: 'missing/model' }, { field: 'portrait', value: 'missing/portrait' },
+  ] });
+  config.skinSelections[rootKey].de.Obla = 'damaged-import';
+  await fs.writeFile(target, '[hfoo]\nfile=package-default\n');
+  const partialRestore = await service.restoreSelections();
+  assert.equal(partialRestore.length, 1);
+  assert.match(partialRestore[0], /de\/Obla/);
+  assert.equal(config.skinSelections[rootKey].de.Obla, 'damaged-import', 'broken selections remain available for repair');
+  assert.equal(parseSkinSections(await fs.readFile(target, 'utf8')).hfoo['file:hd'], elfChoices.find(c => c.unitId === 'hfoo')!.changes.find(c => c.field === 'file')!.value,
+    'one missing portrait does not block recovery of other choices');
   const savedAfterDelete = JSON.stringify(config.skinSelections);
   const original30 = await service.panel('hd');
   assert.equal(original30.originals.Hamg.find((field: { field: string }) => field.field === 'modelScale')?.value, '1');
@@ -237,7 +298,7 @@ try {
   console.log('PASS: per-profile skin writes, concurrent version isolation, persistence, reset, legacy migration, custom version folders, installation isolation');
 } finally {
   // Only remove the exact temporary fixture allocated above, never a game directory.
-  assert(path.dirname(fixture) === os.tmpdir() && path.basename(fixture).startsWith('quenching-version-skins-'));
+  assert(path.dirname(fixture) === fixtureParent && path.basename(fixture).startsWith('quenching-version-skins-'));
   await fs.remove(fixture);
   delete (globalThis as any).__skinFixture;
 }

@@ -4,9 +4,10 @@ import nodeFs from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import path from 'node:path';
 import { prepareResourceBundle } from './prepare-resource-bundle.mjs';
-import { prepareBundledAssets, deferBundledResourcePreparation } from '../src/Main/services/bundled-assets';
+import { prepareBundledAssets, deferBundledResourcePreparation, ensureResourceSelection } from '../src/Main/services/bundled-assets';
 import { RESOURCE_ARCHIVES, RESOURCE_MANIFEST } from '../src/shared/bundled-resource-paths.mjs';
 import { afterResourceFirstPaint, ResourceStartupTask, type ResourceStartupStatus } from '../src/shared/resource-startup';
+import { resourceCacheLocation } from '../src/Main/services/resource-cache-location';
 
 const frames=new Map<number,()=>void>();let frameId=0,visible=false,started=0,completed=0,failures=0;
 const host={requestAnimationFrame:(callback:()=>void)=>{frames.set(++frameId,callback);return frameId;},cancelAnimationFrame:(id:number)=>{frames.delete(id);}};
@@ -27,7 +28,7 @@ failed.start();await failed.settled();assert.equal(failed.getStatus().phase,'fai
 
 const parent=path.resolve('_tmp/resource-startup-20261028');await fs.ensureDir(parent);
 const root=await fs.mkdtemp(path.join(parent,'test-')),assets=path.join(root,'assets'),source=path.join(assets,'unpacked'),q=path.join(assets,'quenching');
-const cacheBase=path.join(root,'cache');
+const cacheBase=path.join(root,'portable 淬火');
 const originalStream=nodeFs.createReadStream,originalRename=fs.rename;
 let track=false;const reads:string[]=[];
 (nodeFs as any).createReadStream=(file:any,...args:any[])=>{if(track)reads.push(String(file));return (originalStream as any)(file,...args);};syncBuiltinESMExports();
@@ -40,10 +41,16 @@ try {
   const capture=async()=>Object.fromEntries(await Promise.all([...RESOURCE_ARCHIVES,RESOURCE_MANIFEST].map(async name=>[name,await fs.readFile(path.join(q,name))])));
   const before=await capture();
   const firstRun:boolean[]=[],progress:number[]=[];
-  const options={cacheBase,required:true,sharedCache:true,verification:'light' as const,
+  const location=resourceCacheLocation(true,path.join(cacheBase,'QMClient.exe'),assets,'win32');
+  assert.equal(location.cacheBase,cacheBase);
+  assert.equal(resourceCacheLocation(true,path.join(cacheBase,'QM.app','Contents','MacOS','QM'),assets,'darwin').cacheBase,cacheBase);
+  assert.equal(resourceCacheLocation(false,process.execPath,assets).cacheBase,path.join(root,'_tmp','runtime-resources'));
+  const options={...location,required:true,
     onPreparation:(first:boolean)=>firstRun.push(first),onProgress:(percent:number)=>progress.push(percent)};
   track=true;
   const cached=(await prepareBundledAssets(assets,options))!;
+  assert.equal(cached,path.join(cacheBase,'unpacked'),'resource folders sit directly beside EXE, with no current/content-ID nesting');
+  assert.equal(await ensureResourceSelection(q,[ui]),cached,'on-demand consumers reuse the same portable root');
   assert.equal(firstRun.at(-1),true);assert.equal(progress.at(-1),100);
   assert(progress.every((p,i)=>i===0 || p>=progress[i-1]));
   assert.deepEqual(reads,[],'cold extraction uses native CRC/size, without archive or expanded-file SHA rereads');
@@ -90,7 +97,7 @@ try {
   await fs.ensureDir(path.join(legacyBase,'unpacked/current'));
   await fs.writeJson(path.join(legacyBase,'unpacked/current/.ready.json'),{schema:3,id:'empty-interrupted-start',files:{}});
   track=true;reads.length=0;let legacyFirst=true;
-  const adopted=(await prepareBundledAssets(assets,{...options,cacheBase:legacyBase,onPreparation:first=>{legacyFirst=first;}}))!;
+  const adopted=(await prepareBundledAssets(assets,{...options,flatCache:false,cacheBase:legacyBase,onPreparation:first=>{legacyFirst=first;}}))!;
   assert.equal(path.basename(adopted),'current');assert(!await fs.pathExists(legacy));assert.equal(legacyFirst,false);
   assert.deepEqual(reads,[],'known same-content legacy cache is adopted without copying or hashing the tree');
   let release!:()=>void,consumerFinished=false;

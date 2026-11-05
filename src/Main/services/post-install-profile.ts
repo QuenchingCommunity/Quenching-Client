@@ -1,11 +1,12 @@
 import { AssetSyncService } from './asset-sync';
 import { syncBlightOnStartup } from './blight-service';
 import { configManager } from './config-manager';
+import { versionSkinService } from './version-skin-service';
 
 /** A package copy is committed before these client-owned settings are applied. */
 export async function applyInstalledProfile(
   war3Path: string,
-  options: { forceUnitSkinBaseline?: boolean; onProgress?: (message: string) => void } = {},
+  options: { forceUnitSkinBaseline?: boolean; restoreSkinsOnly?: boolean; onProgress?: (message: string) => void } = {},
 ): Promise<string[]> {
   const warnings: string[] = [];
   const skippedReasons: Record<string, string> = {
@@ -26,6 +27,11 @@ export async function applyInstalledProfile(
     }
   };
 
+  const restoreSkins = () => apply('已保存的涂装', async () => {
+    const missing = await versionSkinService.restoreSelections(war3Path);
+    if (missing.length) throw new Error(missing.join('；'));
+  });
+  if (options.restoreSkinsOnly) { await restoreSkins(); return warnings; }
   let outcome: Awaited<ReturnType<typeof AssetSyncService.syncConfiguredAssets>> | undefined;
   await apply('当前资源配置', async () => {
     outcome = await AssetSyncService.syncConfiguredAssets(war3Path, undefined, { forceUi: true });
@@ -36,5 +42,6 @@ export async function applyInstalledProfile(
   await apply('单位皮肤基线', () => AssetSyncService.refreshUnitSkinBaseline(
     war3Path, { force: options.forceUnitSkinBaseline === true },
   ));
+  await restoreSkins();
   return warnings;
 }

@@ -1,5 +1,5 @@
 import { CUSTOM_SKIN_CONFIG, SKIN_CONFIG, SkinChange } from './skin-config';
-import { SkinArtSet } from '../../../shared/skin-versions';
+import { SkinArtSet, VersionSkinChoice } from '../../../shared/skin-versions';
 
 export interface SkinTarget { unitId: string; name: string; icon: string }
 export interface PanelSkin { id: string; name: string; config: SkinChange[]; preview?: string }
@@ -19,6 +19,14 @@ const extraUnits: Record<string, string[][]> = {
 // whose SD models were verified in the game's base CASC layer; do not reuse HD-only assets.
 export const LEGACY_SD_SKINS = new Set(['h1_2','h2_2','h3_2','h4_2','o6_2','u11_2','u12_2','n16_2','t17_2','t18_2','t19_2']);
 const compactIcon = (unitId: string) => `skin-icon-${unitId.toLowerCase()}.png`;
+function warbandChanges(changes: SkinChange[]): SkinChange[] {
+  // A replacement model is a specific asset. Do not inherit the original
+  // unit's expansion/variant selection flags (e.g. Sorceress/Catapult).
+  // Presets which deliberately select a variant keep their explicit flags.
+  return changes.some(c => c.field === 'file' || c.field === 'file:hd') &&
+    !changes.some(c => c.field === 'fileVerFlags' || c.field === 'fileVerFlags:hd')
+    ? [...changes, { field: 'fileVerFlags', value: '0' }] : changes;
+}
 export function skinTargets(race: string, category: string): SkinTarget[] {
   if (category === 'hero') return SKIN_CONFIG[race]?.heroes || [];
   if (category === 'building') return (buildings[race] || []).map(([unitId, name]) => ({ unitId, name, icon: compactIcon(unitId) }));
@@ -35,12 +43,28 @@ export function builtInSkins(race: string, targetId: string, artSet: SkinArtSet)
     .map(skin => ({ ...skin, config: artSet === 'sd' ? skin.config.filter(c => !c.field.includes(':')) : skin.config }));
   if (artSet !== 'hd') return [];
   return (SKIN_CONFIG[race]?.warbands || []).filter(w => !w.id.endsWith('_u1'))
-    .map(w => ({ id: `${w.id}:${targetId}`, name: w.name, config: w.config.filter(c => c.unitId === targetId).map(({ field, value }) => ({ field, value })) }))
+    .map(w => ({ id: `${w.id}:${targetId}`, name: w.name, config: warbandChanges(w.config.filter(c => c.unitId === targetId).map(({ field, value }) => ({ field, value }))) }))
     .filter(skin => skin.config.length > 0);
 }
 export function warbandChoices(race: string, presetId: string) {
   const preset = SKIN_CONFIG[race]?.warbands.find(w => w.id === presetId);
   const targets = new Set([...skinTargets(race, 'unit'), ...skinTargets(race, 'building')].map(t => t.unitId));
   const ids = [...new Set(preset?.config.map(c => c.unitId) || [])].filter(id => targets.has(id));
-  return ids.map(unitId => ({ unitId, skinId: presetId.endsWith('_u1') ? 'original' : `${presetId}:${unitId}`, changes: presetId.endsWith('_u1') ? [] : preset!.config.filter(c => c.unitId === unitId).map(({ field, value }) => ({ field, value })) }));
+  return ids.map(unitId => ({ unitId, skinId: presetId.endsWith('_u1') ? 'original' : `${presetId}:${unitId}`, changes: presetId.endsWith('_u1') ? [] : warbandChanges(preset!.config.filter(c => c.unitId === unitId).map(({ field, value }) => ({ field, value }))) }));
+}
+
+/** Resolve persisted IDs from the same catalog used for selecting skins. */
+export function savedSkinChoices(artSet: SkinArtSet, selections: Record<string, string>,
+  custom: Array<{ id: string; targetId: string; artSet?: SkinArtSet; config: SkinChange[] }>) {
+  const choices: VersionSkinChoice[] = [];
+  const missing: string[] = [];
+  for (const [unitId, skinId] of Object.entries(selections)) {
+    if (skinId === 'original') { choices.push({ unitId, skinId, changes: [] }); continue; }
+    const imported = custom.find(skin => skin.id === skinId && skin.targetId === unitId && (skin.artSet || 'hd') === artSet);
+    const builtin = Object.keys(SKIN_CONFIG).flatMap(race => builtInSkins(race, unitId, artSet)).find(skin => skin.id === skinId);
+    const config = imported?.config || builtin?.config;
+    if (config) choices.push({ unitId, skinId, changes: config.map(change => ({ ...change })) });
+    else missing.push(`${artSet}/${unitId}: ${skinId}`);
+  }
+  return { choices, missing };
 }

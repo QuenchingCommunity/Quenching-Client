@@ -1,5 +1,7 @@
 # 每次版本更新的准备与验收
 
+Windows 签名维护（2026-10-29）：见 `wiki/windows-trust-signing-20261029.md`。正式 Windows 包必须具备可信 Authenticode 签名，不能漏签 .node／DLL；beforePack／afterPack／afterSign 已接入门禁、原生签名、ASAR 完整性维护和签后信任验收。签名完成后才生成更新摘要。TEST 无证书可本地构建，但不得宣称已解决用户的 Smart App Control／SmartScreen 信任问题。
+
 先执行 [测试优先流程](test-first-workflow.md)：A 带标记本地包交用户人工验收；通过后才做 B 独立测试自动更新，再交用户验收；两次通过后才做 C 正式大包及验证。以下构建／签名／上传动作只能在其所属阶段执行，不能合并提前完成。历史资源以 Git 追溯，不常驻复制每版旧树。
 
 ## 目录

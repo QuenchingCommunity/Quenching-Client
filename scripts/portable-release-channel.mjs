@@ -5,6 +5,10 @@ import path from 'node:path';
 export const PORTABLE_TEST_MARKER = 'quenching-update-test.json';
 const testState = new Set(['.test-config', '.test-user-data', 'README-TEST.txt', 'start-update-test.cmd']);
 
+export function isPortableRuntimePath(relative) {
+  return /^(?:unpacked|_tmp)(?:\/|$)/i.test(relative.replaceAll('\\', '/'));
+}
+
 /** Local test selection/configuration must never enter a signed file inventory. */
 export function isPortableTestOnlyPath(relative) {
   const top = relative.replaceAll('\\', '/').split('/')[0].toLowerCase();
@@ -30,7 +34,7 @@ export async function preparePortableChannel(root, { channel = 'test', baseUrl }
   const markerValue = channel === 'test' ? portableTestMarker(baseUrl) : undefined;
   const exe = await fs.lstat(path.join(root, 'QMClient.exe'));
   if (!exe.isFile() || exe.isSymbolicLink()) throw new Error('Expected an ordinary Windows portable QMClient.exe');
-  for (const name of [...testState, '.quenching-client-update']) {
+  for (const name of [...testState, '.quenching-client-update', 'unpacked', '_tmp']) {
     if (await fs.lstat(path.join(root, name)).catch(error => { if (error.code !== 'ENOENT') throw error; return null; })) {
       throw new Error(`Export a fresh build, not a used test installation: ${name}`);
     }

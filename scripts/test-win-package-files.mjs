@@ -58,6 +58,8 @@ for (const file of [
   'node_modules/7zip-bin-full/win/arm64/7z.exe',
   'node_modules/7zip-bin-full/win/ia32/7z.exe',
   'node_modules/7zip-bin-full/win/x64/7zc/7zc.exe',
+  'node_modules/@jamiephan/casclib/prebuilds/linux-x64/native.node',
+  'node_modules/@jamiephan/stormlib/prebuilds/darwin-arm64/native.node',
 ]) assert.equal(fixed.dependency(path.join(root, file), fileStat), false, `Unneeded dependency ${file}`);
 
 // Confirm this regression check detects the original exclusions-only bug.

@@ -29,6 +29,7 @@ import { normalizeWar3RootPath } from './war3-path';
 import { isShaderDirectoryLock, renameShaderDirectory, replaceLockedShaderFiles } from './shader-directory';
 import { createSettingsProgressReporter, SettingsProgress } from '../../shared/settings-progress';
 import { syncAtmosphericLight } from './atmospheric-light';
+import { resourceCacheLocation } from './resource-cache-location';
 
 const PROFILE_ENV_MARKER = '.quenching-public-environment';
 const PROFILE_SHADER_MARKER = '.quenching-shader-profile';
@@ -342,8 +343,8 @@ export class AssetSyncService {
     if(developmentSources)return;
     let firstRun=false;
     await prepareBundledAssets(assets,{
-      cacheBase:path.join(app.getPath('userData'),'resources'),required:app.isPackaged,
-      sharedCache:true,verification:'light',startup:true,
+      ...resourceCacheLocation(app.isPackaged,app.getPath('exe'),assets),required:app.isPackaged,
+      startup:true,
       onPreparation:first=>{firstRun=first;notify({firstRun,percent:0});},
       onProgress:percent=>notify({firstRun,percent}),
     });
@@ -372,8 +373,7 @@ export class AssetSyncService {
       }))?.isDirectory()) {
         const developmentSources = !app.isPackaged && (await Promise.all(UNPACKED_RESOURCE_DIRS.map(dir => fs.pathExists(path.join(p, 'unpacked', dir))))).every(Boolean);
         if (!developmentSources && (app.isPackaged || await fs.pathExists(path.join(p, 'quenching', 'resources.manifest.json')))) {
-          await prepareBundledAssets(p, { cacheBase: path.join(app.getPath('userData'), 'resources'), required: app.isPackaged, selections: resources,
-            sharedCache:true,verification:'light' });
+          await prepareBundledAssets(p, { ...resourceCacheLocation(app.isPackaged,app.getPath('exe'),p), required: app.isPackaged, selections: resources });
         }
         return p;
       }

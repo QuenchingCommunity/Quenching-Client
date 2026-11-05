@@ -30,10 +30,15 @@ extraResources:
       - "!unpacked{,/**/*}"
 
 win:
+  # Smart App Control also validates PE native addons, not only QMClient.exe.
+  signExts: [".node", ".dll"]
+  signtoolOptions:
+    signingHashAlgorithms: ["sha256"]
   files:
     # Keep this matcher inclusive: an exclusions-only platform matcher makes
     # electron-builder prepend **/* alongside the shared runtime allowlist.
     - package.json
+    - "!node_modules/@jamiephan/{casclib,stormlib}/prebuilds/{linux-*,darwin-*,win32-arm64,win32-ia32}/**/*"
     - "!node_modules/7zip-bin-full/mac/**/*"
     - "!node_modules/7zip-bin-full/linux/**/*"
     - "!node_modules/7zip-bin-full/win/{arm,arm64,ia32}/**/*"
@@ -62,6 +67,8 @@ downloadAlternateFFmpeg: false
 
 asar: true
 beforePack: scripts/check-mac-native-before-pack.cjs
+afterPack: scripts/windows-native-signing.cjs
+afterSign: scripts/check-windows-signatures.cjs
 
 # @jamiephan/stormlib ships N-API prebuilds, but its npm package does not ship
 # thirdparty/StormLib sources required by node-gyp rebuild. Rebuilding during

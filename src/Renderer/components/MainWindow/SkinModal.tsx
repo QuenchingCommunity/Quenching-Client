@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Switch, message, Modal } from 'antd';
 import { ModelPreview } from './ModelPreview';
 import { CustomSkinEditor } from './CustomSkinEditor';
@@ -51,6 +51,7 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
   const [originals, setOriginals] = useState<Record<string, VersionSkinChange[]>>({});
   const [editorOpen, setEditorOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const applying = useRef(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [enabled, setEnabled] = useState(true);
@@ -93,9 +94,13 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
   const currentSkin = skins.find(item => item.id === previewId)
     || skins.find(item => item.id === selections[artSet]?.[target?.unitId]) || skins[0];
   const warbands = artSet === 'hd' ? (SKIN_CONFIG[raceId]?.warbands || []).map(item => ({ ...item, name: builtInSkinLabel(item.id, raceId, '', item.name, t) })) : [];
-  const currentPreset = warbands.find(item => item.id === presetId) || warbands[0];
+  const currentPreset = warbands.find(item => item.id === presetId)
+    || warbands.find(item => {
+      const choices = warbandChoices(raceId, item.id);
+      return choices.length > 0 && choices.every(choice => (selections[artSet]?.[choice.unitId] || 'original') === choice.skinId);
+    }) || warbands[0];
   const presetChoices = currentPreset ? warbandChoices(raceId, currentPreset.id) : [];
-  const presetComplete = presetChoices.length > 0 && presetChoices.every(item => selections[artSet]?.[item.unitId] === item.skinId);
+  const presetComplete = presetChoices.length > 0 && presetChoices.every(item => (selections[artSet]?.[item.unitId] || 'original') === item.skinId);
   const representative = presetChoices.find(item => item.changes.some(c => c.field === 'file' || c.field.startsWith('file:'))) || presetChoices[0];
   const previewModel = !isWarband && target && currentSkin
     ? modelFrom(originals[target.unitId] || [], currentSkin.config, artSet) : undefined;
@@ -105,12 +110,16 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
     : !!currentSkin && !isFullPackageInstalled && needsPackage(currentSkin.config);
 
   const apply = async (choices: VersionSkinChoice[]) => {
+    if (applying.current) return false;
+    applying.current = true;
     setBusy(true);
     try {
       setSelections(await window.electronAPI.applyVersionSkins(artSet, choices));
-      setEnabled(true); message.success(t('skin.panel.applied', { mode: artSet.toUpperCase() }));
+      setEnabled(true);
+      return true;
     } catch (e: any) { message.error(e.message || t('skin.apply.fail')); }
-    finally { setBusy(false); }
+    finally { applying.current = false; setBusy(false); }
+    return false;
   };
   const toggle = async () => {
     setBusy(true);
@@ -149,18 +158,25 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
   };
   const chooseRace = (id: string) => { playSmall(); setRaceId(id); setTargetId(''); setPreviewId(''); setPresetId(''); setEditorOpen(false); };
   const chooseCategory = (id: Category) => { playSmall(); setCategory(id); if (id !== 'hero' && raceId === 'neutral') setRaceId('hum'); setUnitMode('single'); setTargetId(''); setPreviewId(''); setPresetId(''); setEditorOpen(false); };
-  const cycleSkin = (step: number) => {
-    if (!skins.length) return;
+  const cycleSkin = async (step: number) => {
+    if (!canApply || !target || !skins.length || applying.current) return;
     const index = skins.findIndex(item => item.id === currentSkin?.id);
     const next = (index + step + skins.length) % skins.length;
-    setPreviewId(skins[next].id);
+    const skin = skins[next];
+    setPreviewId(skin.id);
+    if (!isFullPackageInstalled && needsPackage(skin.config)) { message.info(t('skin.panel.needPackage')); return; }
     playSmall();
+    await apply([{ unitId: target.unitId, skinId: skin.id, changes: skin.config }]);
   };
-  const cyclePreset = (step: number) => {
-    if (!warbands.length) return;
+  const cyclePreset = async (step: number) => {
+    if (!canApply || !warbands.length || applying.current) return;
     const index = warbands.findIndex(item => item.id === currentPreset?.id);
-    setPresetId(warbands[(index + step + warbands.length) % warbands.length].id);
+    const preset = warbands[(index + step + warbands.length) % warbands.length];
+    setPresetId(preset.id);
+    if (!isFullPackageInstalled && needsPackage(preset.config)) { message.info(t('skin.panel.needPackage')); return; }
     playSmall();
+    const choices = warbandChoices(raceId, preset.id);
+    if (choices.length) await apply(choices);
   };
 
   if (!open) return null;
@@ -169,7 +185,7 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
       <div className={styles.layout}>
         <nav className={styles.sidebar} aria-label={t('skin.panel.categories')}>
           {categories.map(item => <button key={item.id} className={`${styles.category} ${category === item.id ? styles.categoryActive : ''}`}
-            aria-pressed={category === item.id} onClick={() => chooseCategory(item.id)} onMouseEnter={playHover}>
+            disabled={busy} aria-pressed={category === item.id} onClick={() => chooseCategory(item.id)} onMouseEnter={playHover}>
             <img src={asset(item.icon)} alt="" /><span>{t(`skin.category.${item.id}`)}</span>
           </button>)}
           <div className={styles.sidebarFoot}>{t('skin.panel.quality', { mode: artSet.toUpperCase() })}<br /><small>{t('skin.panel.switchQuality')}</small></div>
@@ -194,13 +210,13 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
             {category === 'unit' && <div className={styles.unitModes} role="group" aria-label={t('skin.panel.unitModes')}>
               {(['single', 'warband', 'retro'] as const).map(id =>
                 <button key={id} className={unitMode === id ? styles.modeActive : ''} aria-pressed={unitMode === id}
-                  onClick={() => { playSmall(); setUnitMode(id); setEditorOpen(false); }} onMouseEnter={playHover}>{t(`skin.panel.mode.${id}`)}</button>)}
+                  disabled={busy} onClick={() => { playSmall(); setUnitMode(id); setEditorOpen(false); }} onMouseEnter={playHover}>{t(`skin.panel.mode.${id}`)}</button>)}
             </div>}
             {!isRetro && <section>
               <h3>{t('skin.panel.race')}</h3>
               <div className={styles.races} role="group" aria-label={t('skin.panel.selectRace')}>
                 {visibleRaces.map(item => <button key={item.id} className={`${styles.race} ${raceId === item.id ? styles.raceActive : ''}`}
-                  title={t(`skin.race.${item.id}`)} aria-label={t(`skin.race.${item.id}`)} aria-pressed={raceId === item.id} onClick={() => chooseRace(item.id)} onMouseEnter={playHover}>
+                  disabled={busy} title={t(`skin.race.${item.id}`)} aria-label={t(`skin.race.${item.id}`)} aria-pressed={raceId === item.id} onClick={() => chooseRace(item.id)} onMouseEnter={playHover}>
                   <img src={asset(item.icon)} alt="" />
                 </button>)}
               </div>
@@ -219,7 +235,7 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
                 <h3>{t(`skin.panel.select.${category}`)}</h3>
                 <div className={styles.targets}>
                   {targets.map(item => <button key={item.unitId} className={`${styles.target} ${target?.unitId === item.unitId ? styles.targetActive : ''}`}
-                    title={item.name} aria-label={item.name} aria-pressed={target?.unitId === item.unitId}
+                    disabled={busy} title={item.name} aria-label={item.name} aria-pressed={target?.unitId === item.unitId}
                     onClick={() => { playSmall(); setTargetId(item.unitId); setPreviewId(''); setEditorOpen(false); }} onMouseEnter={playHover}>
                     {item.icon ? <img src={asset(item.icon)} alt="" /> : <span className={styles.targetLabel}>{item.name}</span>}
                   </button>)}
@@ -230,17 +246,16 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
                 <h3>{t('skin.panel.skins')}</h3>
                 {isWarband && !warbands.length && <p className={styles.empty}>{t('skin.panel.noWarbands')}</p>}
                 <div className={styles.choiceRow}>
-                  <button className={styles.arrow} aria-label={t(isWarband ? 'skin.panel.previousWarband' : 'skin.panel.previousSkin')} onClick={() => isWarband ? cyclePreset(-1) : cycleSkin(-1)} disabled={isWarband ? !warbands.length : !skins.length}>‹</button>
+                  <button className={styles.arrow} aria-label={t(isWarband ? 'skin.panel.previousWarband' : 'skin.panel.previousSkin')} onClick={() => void (isWarband ? cyclePreset(-1) : cycleSkin(-1))} disabled={!canApply || (isWarband ? !warbands.length : !skins.length)}>‹</button>
                   <div className={styles.choiceName}><strong>{previewTitle || t(isWarband ? 'skin.panel.noWarbands' : 'skin.panel.noSkins')}</strong><small>{isWarband ? currentPreset ? t('skin.panel.targetCount', { count: presetChoices.length }) : t('skin.panel.noWarbands') : t(currentSkin && selections[artSet]?.[target?.unitId] === currentSkin.id ? 'skin.panel.currentApplied' : 'skin.panel.livePreview')}</small></div>
-                  <button className={styles.arrow} aria-label={t(isWarband ? 'skin.panel.nextWarband' : 'skin.panel.nextSkin')} onClick={() => isWarband ? cyclePreset(1) : cycleSkin(1)} disabled={isWarband ? !warbands.length : !skins.length}>›</button>
-                  {isWarband ? <button className={styles.apply} disabled={!canApply || unavailable || !presetChoices.length} onClick={() => void apply(presetChoices)}>{t(unavailable ? 'skin.panel.needPackage' : presetComplete ? 'skin.panel.reapply' : 'skin.panel.select')}</button>
-                    : <button className={styles.apply} disabled={!canApply || unavailable || !target || !currentSkin} onClick={() => void apply([{ unitId: target!.unitId, skinId: currentSkin!.id, changes: currentSkin!.config }])}>
-                      {t(unavailable ? 'skin.panel.needPackage' : 'skin.panel.select')}
-                    </button>}
+                  <button className={styles.arrow} aria-label={t(isWarband ? 'skin.panel.nextWarband' : 'skin.panel.nextSkin')} onClick={() => void (isWarband ? cyclePreset(1) : cycleSkin(1))} disabled={!canApply || (isWarband ? !warbands.length : !skins.length)}>›</button>
+                  <span className={styles.selectionStatus} role="status">{t(busy ? 'skin.panel.processing' : unavailable ? 'skin.panel.needPackage' :
+                    (isWarband ? presetComplete : (selections[artSet]?.[target?.unitId] || 'original') === currentSkin?.id)
+                      ? 'skin.panel.currentApplied' : 'skin.panel.livePreview')}</span>
                 </div>
                 {!isWarband && <div className={styles.choiceMeta}>
                   <span className={styles.skinCount}>{target ? `${Math.max(0, skins.findIndex(item => item.id === currentSkin?.id) + 1)} / ${skins.length} · ${target.name}` : ''}</span>
-                  {target && <button className={styles.addCustom} onClick={() => { playSmall(); setEditorOpen(true); }}>
+                  {target && <button className={styles.addCustom} disabled={busy || loading} onClick={() => { playSmall(); setEditorOpen(true); }}>
                     <span aria-hidden="true">＋</span> {t('skin.editor.title')}
                   </button>}
                   {custom.some(item => item.id === currentSkin?.id) && <button className={styles.addCustom}
@@ -270,6 +285,6 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
     </OverlayModal>
     {target && editorOpen && <CustomSkinEditor open={editorOpen} artSet={artSet} targetId={target.unitId} targetName={target.name}
       category={category} race={raceId} onClose={() => setEditorOpen(false)}
-      onCreated={item => { setCustom(previous => [...previous, item]); setPreviewId(item.id); }} />}
+      onCreated={item => { setCustom(previous => [...previous, item]); setPreviewId(item.id); void apply([{ unitId: item.targetId, skinId: item.id, changes: item.config }]); }} />}
   </>;
 };

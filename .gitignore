@@ -82,5 +82,6 @@ yarn-error.log*
 # Prefer deleting the unused one rather than ignoring both.
 
 __pycache__/
+/unpacked/
 offline.exe
 *.pyc

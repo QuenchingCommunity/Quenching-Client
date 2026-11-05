@@ -1,4 +1,8 @@
 module.exports = async context => {
+    if(context.electronPlatformName==='win32') {
+        const { configureWindowsSigning } = await import('./windows-signing.mjs');
+        await configureWindowsSigning(context);
+    }
     const { prepareClientAssets } = await import('./prepare-client-assets.mjs');
     await prepareClientAssets(context.packager.info.projectDir);
     if (context.electronPlatformName !== 'darwin') return;
