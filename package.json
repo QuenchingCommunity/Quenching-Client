@@ -1,10 +1,12 @@
 {
 	"name": "quenching-electron-client",
 	"productName": "Quenching Mod Client",
-	"version": "3.7.0",
+	"version": "3.7.4",
 	"main": "dist/main.js",
 	"scripts": {
 		"postinstall": "patch-package --patch-dir build-patches --error-on-fail",
+		"test:hdr-exposure": "tsx scripts/test-hdr-exposure.ts && tsx scripts/test-hdr-exposure-ipc.ts",
+		"test:vision-modules": "tsx scripts/test-vision-modules.ts",
 		"test:de-model": "tsx scripts/test-de-model.ts",
 		"test:forsaken-paladin": "tsx scripts/test-forsaken-paladin.ts",
 		"test:preview-sequences": "tsx scripts/test-preview-sequences.ts",

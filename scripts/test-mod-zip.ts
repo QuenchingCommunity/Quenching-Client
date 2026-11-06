@@ -89,6 +89,7 @@ export async function run() {
       const branch = path.join(game, channel === 'retail' ? '_retail_' : '_ptr_');
       // No local/bundled ownership list; an unchanged official file is missing on purpose.
       await writeTree(branch, { 'QMoff/textures/changed.txt': 'player customized 35', 'QMoff/textures/retired.txt': 'old official',
+        'NELonstar/nested/player.txt': 'unmanaged player directory',
         'textures/player-retired.txt': 'player owns this edit', 'textures/custom.txt': 'player file', '_patch/keep.que': '-v3.5-\n' });
       return { game, branch };
     }
@@ -113,6 +114,7 @@ export async function run() {
     assert.ok(progress.every((percent, index) => index === 0 || percent >= progress[index - 1])); assert.equal(progress.at(-1), 100);
     assert.ok(requests.includes('missing/QMF3.5-to-3.6.zip')); // Existing fallback download behavior.
     assert.equal((await getModUpdateStatus(firstInstall.game, options)).decision, 'upToDate');
+    assert.equal(await fs.readFile(path.join(firstInstall.branch, 'NELonstar/nested/player.txt'), 'utf8'), 'unmanaged player directory');
 
     const failureInstall = await installation('rollback');
     const copy = fs.copy;
@@ -133,6 +135,35 @@ export async function run() {
     const resumed = await applyModUpdate(failureInstall.game, options);
     assert.ok(resumed.applied, resumed.error); assert.equal(resumed.appliedPatches, 1);
     assert.ok(!requests.some(url => url.endsWith('QMF3.5-to-3.6.zip')));
+    assert.ok(!requests.some(url => url.endsWith('.zip')), 'verified failed-step ZIP is reused without any ZIP download');
+    assert.match(resumed.downloadedFrom || '', /verified-cache/);
+
+    const observerInstall = await installation('closed-progress-window');
+    const observer = await applyModUpdate(observerInstall.game, { ...options, onProgress: event => {
+      if (event.phase === 'complete') throw new Error('fixture renderer closed after commit');
+    } });
+    assert.ok(observer.applied, observer.error);
+    assert.equal((await getInstalledModState(observerInstall.game))?.version, '3.7');
+
+    const stateInstall = await installation('state-rename-failure');
+    const previousState = { sequence: 35, version: '3.5', note: 'previous installed state must survive' };
+    const stateFile = path.join(stateInstall.branch, '.quenching/installed-mod.json');
+    await fs.outputJson(stateFile, previousState);
+    const rename = fs.rename;
+    (fs as any).rename = async (source: string, destination: string, ...args: any[]) => {
+      if (destination === stateFile) throw new Error('injected state replacement failure');
+      return (rename as any)(source, destination, ...args);
+    };
+    let stateFailure;
+    try { stateFailure = await applyModUpdate(stateInstall.game, options); } finally { fs.rename = rename; }
+    assert.equal(stateFailure.applied, false);
+    assert.deepEqual(await fs.readJson(stateFile), previousState);
+    assert.equal((await getInstalledModState(stateInstall.game))?.version, '3.5');
+    await fs.writeFile(path.join(stateInstall.branch, '_tmp/mod-update-cache', manifest.patches[0].sha256 + '.bin'), 'corrupt retry ZIP');
+    requests.length = 0;
+    const repairedCache = await applyModUpdate(stateInstall.game, options);
+    assert.ok(repairedCache.applied, repairedCache.error);
+    assert(requests.some(url => url.endsWith('QMF3.5-to-3.6.zip')), 'corrupt MOD cache is rejected and fetched again');
 
     // A corrupt ZIP is authenticated before any player writes; also reject a
     // signed-but-internally-inconsistent payload rather than marking it installed.

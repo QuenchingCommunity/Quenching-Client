@@ -1,3 +1,6 @@
+import {validateHdrExposure} from '../../shared/hdr-exposure';
+import {copyPostProcessingConfigIfMissing,setPostProcessingTonemapEnabled,POST_PROCESSING_CONFIG_FILE} from '../services/post-processing-config';
+import {assertVisionSettingAllowed} from '../services/vision-modules';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import path from 'path';
@@ -56,6 +59,7 @@ async function resolveCurrentShaderProfile(war3Path: string, overrides: Record<s
 async function applyCurrentShaderToggles(
     war3Path: string, overrides: Record<string, unknown> = {}, installFiles: string[] = [],
 ): Promise<void> {
+    await assertVisionSettingAllowed(war3Path,'objectShader');
     const { profile, modSettings } = await resolveCurrentShaderProfile(war3Path, overrides);
     const shadersDir = path.join(await resolveShadersBaseDir(war3Path), 'shaders');
     const quenchingDir = path.join(await AssetSyncService.getAssetsDir(), 'quenching');
@@ -320,7 +324,24 @@ export function registerShaderHandlers() {
         return true;
     });
 
+    ipcMain.handle('shader:update-hdr-exposure', async (_event, war3Path: string, value: number) => {
+        const exposure=validateHdrExposure(value);
+        await assertVisionSettingAllowed(war3Path,'hdrExposure');
+        const {profile,modSettings}=await resolveCurrentShaderProfile(war3Path);
+        if(!supportsHdr(profile))throw new Error('Overall brightness is unavailable for this game version');
+        if(getChannelModEnabled(getSelectedGameChannel())){
+            const buildDir=path.join(war3Path,getSelectedGameFolder());
+            if(!(await fs.stat(buildDir)).isDirectory())throw new Error('Game branch missing');
+            const source=path.join(await AssetSyncService.getAssetsDir([]),'quenching',POST_PROCESSING_CONFIG_FILE);
+            await copyPostProcessingConfigIfMissing(buildDir,source);
+            await setPostProcessingTonemapEnabled(buildDir,modSettings.hdr ?? modSettings.postProcessing !== false,exposure);
+        }
+        configManager.set('modSettings',{...configManager.get('modSettings'),hdrExposure:exposure});
+        return true;
+    });
+
     ipcMain.handle('shader:update-hdr', async (_event, war3Path: string, enabled: boolean) => {
+        await assertVisionSettingAllowed(war3Path,'hdr');
         if (typeof enabled !== 'boolean') throw new Error('Invalid HDR setting');
         if (!getChannelModEnabled(getSelectedGameChannel())) return true;
         const { profile } = await resolveCurrentShaderProfile(war3Path);
@@ -332,6 +353,7 @@ export function registerShaderHandlers() {
     });
 
     ipcMain.handle('shader:update-post-processing-glow', async (_event, war3Path: string, enabled: boolean) => {
+        await assertVisionSettingAllowed(war3Path,'postProcessingGlow');
         console.log(`[Shader] Updating post-processing glow: ${enabled}`);
 
         if (enabled) {

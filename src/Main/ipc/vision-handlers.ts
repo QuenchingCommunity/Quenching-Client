@@ -1,3 +1,4 @@
+import {getVisionModules, setVisionModule} from '../services/vision-modules';
 import { ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
@@ -78,11 +79,14 @@ async function scanVisionMod(visionModPath: string) {
 
 export function registerVisionHandlers() {
     console.log('[Vision] Vision handlers registered.');
+    ipcMain.handle('vision:modules', (_event, root: string) => getVisionModules(root));
+    ipcMain.handle('vision:set-module', (_event, root: string, source: string, module: any, enabled: boolean) => setVisionModule(root,source,module,enabled));
 
     // 处理半身头像
     ipcMain.handle('vision:update-half-portrait', async (event, war3Path: string, visionModPath: string, enabled: boolean) => {
         console.log(`[Vision] Updating half portrait: ${enabled}`);
         try {
+            if(Object.values(await getVisionModules(war3Path)).some(Boolean))throw new Error('请先关闭 Vision Mod 模块，再使用旧版兼容接口');
             if (!visionModPath || !(await fs.pathExists(visionModPath))) {
                 throw new Error('未设置或无效的 VisionMod 路径');
             }
@@ -115,6 +119,7 @@ export function registerVisionHandlers() {
     ipcMain.handle('vision:update-model-enhance', async (event, war3Path: string, visionModPath: string, enabled: boolean) => {
         console.log(`[Vision] Updating model enhance: ${enabled}`);
         try {
+            if(Object.values(await getVisionModules(war3Path)).some(Boolean))throw new Error('请先关闭 Vision Mod 模块，再使用旧版兼容接口');
             if (!visionModPath || !(await fs.pathExists(visionModPath))) {
                 throw new Error('未设置或无效比 VisionMod 路径');
             }

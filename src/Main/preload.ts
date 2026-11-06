@@ -3,6 +3,8 @@ import { IS_TEST_RELEASE } from '../shared/local-release';
 
 // 暴露安全的API给渲染进程
 const electronAPI: ElectronAPI = {
+  getVisionModules: root => ipcRenderer.invoke('vision:modules',root),
+  setVisionModule: (root,source,module,enabled) => ipcRenderer.invoke('vision:set-module',root,source,module,enabled),
   showForum: bounds => ipcRenderer.invoke('forum:show', bounds),
   setForumBounds: bounds => ipcRenderer.invoke('forum:bounds', bounds),
   hideForum: () => ipcRenderer.invoke('forum:hide'),
@@ -71,6 +73,7 @@ const electronAPI: ElectronAPI = {
   updateObjectShader: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-object-shader', war3Path, enabled),
   updatePostProcessing: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing', war3Path, enabled),
   updatePostProcessingGlow: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing-glow', war3Path, enabled),
+  updateHdrExposure: (war3Path: string, exposure: number) => ipcRenderer.invoke('shader:update-hdr-exposure',war3Path,exposure),
   updateHdr: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-hdr', war3Path, enabled),
   updatePostProcessingOutline: (war3Path: string, enabled: boolean) => ipcRenderer.invoke('shader:update-post-processing-outline', war3Path, enabled),
   /** @deprecated Manual toggle removed; always syncs shaders from detected War3 version. */

@@ -14,7 +14,7 @@ const fixture: any = { handlers: {}, config: { war3Path: root, gameChannel: 'ret
 (globalThis as any).__packageSwitchFixture = fixture;
 const mocks: Record<string, string> = {
   electron: 'export const ipcMain={handle:(key,handler)=>f.handlers[key]=handler};export const dialog={};',
-  'config-manager': 'export const configManager={get:key=>f.config[key],set:(key,value)=>f.config[key]=value};',
+  'config-manager': 'export const configManager={get:key=>f.config[key],set:(key,value)=>{if(f.failPersistence&&key==="lastFullPackageBytes")throw new Error("fixture settings persistence failed");f.config[key]=value;}};',
   'asset-sync': 'export const AssetSyncService={getAssetsDir:async()=>"unused-assets",ensurePostProcessingConfig:async()=>{}};',
   'game-launcher': 'export const GameLauncher={};',
   'offline-test-launcher': 'export const registerOfflineTestLauncher=()=>{};',
@@ -30,7 +30,7 @@ const mocks: Record<string, string> = {
   'client-mod-files': 'import fs from "fs-extra";import path from "node:path";export const enumerateClientModFiles=async(build,parked)=>await fs.pathExists(path.join(build,...(parked?["QMoff"]:[]),"units","unitskin.txt"))?["units/unitskin.txt"]:[];',
   'full-package-install': 'export const installPackageSources=(...args)=>f.install(...args);',
   'mod-update-service': 'export const assertWarcraftNotRunning=async()=>{};',
-  'post-install-profile': 'export const applyInstalledProfile=async(_,options={})=>{if(options.restoreSkinsOnly)f.restores++;else f.profiles++;return[];};',
+  'post-install-profile': 'export const applyInstalledProfile=async(_,options={})=>{if(f.failProfile)throw new Error("fixture post-copy profile failed");if(options.restoreSkinsOnly)f.restores++;else f.profiles++;return[];};',
 };
 try {
   const bundle = await build({ stdin: { contents: 'export { registerLaunchHandlers } from "./src/Main/ipc/launch-handlers";', resolveDir: process.cwd(), loader: 'ts' },
@@ -93,6 +93,20 @@ try {
   assert.equal(fixture.config.channelModEnabled.retail, true);
   assert.equal(await fs.readFile(resource, 'utf8'), 'new package skin');
   assert.equal(fixture.profiles, 2, 'explicitly enabling MOD applies the installed resource settings');
+  fixture.failPersistence = true;
+  const persistenceWarning = await install();
+  assert.equal(persistenceWarning.success, true);
+  assert.match(persistenceWarning.configurationError, /settings persistence/);
+  fixture.failPersistence = false;
+  fixture.failProfile = true;
+  const profileWarning = await install();
+  assert.equal(profileWarning.success, true);
+  assert.match(profileWarning.configurationError, /post-copy profile/);
+  fixture.failProfile = false;
+  const closedWindow = await fixture.handlers['mod:install-full-package']({ sender: {
+    send() { throw new Error('fixture window closed'); },
+  } }, [source]);
+  assert.equal(closedWindow.success, true, 'closed progress window cannot turn installed files into failure');
   // Unsupported builds must be rejected before extraction, journal recovery or enabling.
   await toggle(false);
   const offJournal = await fs.readFile(path.join(retail, '.quenching', 'branch-toggle.json'), 'utf8');

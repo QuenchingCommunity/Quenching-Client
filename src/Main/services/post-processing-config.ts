@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { randomUUID } from 'node:crypto';
 import { withResourceDirectory } from './resource-directory-queue';
+import {validateHdrExposure} from '../../shared/hdr-exposure';
 
 export const POST_PROCESSING_CONFIG_FILE = 'PostProcessingConfig.txt';
 
@@ -22,16 +23,17 @@ export async function setPostProcessingAoEnabled(buildDir: string, enabled: bool
   return setPostProcessingSectionEnabled(buildDir, 'ASSAO', enabled);
 }
 
-/** Only [Tonemap] Enabled changes; exposure and all other sections stay intact. */
-export async function setPostProcessingTonemapEnabled(buildDir: string, enabled: boolean): Promise<boolean> {
-  return setPostProcessingSectionEnabled(buildDir, 'Tonemap', enabled);
+/** Update Tonemap atomically; omitted exposure preserves an existing custom value. */
+export async function setPostProcessingTonemapEnabled(buildDir: string, enabled: boolean, exposure?: number): Promise<boolean> {
+  if (exposure !== undefined) exposure = validateHdrExposure(exposure);
+  return setPostProcessingSectionEnabled(buildDir, 'Tonemap', enabled, exposure);
 }
 
 export async function setPostProcessingBloomEnabled(buildDir: string, enabled: boolean): Promise<boolean> {
   return setPostProcessingSectionEnabled(buildDir, 'Bloom', enabled);
 }
 
-async function setPostProcessingSectionEnabled(buildDir: string, section: string, enabled: boolean): Promise<boolean> {
+async function setPostProcessingSectionEnabled(buildDir: string, section: string, enabled: boolean, exposure?: number): Promise<boolean> {
   const target = path.join(buildDir, POST_PROCESSING_CONFIG_FILE);
   return withResourceDirectory(target, async () => {
   const content = await fs.readFile(target, 'utf8').catch((error: NodeJS.ErrnoException) => {
@@ -41,17 +43,20 @@ async function setPostProcessingSectionEnabled(buildDir: string, section: string
   if (content === null) return false;
   const eol = content.includes('\r\n') ? '\r\n' : '\n';
   const lines = content.split(/\r?\n/);
-  const value = `Enabled=${enabled ? 1 : 0}`;
-  const header = lines.findIndex(line => line.trim().toLowerCase() === `[${section.toLowerCase()}]`);
+  const values:Record<string,string> = {Enabled: String(enabled ? 1 : 0), ...(exposure !== undefined ? {Exposure:String(exposure)} : {})};
+  let header = lines.findIndex(line => line.trim().toLowerCase() === `[${section.toLowerCase()}]`);
   if (header === -1) {
     while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
-    lines.push('', `[${section}]`, value);
-  } else {
+    lines.push('', `[${section}]`);
+    header = lines.length - 1;
+  }
+  for (const [key,value] of Object.entries(values)) {
     let end = lines.findIndex((line, i) => i > header && line.trim().startsWith('['));
     if (end === -1) end = lines.length;
-    const existing = lines.findIndex((line, i) => i > header && i < end && /^\s*enabled\s*=/i.test(line));
-    if (existing === -1) lines.splice(header + 1, 0, value);
-    else lines[existing] = value;
+    const pattern = new RegExp(`^\\s*${key}\\s*=`,'i');
+    const matches = lines.map((line,i)=>i>header && i<end && pattern.test(line)?i:-1).filter(i=>i!==-1);
+    if (!matches.length) lines.splice(header + 1, 0, `${key}=${value}`);
+    else {lines[matches[0]]=`${key}=${value}`;for(const i of matches.slice(1).reverse())lines.splice(i,1);}
   }
   const next = lines.join(eol);
   if (next === content) return false;

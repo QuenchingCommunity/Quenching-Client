@@ -54,6 +54,8 @@ interface ThirdPartyState {
 }
 
 interface ElectronAPI {
+  getVisionModules: (root:string) => Promise<import('../shared/vision-modules').VisionModules>;
+  setVisionModule: (root:string,source:string,module:import('../shared/vision-modules').VisionModule,enabled:boolean) => Promise<boolean>;
   showForum: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>;
   setForumBounds: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>;
   hideForum: () => Promise<void>;
@@ -174,6 +176,7 @@ interface ElectronAPI {
   updateObjectShader: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updatePostProcessing: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updatePostProcessingGlow: (war3Path: string, enabled: boolean) => Promise<boolean>;
+  updateHdrExposure: (war3Path: string, exposure: number) => Promise<boolean>;
   updateHdr: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updatePostProcessingOutline: (war3Path: string, enabled: boolean) => Promise<boolean>;
   /** @deprecated Always auto-syncs from War3 version; `enabled` ignored. */

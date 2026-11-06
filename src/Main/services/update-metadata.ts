@@ -1,5 +1,4 @@
-import http from 'node:http';
-import https from 'node:https';
+import { getUpdateResponse } from './update-network';
 
 export const UPDATE_METADATA_TIMEOUT_MS = 15_000;
 
@@ -18,11 +17,11 @@ export async function requestUpdateMetadata(url: string, options: {
         parsed.username || parsed.password || parsed.hash) throw new Error('unsafe update metadata URL');
     if (redirects > 5) throw new Error('too many metadata redirects');
     if (controller.signal.aborted) throw new Error('update metadata request timed out');
-    return new Promise<Buffer>((resolve, reject) => {
-      const req = (parsed.protocol === 'https:' ? https : http).get(parsed, {
+    const res = await getUpdateResponse(parsed, {
         signal: controller.signal,
         headers: { 'User-Agent': 'Quenching-Updater/1', Accept: 'application/json, text/plain', 'Cache-Control': 'no-cache' },
-      }, res => {
+      });
+    return new Promise<Buffer>((resolve, reject) => {
         if ([301, 302, 303, 307, 308].includes(res.statusCode || 0) && res.headers.location) {
           const next = new URL(res.headers.location, parsed).toString();
           res.destroy();
@@ -45,8 +44,6 @@ export async function requestUpdateMetadata(url: string, options: {
         res.on('end', () => resolve(Buffer.concat(chunks)));
         res.on('error', reject);
         res.on('aborted', () => reject(new Error('metadata response interrupted')));
-      });
-      req.on('error', reject);
     });
   };
   try { return await visit(url, 0); }

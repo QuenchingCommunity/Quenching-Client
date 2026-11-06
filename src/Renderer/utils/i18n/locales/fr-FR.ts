@@ -268,6 +268,8 @@ const messages = {
   'main.home.combinedUpdateManual': 'Après confirmation, les pages de téléchargement correspondantes seront ouvertes.',
   'main.home.combinedUpdateMixed': 'Après confirmation, les mises à jour automatiques seront appliquées et les pages de téléchargement manuel seront ouvertes.',
   'main.home.combinedUpdateOrder': 'Après confirmation, le paquet de ressources MOD sera mis à jour en premier, puis le client sera mis à jour et redémarrera automatiquement.',
+  'main.home.combinedUpdateAutomatic': "Confirmez pour télécharger et installer les mises à jour indiquées.",
+  'main.home.clientCurrentModPending': "Votre client est à jour. La mise à jour des ressources du MOD ci-dessous reste à effectuer.",
   'main.home.combinedUpdateTitle': 'Mises à jour disponibles',
   'main.home.confirmUpdate': 'Confirmer et mettre à jour',
   'main.home.currentVersion': 'Version actuelle',
@@ -298,6 +300,7 @@ const messages = {
   'msg.update.full_required': 'Cette version ne peut pas être mise à jour par correctif. Téléchargez le paquet complet.',
   'msg.update.unknown_install': 'Version installée non vérifiable. Réinstallez le paquet complet.',
   'msg.update.up_to_date': 'Le MOD est à jour',
+  'msg.update.none_available': "Votre version est à jour.",
   'main.channel.launchOnly': 'Tous les fichiers MOD (y compris QMoff) sont déplacés vers la branche choisie ; l’autre branche redevient d’origine.',
   'main.channel.launchOnlyHint': 'Le MOD se trouve dans une seule branche et suit votre choix',
   'main.channel.modHint': 'Installez et activez chaque branche séparément ; la désactivation place les fichiers MOD gérés dans le dossier QMoff de cette branche',
@@ -347,7 +350,7 @@ const messages = {
   'main.home.fullUpdateAvailable': 'Nouvelle version du MOD disponible',
   'main.home.fullUpdateVersion': 'Dernière version du MOD',
   'main.home.fullUpdateGuide': 'Consultez la page des joueurs pour trouver le paquet complet correspondant.',
-  'main.home.fullUpToDate': 'Votre version du MOD correspond à la version en ligne ; consultez la page des joueurs pour les paquets complets.',
+  'main.home.fullUpToDate': "Votre version est à jour.",
   'main.home.fullCheckFailed': 'Échec de la vérification des mises à jour du paquet complet',
   'main.home.config': 'Configuration de lancement',
   'main.home.ready': 'PRÊT À JOUER',
@@ -1376,6 +1379,22 @@ const messages = {
   "settings.hdr.on.desc": "Ajuste les couleurs et la luminosité pour adoucir les hautes lumières et les ombres.",
   "settings.hdr.off.desc": "Rétablit le mappage tonal du jeu.",
   "settings.hdr.unsupported": "Cet effet est indisponible avec les anciens shaders de Warcraft 3.0.",
+
+  'settings.vision.visionUnits.title': 'Unit enhancements',
+  'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
+  'settings.vision.visionDecorations.title': 'Doodads',
+  'settings.vision.visionDecorations.desc': 'Use Vision Mod doodads and replaceable textures; pause Quenching tree settings.',
+  'settings.vision.visionTerrain.title': 'Terrain',
+  'settings.vision.visionTerrain.desc': 'Use Vision Mod terrain and foliage; pause Quenching terrain, foliage and water settings.',
+  'settings.vision.visionMisc.title': 'Other resources',
+  'settings.vision.visionMisc.desc': 'Use other game resources; keep Quenching day/night lighting files.',
+  'settings.vision.managed': 'Managed by Vision Mod. Turn off the matching module first.',
+
+  'settings.hdr.brightness': 'Overall brightness',
+  'settings.hdr.minimum': 'Minimum',
+  'settings.hdr.maximum': 'Maximum',
+  'settings.hdr.brightness.desc': 'Adjust the brightness of the whole scene. Changing the lighting type restores its default brightness.',
+  'settings.lighting.strength': 'Light intensity',
 };
 
 export default messages;

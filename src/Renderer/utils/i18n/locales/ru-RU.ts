@@ -268,6 +268,8 @@ const messages = {
   'main.home.combinedUpdateManual': 'После подтверждения откроются соответствующие страницы загрузки.',
   'main.home.combinedUpdateMixed': 'После подтверждения будут установлены автоматические обновления и открыты страницы для ручной загрузки.',
   'main.home.combinedUpdateOrder': 'После подтверждения сначала обновится пакет ресурсов MOD, затем клиент обновится и автоматически перезапустится.',
+  'main.home.combinedUpdateAutomatic': "Подтвердите загрузку и установку перечисленных обновлений.",
+  'main.home.clientCurrentModPending': "Клиент обновлён. Обновление ресурсов MOD ниже ещё не выполнено.",
   'main.home.combinedUpdateTitle': 'Доступны обновления',
   'main.home.confirmUpdate': 'Подтвердить и обновить',
   'main.home.currentVersion': 'Текущая версия',
@@ -298,6 +300,7 @@ const messages = {
   'msg.update.full_required': 'Эту версию нельзя обновить патчем. Скачайте полный пакет.',
   'msg.update.unknown_install': 'Не удалось определить установленную версию. Переустановите полный пакет.',
   'msg.update.up_to_date': 'MOD обновлён до последней версии',
+  'msg.update.none_available': "У вас последняя версия.",
   'main.channel.launchOnly': 'Все файлы MOD (включая QMoff) переместятся в выбранную ветку; другая ветка вернётся к оригиналу.',
   'main.channel.launchOnlyHint': 'MOD находится в одной ветке и переносится при переключении',
   'main.channel.modHint': 'Устанавливайте и включайте каждую ветку отдельно; при отключении управляемые файлы MOD перемещаются в папку QMoff этой ветки',
@@ -347,7 +350,7 @@ const messages = {
   'main.home.fullUpdateAvailable': 'Доступна новая версия MOD',
   'main.home.fullUpdateVersion': 'Последняя версия MOD',
   'main.home.fullUpdateGuide': 'Найдите соответствующий полный пакет на странице игроков.',
-  'main.home.fullUpToDate': 'Ваша версия MOD совпадает с онлайн-версией; новые полные пакеты проверяйте на странице игроков.',
+  'main.home.fullUpToDate': "У вас последняя версия.",
   'main.home.fullCheckFailed': 'Не удалось проверить обновления полного пакета',
   'main.home.config': 'Настройка запуска',
   'main.home.ready': 'ГОТОВО К ИГРЕ',
@@ -1376,6 +1379,22 @@ const messages = {
   "settings.hdr.on.desc": "Настраивает яркость и цвет для плавных переходов между светом и тенью.",
   "settings.hdr.off.desc": "Восстанавливает исходную тональную компрессию игры.",
   "settings.hdr.unsupported": "Этот эффект недоступен в старых шейдерах Warcraft 3.0.",
+
+  'settings.vision.visionUnits.title': 'Unit enhancements',
+  'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
+  'settings.vision.visionDecorations.title': 'Doodads',
+  'settings.vision.visionDecorations.desc': 'Use Vision Mod doodads and replaceable textures; pause Quenching tree settings.',
+  'settings.vision.visionTerrain.title': 'Terrain',
+  'settings.vision.visionTerrain.desc': 'Use Vision Mod terrain and foliage; pause Quenching terrain, foliage and water settings.',
+  'settings.vision.visionMisc.title': 'Other resources',
+  'settings.vision.visionMisc.desc': 'Use other game resources; keep Quenching day/night lighting files.',
+  'settings.vision.managed': 'Managed by Vision Mod. Turn off the matching module first.',
+
+  'settings.hdr.brightness': 'Overall brightness',
+  'settings.hdr.minimum': 'Minimum',
+  'settings.hdr.maximum': 'Maximum',
+  'settings.hdr.brightness.desc': 'Adjust the brightness of the whole scene. Changing the lighting type restores its default brightness.',
+  'settings.lighting.strength': 'Light intensity',
 };
 
 export default messages;

@@ -268,6 +268,8 @@ const messages = {
   'main.home.combinedUpdateManual': 'Confirm to open the corresponding download pages.',
   'main.home.combinedUpdateMixed': 'Confirm to apply automatic updates and open the pages for updates that require a manual download.',
   'main.home.combinedUpdateOrder': 'Confirm to update the MOD resource package first, then update the client and restart automatically.',
+  'main.home.combinedUpdateAutomatic': 'Confirm to download and install the listed updates.',
+  'main.home.clientCurrentModPending': 'Your client is up to date. The MOD resource update below is still pending.',
   'main.home.combinedUpdateTitle': 'Updates available',
   'main.home.confirmUpdate': 'Confirm and update',
   'main.home.currentVersion': 'Current version',
@@ -874,6 +876,7 @@ const messages = {
   'msg.update.full_required': 'This version cannot use a patch. Download the full package.',
   'msg.update.unknown_install': 'The installed version could not be verified. Reinstall the full package.',
   'msg.update.up_to_date': 'MOD is up to date',
+  'msg.update.none_available': "Your version is up to date.",
   'main.tips.toggle': 'Click icon to toggle Quenching',
   'main.status.full_installed': 'Full package installed',
   'main.status.full_not_installed': 'Full package not installed',
@@ -938,7 +941,7 @@ const messages = {
   'main.home.fullUpdateAvailable': 'New MOD version available',
   'main.home.fullUpdateVersion': 'Latest MOD version',
   'main.home.fullUpdateGuide': 'Check the player page for a matching full package.',
-  'main.home.fullUpToDate': 'Your MOD version matches the online version; check the player page for full-package releases',
+  'main.home.fullUpToDate': "Your version is up to date.",
   'main.home.fullCheckFailed': 'Failed to check full-package updates',
   'main.home.config': 'Launch configuration',
   'main.home.ready': 'READY TO PLAY',
@@ -1379,6 +1382,22 @@ const messages = {
   "settings.hdr.on.desc": "Adjust brightness and color for smoother highlights and shadows.",
   "settings.hdr.off.desc": "Restore the game’s original tone mapping.",
   "settings.hdr.unsupported": "This effect is unavailable in the legacy Warcraft 3.0 shaders.",
+
+  'settings.vision.visionUnits.title': 'Unit enhancements',
+  'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
+  'settings.vision.visionDecorations.title': 'Doodads',
+  'settings.vision.visionDecorations.desc': 'Use Vision Mod doodads and replaceable textures; pause Quenching tree settings.',
+  'settings.vision.visionTerrain.title': 'Terrain',
+  'settings.vision.visionTerrain.desc': 'Use Vision Mod terrain and foliage; pause Quenching terrain, foliage and water settings.',
+  'settings.vision.visionMisc.title': 'Other resources',
+  'settings.vision.visionMisc.desc': 'Use other game resources; keep Quenching day/night lighting files.',
+  'settings.vision.managed': 'Managed by Vision Mod. Turn off the matching module first.',
+
+  'settings.hdr.brightness': 'Overall brightness',
+  'settings.hdr.minimum': 'Minimum',
+  'settings.hdr.maximum': 'Maximum',
+  'settings.hdr.brightness.desc': 'Adjust the brightness of the whole scene. Changing the lighting type restores its default brightness.',
+  'settings.lighting.strength': 'Light intensity',
 };
 
 export default messages;

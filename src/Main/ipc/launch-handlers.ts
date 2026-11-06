@@ -309,6 +309,11 @@ export function registerLaunchHandlers() {
             };
         }
 
+        let packageCopied = false;
+        const installProgress = (percent: number, message: string) => {
+            try { if (!event.sender.isDestroyed?.()) event.sender.send('mod:install-progress', { percent, message }); }
+            catch (error) { console.warn('[FullPackage] Could not notify renderer:', error); }
+        };
         try {
             await assertWarcraftNotRunning();
             assertShaderProfileSupported(await resolveModProfile(war3Path, configManager.get('modSettings') || {}));
@@ -335,12 +340,13 @@ export function registerLaunchHandlers() {
             let archiveBytes: number;
             try {
                 archiveBytes = await installPackageSources(requestedZips, targetPath, (percent, message) => {
-                    event.sender.send('mod:install-progress', { percent, message });
+                    installProgress(percent, message);
                 }, async () => {
                     // Merge the package with restored files, then retain the user's switch state.
                     await applyBranchModFilesForSwitch(targetPath, true);
                     prepared = true;
                 });
+                packageCopied = true;
             } finally {
                 if (prepared && !modEnabled) await applyBranchModFilesForSwitch(targetPath, false);
             }
@@ -349,9 +355,9 @@ export function registerLaunchHandlers() {
             const warnings = await applyInstalledProfile(normalizedWar3Path, {
                 forceUnitSkinBaseline: true,
                 restoreSkinsOnly: !modEnabled,
-                onProgress: (message) => event.sender.send('mod:install-progress', { percent: 99, message }),
+                onProgress: (message) => installProgress(99, message),
             });
-            event.sender.send('mod:install-progress', { percent: 100, message: '安装完成' });
+            installProgress(100, '安装完成');
             return {
                 success: true,
                 skipped: false,
@@ -359,6 +365,8 @@ export function registerLaunchHandlers() {
             };
         } catch (e: any) {
             console.error('[FullPackage] ZIP installation failed:', e);
+            if (packageCopied) return { success: true, skipped: false,
+                configurationError: `资源包已安装，后续配置未完成：${e?.message || String(e)}` };
             return {
                 success: false,
                 error: e && e.message ? e.message : String(e)

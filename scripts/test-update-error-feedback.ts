@@ -16,8 +16,9 @@ try {
   const translated = reportUpdateFailure(error, key => key === 'msg.update.retry_or_manual' ? 'Short translated update error.' : '');
   assert.equal(translated, 'Short translated update error.');
   const source = await fs.readFile('src/Renderer/components/MainWindow/index.tsx', 'utf8');
-  assert.equal((source.match(/message\.error\(reportUpdateFailure\(error, t\)\)/g) || []).length, 3,
-    'client, MOD and combined updates use the same short feedback');
+  assert(source.includes('Modal.error({'), 'failure remains visible until the user acknowledges it');
+  assert.equal((source.match(/showUpdateFailure\(error\)/g) || []).length, 3,
+    'client, MOD and combined failures share persistent feedback');
 } finally {
   console.error = original;
 }

@@ -268,6 +268,8 @@ const messages = {
   'main.home.combinedUpdateManual': '确定后将打开对应的下载页面。',
   'main.home.combinedUpdateMixed': '确定后会执行可自动完成的更新，并打开需要手动下载的页面。',
   'main.home.combinedUpdateOrder': '确定后将先更新 MOD 资源包，再更新客户端并自动重启。',
+  'main.home.combinedUpdateAutomatic': '确定后将下载并安装所列更新。',
+  'main.home.clientCurrentModPending': '客户端已是最新版本；以下是尚未完成的 MOD 资源包更新。',
   'main.home.combinedUpdateTitle': '发现可用更新',
   'main.home.confirmUpdate': '确定并更新',
   'main.home.currentVersion': '当前版本',
@@ -808,6 +810,7 @@ const messages = {
   'msg.update.full_required': '当前版本无法使用补丁，请下载完整版。',
   'msg.update.unknown_install': '无法确认已安装版本，请重新安装完整版。',
   'msg.update.up_to_date': 'MOD 已是最新版本',
+  'msg.update.none_available': "你的版本是最新的",
   'main.tips.toggle': '点击图标打开/关闭淬火',
   'main.status.full_installed': '完整包已安装',
   'main.status.full_not_installed': '完整包未安装',
@@ -872,7 +875,7 @@ const messages = {
   'main.home.fullUpdateAvailable': '发现新版 MOD',
   'main.home.fullUpdateVersion': '最新 MOD 版本',
   'main.home.fullUpdateGuide': '请前往玩家页面确认并下载对应的完整版。',
-  'main.home.fullUpToDate': '当前 MOD 版本与线上一致；完整版发布状态请以玩家页面为准',
+  'main.home.fullUpToDate': "你的版本是最新的",
   'main.home.fullCheckFailed': '检查完整版更新失败',
   'main.home.config': '启动配置',
   'main.home.ready': '准备进入游戏',
@@ -1382,6 +1385,22 @@ const messages = {
   "settings.hdr.on.desc": "调整整体明暗与色彩，让高光和阴影过渡更自然。",
   "settings.hdr.off.desc": "恢复游戏原有的色调映射。",
   "settings.hdr.unsupported": "魔兽 3.0 的旧着色器没有提供此效果。",
+
+  'settings.vision.visionUnits.title': '单位增强',
+  'settings.vision.visionUnits.desc': '替换单位和建筑模型、贴图，保留淬火配置和涂装。',
+  'settings.vision.visionDecorations.title': '装饰物变化',
+  'settings.vision.visionDecorations.desc': '使用 Vision Mod 装饰物和可替换贴图，暂时停用淬火树木配置。',
+  'settings.vision.visionTerrain.title': '地形变化',
+  'settings.vision.visionTerrain.desc': '使用 Vision Mod 地形和植被；淬火地形、植被和水面设置暂不可用。',
+  'settings.vision.visionMisc.title': '杂项变化',
+  'settings.vision.visionMisc.desc': '使用其余游戏资源，保留淬火昼夜光照。',
+  'settings.vision.managed': '由 Vision Mod 接管，请先关闭对应模块。',
+
+  'settings.hdr.brightness': '整体亮度',
+  'settings.hdr.minimum': '最小',
+  'settings.hdr.maximum': '最大',
+  'settings.hdr.brightness.desc': '调整整个画面的明暗。切换光照类型后，会使用该模式的默认亮度。',
+  'settings.lighting.strength': '光照强度',
 };
 
 export default messages;

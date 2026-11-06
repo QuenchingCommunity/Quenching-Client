@@ -1,10 +1,12 @@
 import type { ModProfile } from './mod-profile';
+import {defaultHdrExposure} from './hdr-exposure';
 
 export type RenderingPreset = 'standard' | 'battle';
 export function renderingPresetSettings(preset: RenderingPreset) {
   const battle = preset === 'battle';
   return {
     lighting: battle ? 'battle' as const : 'standard' as const,
+    hdrExposure: defaultHdrExposure(battle ? 'battle' : 'standard'),
     lightingBrightness: battle ? 4 as const : 3 as const,
     tree: battle ? 'v16' as const : 'tall' as const,
     terrain: battle ? 'v16' as const : 'latest' as const,

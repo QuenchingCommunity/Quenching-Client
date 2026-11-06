@@ -36,7 +36,7 @@ BlurAmount=1.5
 
 [Tonemap]
 Enabled=1
-Exposure=0.88
+Exposure=1.2
 
 [Texture]
 NormalMapStrength=1.2

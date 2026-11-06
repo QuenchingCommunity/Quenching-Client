@@ -234,6 +234,7 @@ export async function setThirdPartyName(root: string, id: number, name: string):
 }
 
 export async function isThirdPartyQuenchingPaused(root: string): Promise<boolean> {
+  if(Object.values(await (await import('./vision-modules')).getVisionModules(root)).some(Boolean))return true;
   if (!(await fs.pathExists(statePath(root)))) return false;
   const state = await readState(root);
   return state.slots.some(slot => slot.enabled);
@@ -333,6 +334,7 @@ export async function setThirdPartyEnabled(root: string, id: number, enabled: bo
   await assertRetail(root);
   const state = await readState(root);
   const slot = slotOf(state, id);
+  if(enabled && Object.values(await (await import('./vision-modules')).getVisionModules(root)).some(Boolean))throw new Error('请先关闭 Vision Mod 模块，再启用资源槽');
   if (enabled) await enableSlot(root, state, slot);
   else await disableSlot(root, state, slot);
   await writeState(root, state);

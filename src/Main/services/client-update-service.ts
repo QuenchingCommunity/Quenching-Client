@@ -8,25 +8,40 @@ import { isNewerClientVersion } from '../../shared/client-version';
 import { FileSnapshot, FileSyncDescriptor, SyncArtifact, planFileSync, syncFileArtifact, syncSourceUrls, validateFileSync, validateSyncArtifact } from '../../shared/file-sync';
 import { decodeSnapshot, encodeSnapshot } from './file-sync-snapshot';
 import { downloadUpdateFile, rememberUpdateDownloadSource, updateDownloadSources } from './update-download';
-import { updateTestEnabled, updateTestUrls } from './update-channel';
+import { updateTestEnabled } from './update-channel';
 import { fetchUpdateMetadata, requestUpdateMetadata } from './update-metadata';
 import { updateMetadataUrls } from './update-metadata-urls';
+import { reuseUpdateArtifactCache as reuseClientUpdateCache, storeUpdateArtifactCache as storeClientUpdateCache } from './update-artifact-cache';
 
 // Read app.asar as an update file without disabling ASAR module loading in the UI process.
 const fs: typeof import('node:fs') = require('original-fs');
 const fsp = fs.promises;
 const { statfs } = fsp;
 
-function defaultManifestUrls(version: string): string[] {
-  // Prefer one latest file-sync release; retain old per-version binary patches for compatibility.
-  if (!VERSION.test(version)) return [];
-  return updateMetadataUrls(['client-manifests/latest.json', `client-manifests/${version}.json`]);
-}
 const MAX_MANIFEST = 1024 * 1024;
 const HASH = /^[a-f0-9]{64}$/;
 const VERSION = /^\d+\.\d+(?:\.\d+)?$/;
 const DOWNLOAD_LIMIT = 2 * 1024 * 1024 * 1024;
 let preparing = false;
+
+function safeUpdateDiagnostic(value: unknown): string {
+  return String(value).replace(/https?:\/\/[^\s'"<>]+/g, text => {
+    try { const url = new URL(text); url.username = ''; url.password = ''; url.search = ''; url.hash = ''; return url.toString(); }
+    catch { return '[invalid URL]'; }
+  }).slice(0, 12_000);
+}
+
+async function retainClientUpdateFailure(error: unknown, phase: string, targetVersion?: string): Promise<void> {
+  const directory = path.join(path.dirname(process.execPath), '.quenching-client-update');
+  try {
+    await fsp.mkdir(directory, { recursive: true });
+    const failure = { schema: 1, at: new Date().toISOString(), currentVersion: app.getVersion(), targetVersion,
+      phase, message: safeUpdateDiagnostic((error as Error)?.message || error), stack: safeUpdateDiagnostic((error as Error)?.stack || '') };
+    const temporary = path.join(directory, 'last-error.json.tmp');
+    await fsp.writeFile(temporary, JSON.stringify(failure, null, 2));
+    await fsp.rename(temporary, path.join(directory, 'last-error.json'));
+  } catch { console.error('[ClientUpdate] Could not retain update failure diagnostic'); }
+}
 
 export interface ClientUpdateFile {
   path: string;
@@ -138,7 +153,7 @@ async function publicKey(): Promise<string> {
 async function fetchManifest(): Promise<ClientUpdateManifest> {
   const key = await publicKey();
   const override = process.env.QUENCHING_CLIENT_MANIFEST_URL?.trim();
-  const urls = updateTestUrls('client-manifests/latest.json') || [...new Set([...(override ? [override] : []), ...defaultManifestUrls(app.getVersion())])];
+  const urls = updateMetadataUrls(['client-manifests/latest.json', `client-manifests/${app.getVersion()}.json`], override);
   return fetchUpdateMetadata(urls, async (url, timeoutMs) => validateClientUpdateManifest(JSON.parse((await requestUpdateMetadata(url, {
     limit: MAX_MANIFEST, timeoutMs, allowHttpLoopback: updateTestEnabled() || process.env.QUENCHING_CLIENT_UPDATE_TEST === '1',
   })).toString('utf8')), key));
@@ -276,6 +291,7 @@ export async function stageClientFileSync(
   const bytes = [...selected.values()].reduce((sum, file) => sum + file.size * 3, 0) + 64 * 1024 ** 2;
   if (Number(volume.bavail) * Number(volume.bsize) < bytes) throw new Error('客户端磁盘空间不足，无法保留更新和回滚文件');
   const files: ClientUpdateFile[] = [];
+  const transferSummary: { path: string; method: string; bytes: number }[] = [];
   for (const [index, file] of [...selected.values()].entries()) {
     assertNoLinks(root, file.path);
     const installed = path.join(root, ...file.path.split('/'));
@@ -289,24 +305,37 @@ export async function stageClientFileSync(
       fileProgress = Math.max(fileProgress, Math.min(0.95, 0.95 * completedBytes / (totalBytes || 1)));
       onProgress?.(`正在下载 ${file.path}`, index + fileProgress, selected.size + 1, { completedBytes, totalBytes });
     };
+    let method = 'local';
+    let downloadBytes = 0;
     if (oldHash === file.sha256) await fsp.copyFile(installed, output);
+    else if (await reuseClientUpdateCache(root, file, output)) method = 'verified-cache';
     else {
+      await fsp.rm(output, { force: true });
       const delta = manifest.fileSync.deltas?.find(delta => delta.path === file.path && delta.oldSha256 === oldHash);
       let reconstructed = false;
       if (delta) {
         try {
           const deltaPath = path.join(stage, 'artifacts', String(index) + '.zst');
           await downloadSyncArtifact(delta.artifact, deltaPath, manifest.fileSync.githubMirrors, reportBytes);
+          downloadBytes += delta.artifact.size;
           await reconstruct(installed, deltaPath, output);
           reconstructed = (await fsp.stat(output)).size === file.size && await hashFile(output) === file.sha256;
+          if (reconstructed) method = 'delta';
         } catch (error) { console.warn('[ClientUpdate] Optional delta failed; using the full signed file:', file.path); }
       }
       if (!reconstructed) {
         await fsp.rm(output, { force: true });
         await downloadSyncArtifact(artifact, output, manifest.fileSync.githubMirrors, reportBytes);
+        method = 'full'; downloadBytes += artifact.size;
       }
     }
     if ((await fsp.stat(output)).size !== file.size || await hashFile(output) !== file.sha256) throw new Error(`客户端文件校验失败: ${file.path}`);
+    if (method === 'delta' || method === 'full') await storeClientUpdateCache(root, file, output);
+    transferSummary.push({ path: file.path, method, bytes: downloadBytes });
+    await fsp.writeFile(path.join(stage, 'download-summary.json'), JSON.stringify({
+      note: 'Verified payload bytes; excludes metadata and incomplete transport attempts', files: transferSummary,
+    }, null, 2));
+    console.log('[ClientUpdate]', method, file.path, downloadBytes);
     files.push({ path: file.path, oldSha256: oldHash, newSha256: file.sha256, newSize: file.size, method: 'replace', artifact });
     onProgress?.(`已校验 ${file.path}`, index + 1, selected.size + 1);
   }
@@ -378,9 +407,12 @@ export async function prepareClientUpdate(onProgress?: ClientProgress): Promise<
   let stage = '';
   let createdHelperExe = '';
   let activePath = '';
+  let phase = 'checking';
+  let targetVersion: string | undefined;
   try {
     if (!await gateAllows()) throw new Error('此更新尚未公开');
     const manifest = await fetchManifest();
+    targetVersion = manifest.targetVersion;
     if (manifest.schema === 1 && manifest.baseVersion !== app.getVersion()) throw new Error('没有适用于当前客户端版本的增量包');
     if (manifest.schema === 2 && manifest.runtimeVersion !== process.versions.electron) throw new Error('Electron 内核变化，请下载新的便携客户端');
     const root = path.dirname(process.execPath);
@@ -400,10 +432,12 @@ export async function prepareClientUpdate(onProgress?: ClientProgress): Promise<
     if (Number(volume.bavail) * Number(volume.bsize) < required * 1.1) throw new Error('客户端所在磁盘空间不足，无法保留回滚备份');
     stage = path.join(management, crypto.randomBytes(12).toString('hex'));
     await fsp.mkdir(stage);
+    phase = 'staging';
     manifest.files = manifest.schema === 2
       ? await stageClientFileSync(manifest, root, stage, app.getVersion(), onProgress)
       : await stageLegacyClientUpdate(manifest, root, stage, onProgress);
     const token = crypto.randomBytes(16).toString('hex');
+    phase = 'starting-helper';
     const relaunchArgs = process.argv.slice(1).filter(arg => arg.startsWith('--user-data-dir=') ||
       (process.env.QUENCHING_CLIENT_UPDATE_TEST === '1' && arg.startsWith('--remote-debugging-port=')));
     const plan = { root, stage, token, relaunchArgs,
@@ -430,6 +464,7 @@ export async function prepareClientUpdate(onProgress?: ClientProgress): Promise<
     if (activePath) await fsp.rm(activePath, { force: true }).catch(() => undefined);
     if (createdHelperExe) await fsp.rm(createdHelperExe, { force: true }).catch(() => undefined);
     if (stage) await fsp.rm(stage, { recursive: true, force: true }).catch(() => undefined);
+    await retainClientUpdateFailure(error, phase, targetVersion);
     throw error;
   } finally { preparing = false; }
 }
@@ -460,9 +495,12 @@ export async function cleanupCompletedClientUpdate(): Promise<void> {
       await fsp.rm(path.join(root, 'QMClient.next.exe'), { force: true }).catch(() => undefined);
       continue;
     }
-    if (journal?.state !== 'complete' || fs.existsSync(path.join(stage, 'backup'))) continue;
+    if (journal?.state !== 'complete') continue;
     try {
       await fsp.rm(path.join(root, 'QMClient.next.exe'), { force: true });
+      // Remove the GUI's potentially open stdout before its journal, so a
+      // cleanup blocked by Windows remains discoverable on the next launch.
+      await fsp.rm(path.join(stage, 'new-client.log'), { force: true });
       await fsp.rm(stage, { recursive: true, force: true });
     } catch { /* The helper may still hold its executable; retry on next start. */ }
   }

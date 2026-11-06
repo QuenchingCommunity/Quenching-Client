@@ -29,6 +29,7 @@ try {
     'https://qm.txzy.net/quenching/update-test/no-slash', 'https://u:p@qm.txzy.net/quenching/update-test/',
     'https://qm.txzy.net/quenching/update-test/?x=1']) assert.throws(() => portableTestMarker(url));
   assert.equal(portableTestMarker('http://127.0.0.1:1234/fixture/').enabled, true);
+  assert.equal(portableTestMarker('https://www.tianxiazhengyi.net/').enabled, true);
   for (const name of ['.test-config', '.test-user-data', '.quenching-client-update', 'README-TEST.txt', 'start-update-test.cmd', 'unpacked', '_tmp']) {
     await fs.mkdir(path.join(formal, name));
     for (const channel of ['production', 'test']) await assert.rejects(preparePortableChannel(formal, { channel, ...(channel === 'test' ? { baseUrl } : {}) }), /fresh build/);

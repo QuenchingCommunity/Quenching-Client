@@ -1,3 +1,4 @@
+import {assertVisionSettingAllowed} from '../services/vision-modules';
 import { resourcePath } from '../../shared/bundled-resource-paths.mjs';
 import { getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
@@ -189,6 +190,7 @@ export function registerTerrainHandlers() {
     ipcMain.handle(
         'terrain:update-settings',
         async (event, war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string, requestId?: string) => {
+        await assertVisionSettingAllowed(war3Path,'terrain');
         const report = createSettingsProgressReporter((step, percent) => {
             if (event?.sender && !event.sender.isDestroyed?.()) event.sender.send('mod:profile-progress', { step, percent, operation: 'terrain', requestId });
         });

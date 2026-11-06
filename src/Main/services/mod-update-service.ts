@@ -14,9 +14,10 @@ import { FileSyncDescriptor, planFileSync, syncFileArtifact, validateFileSync } 
 import { ModZipPatch, ModZipPolicy, planModZipChain, validateModZipPolicy } from '../../shared/mod-zip-update';
 import { decodeSnapshot, encodeSnapshot } from './file-sync-snapshot';
 import { downloadUpdateFile, rememberUpdateDownloadSource, SlowUpdateDownloadError, updateDownloadSources } from './update-download';
-import { updateTestUrls } from './update-channel';
+import { updateTestEnabled } from './update-channel';
 import { fetchUpdateMetadata, requestUpdateMetadata } from './update-metadata';
 import { updateMetadataUrls } from './update-metadata-urls';
+import { reuseUpdateArtifactCache, storeUpdateArtifactCache, removeUpdateArtifactCache } from './update-artifact-cache';
 import {
   loadIntegrityManifest,
   MOD_INTEGRITY_PATHS,
@@ -131,16 +132,11 @@ export interface ModUpdateResult {
   appliedPatches?: number;
 }
 
-const DEFAULT_MANIFEST_URLS = updateMetadataUrls(['mod-zip-manifest.json', 'mod-sync-manifest.json', 'manifest.json']);
-
 function manifestUrls(options?: ModUpdateOptions): string[] {
-  const testUrls = updateTestUrls('mod-zip-manifest.json');
-  if (testUrls) return [...testUrls, ...updateTestUrls('mod-sync-manifest.json')!];
   const configured = process.env.QUENCHING_MANIFEST_URL?.trim();
-  return Array.from(new Set([
-    ...(configured ? [configured] : []),
-    ...(options?.manifestUrls ?? DEFAULT_MANIFEST_URLS),
-  ]));
+  return updateTestEnabled() || !options?.manifestUrls
+    ? updateMetadataUrls(['mod-zip-manifest.json', 'mod-sync-manifest.json', 'manifest.json'], configured)
+    : Array.from(new Set([...(configured ? [configured] : []), ...options.manifestUrls]));
 }
 
 function sha256File(filePath: string): Promise<string> {
@@ -316,7 +312,9 @@ export async function writeInstalledModState(war3Path: string, state: InstalledM
   const temporaryPath = `${statePath}.${process.pid}.${Date.now()}.tmp`;
   try {
     await fs.writeJson(temporaryPath, state, { spaces: 2 });
-    await fs.move(temporaryPath, statePath, { overwrite: true });
+    // Same-volume replace must preserve the previous state if Windows refuses
+    // the rename; fs.move(overwrite) first removes that previous state.
+    await fs.rename(temporaryPath, statePath);
   } finally {
     await fs.remove(temporaryPath).catch(() => undefined);
   }
@@ -448,8 +446,14 @@ async function downloadArtifact(
   onDownload?: (completed: number, total: number) => void,
   onVerifying?: () => void,
   githubMirrors: readonly string[] = [],
+  cacheRoot?: string,
 ): Promise<string> {
   const errors: string[] = [];
+  await fs.ensureDir(path.dirname(destination));
+  if (cacheRoot && await reuseUpdateArtifactCache(cacheRoot, artifact, destination, 'mod')) {
+    onVerifying?.(); onDownload?.(artifact.size, artifact.size);
+    return `verified-cache:${artifact.sha256}`;
+  }
   const partPath = `${destination}.part`;
   const sources = updateDownloadSources(artifact.sources, githubMirrors);
   for (const [sourceIndex, source] of sources.entries()) {
@@ -494,6 +498,7 @@ async function downloadArtifact(
       onVerifying?.();
       const hash = await sha256File(destination);
       if (hash !== artifact.sha256.toLowerCase()) throw new Error(`sha256 mismatch: expected ${artifact.sha256}, got ${hash}`);
+      if (cacheRoot) await storeUpdateArtifactCache(cacheRoot, artifact, destination, 'mod');
       rememberUpdateDownloadSource(source, githubMirrors);
       return label;
     } catch (error: any) {
@@ -554,7 +559,7 @@ async function applyPatchArchive(
     if (rounded === lastProgressPercent && message === lastProgressMessage) return;
     lastProgressPercent = rounded;
     lastProgressMessage = message;
-    onProgress?.(rounded, message);
+    try { onProgress?.(rounded, message); } catch (error) { console.warn('[ModUpdate] Progress listener failed:', error); }
   };
   const legacy34 = current.sequence === 34 && current.version === '3.4';
   const patchRoot = path.join(stagingRoot, 'patch');
@@ -713,7 +718,8 @@ async function applyPatchDirectory(
 
 export async function applyModUpdate(war3Path: string, options?: ModUpdateOptions): Promise<ModUpdateResult> {
   const report = (phase: ModUpdateProgress['phase'], percent: number, message: string, completedBytes?: number, totalBytes?: number) => {
-    options?.onProgress?.({ phase, percent: Math.max(0, Math.min(100, Math.round(percent))), message, completedBytes, totalBytes });
+    try { options?.onProgress?.({ phase, percent: Math.max(0, Math.min(100, Math.round(percent))), message, completedBytes, totalBytes }); }
+    catch (error) { console.warn('[ModUpdate] Progress listener failed:', error); }
   };
   report('preparing', 0, '正在准备 MOD 更新');
   const status = await getModUpdateStatus(war3Path, options);
@@ -747,13 +753,14 @@ export async function applyModUpdate(war3Path: string, options?: ModUpdateOption
         };
         sources.push(await downloadArtifact(patch, stepArchive,
           received => stepProgress('downloading', received / Math.max(patch.size, 1) * 0.7, '正在下载 ZIP 补丁', completedBytes + received),
-          () => stepProgress('verifying', 0.7, '正在校验 ZIP 补丁', completedBytes + patch.size), status.githubMirrors));
+          () => stepProgress('verifying', 0.7, '正在校验 ZIP 补丁', completedBytes + patch.size), status.githubMirrors, retailDir));
         completedBytes += patch.size;
         const target = { sequence: patch.toSequence, version: patch.version, displayVersion: patch.displayVersion };
         await applyPatchArchive(stepArchive, war3Path, current, target, stepRoot, !options?.stagingRoot,
           (percent, message) => stepProgress(percent < 34 ? 'extracting' : percent < 98 ? 'installing' : 'finalizing', 0.7 + percent * 0.003, message), patch);
         appliedPatches++;
         current = lightweightState(target.sequence, target.version, target.displayVersion);
+        await removeUpdateArtifactCache(retailDir, patch, 'mod');
         await fs.remove(stepRoot).catch(() => undefined);
       }
       report('complete', 100, 'MOD 更新完成', totalBytes, totalBytes);
@@ -816,6 +823,7 @@ export async function applyModUpdate(war3Path: string, options?: ModUpdateOption
       archivePath,
       (completed, total) => report('downloading', 5 + completed / Math.max(total, 1) * 65, '正在下载 MOD 更新', completed, total),
       () => report('verifying', 72, '正在校验下载文件', status.patch?.size, status.patch?.size),
+      undefined, retailDir,
     );
     await applyPatchArchive(
       archivePath,
@@ -827,6 +835,7 @@ export async function applyModUpdate(war3Path: string, options?: ModUpdateOption
       (percent, message) => report(percent < 34 ? 'extracting' : percent < 98 ? 'installing' : 'finalizing', 74 + percent * 0.25, message),
     );
     report('complete', 100, 'MOD 更新完成');
+    await removeUpdateArtifactCache(retailDir, status.patch!, 'mod');
     return { status, applied: true, downloadedFrom };
   } catch (error: any) {
     const current = appliedPatches ? await getInstalledModState(war3Path) : status.current;
@@ -840,4 +849,5 @@ export async function getInstalledModState(war3Path: string): Promise<InstalledM
   return await readMarkedState(war3Path) || await readLegacy34State(war3Path);
 }
 
-export const MOD_UPDATE_DEFAULTS = { product: PRODUCT, minManagedSequence: MIN_MANAGED_SEQUENCE, manifestUrls: DEFAULT_MANIFEST_URLS } as const;
+export const MOD_UPDATE_DEFAULTS = { product: PRODUCT, minManagedSequence: MIN_MANAGED_SEQUENCE,
+  get manifestUrls() { return updateMetadataUrls(['mod-zip-manifest.json', 'mod-sync-manifest.json', 'manifest.json']); } } as const;

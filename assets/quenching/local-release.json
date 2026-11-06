@@ -2,7 +2,7 @@
   "schema": 1,
   "product": "quenching-local-build",
   "displayVersion": "3.7",
-  "internalVersion": "3.7.0",
+  "internalVersion": "3.7.4",
   "channel": "test",
   "label": "3.7 TEST"
 }

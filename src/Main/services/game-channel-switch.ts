@@ -15,6 +15,7 @@ const CHANNEL_ENTRIES = [
     ...BRANCH_MOD_FOLDERS,
     'd30', 'buildings-dis', 'doodads-dis',
     'QMoff', '.quenching', '_patch', '_manual',
+    '.quenching-vision-modules.json', '.quenching-vision-backups',
     '_QMThirdParty.json', 'quenching-vio.que', 'PostProcessingConfig.txt', 'Mac.txt', 'reg.reg',
 ];
 
@@ -29,6 +30,8 @@ async function thirdPartyEntries(buildDir: string): Promise<string[]> {
         .flatMap(slot => (slot.files as unknown[]).filter((file): file is string => typeof file === 'string'))
         .map(file => file.replace(/\\/g, '/').replace(/^\/+/, '').split('/')[0])
         .filter(name => name && name !== '.' && name !== '..' && !BLIZZARD_ENTRIES.has(name.toLowerCase()));
+    const vision=await fs.readJson(path.join(buildDir,'.quenching-vision-modules.json')).catch(e=>{if(e.code==='ENOENT')return {};throw e;});
+    for(const entry of Object.values(vision) as Array<{files?:string[]}>){for(const file of entry.files||[]){const top=file.split('/')[0];if(top && !BLIZZARD_ENTRIES.has(top.toLowerCase()) && /^[\w-]+$/.test(top))tops.push(top);}}
     return [...new Set(tops)];
 }
 

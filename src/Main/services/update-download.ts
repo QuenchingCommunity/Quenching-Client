@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
-import https from 'node:https';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { SyncSource } from '../../shared/file-sync';
+import { getUpdateResponse } from './update-network';
 
 // Only transport public Release assets. Never send metadata, R2 URLs or credentials
 // to a third-party proxy; the signed manifest remains the source of file hashes.
@@ -22,12 +22,18 @@ function canMirrorGithubRelease(url: string): boolean {
 }
 
 export function updateDownloadSources(sources: SyncSource[], githubMirrors: readonly string[] = []): SyncSource[] {
-  return sources.flatMap<SyncSource>(source => {
+  const expanded = sources.flatMap<SyncSource>(source => {
     if (typeof source !== 'string') return [source];
     if (!canMirrorGithubRelease(source)) return [source];
     const mirrors = githubMirrors.map(base => base + source);
     const preferred = preferredGithubMirror && preferredMirrorPolicy === JSON.stringify(githubMirrors) && githubMirrors.includes(preferredGithubMirror);
     return [...new Set(preferred ? [preferredGithubMirror + source, source, ...mirrors] : [source, ...mirrors])];
+  });
+  const seen = new Set<string>();
+  return expanded.filter(source => {
+    const key = JSON.stringify(source);
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
   });
 }
 
@@ -43,8 +49,8 @@ export class SlowUpdateDownloadError extends Error {
 }
 
 export const UPDATE_DOWNLOAD_POLICY = {
-  graceMs: 0, windowMs: 15_000, sampleMs: 1_000,
-  minimumBytesPerSecond: 128 * 1024, minimumRemainingBytes: 32 * 1024,
+  graceMs: 10_000, windowMs: 30_000, sampleMs: 1_000,
+  minimumBytesPerSecond: 32 * 1024, minimumRemainingBytes: 1024 * 1024,
 };
 
 interface DownloadOptions {
@@ -93,12 +99,9 @@ export async function downloadUpdateFile(url: string, destination: string, expec
     if (!target.startsWith('https://') && !(options.allowHttpLoopback && /^http:\/\/127\.0\.0\.1:\d+\//.test(target))) {
       throw new Error('unsafe update URL');
     }
-    const response = await new Promise<http.IncomingMessage>((resolve, reject) => {
-      const req = (target.startsWith('https:') ? https : http).get(target, {
-        signal: controller.signal, headers: { 'User-Agent': 'Quenching-Updater/1' },
-      }, resolve);
-      req.setTimeout(30_000, () => req.destroy(new Error('download timed out')));
-      req.on('error', reject);
+    const response = await getUpdateResponse(target, {
+      signal: controller.signal, timeoutMs: 30_000,
+      headers: { 'User-Agent': 'Quenching-Updater/1' },
     });
     if ([301, 302, 303, 307, 308].includes(response.statusCode || 0) && response.headers.location) {
       const next = new URL(response.headers.location, target).toString();

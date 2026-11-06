@@ -266,6 +266,8 @@ export async function applyBranchModFilesForSwitch(buildDir: string, enabled: bo
 }
 
 export async function setBranchModEnabledOnDisk(buildDir: string, enabled: boolean, options: ToggleOptions = {}): Promise<void> {
+  const vision=await fs.readJson(path.join(buildDir,'.quenching-vision-modules.json')).catch(e=>{if(e.code==='ENOENT')return {};throw e;});
+  if(Object.keys(vision).length)throw new Error('请先关闭 Vision Mod 模块，再切换 MOD 总开关');
   let existing = await readState(buildDir);
   if (existing && existing.phase !== 'disabled') throw new Error('Branch toggle is incomplete');
   if (enabled && !existing) {

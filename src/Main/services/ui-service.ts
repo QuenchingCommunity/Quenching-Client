@@ -1,3 +1,4 @@
+import {getVisionModules,assertVisionSettingAllowed} from './vision-modules';
 import { resourceArchiveExists } from './bundled-packages';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder } from './game-channel';
 import path from 'path';
@@ -33,6 +34,7 @@ function knownUiRoots(stagingPath: string) {
 
 export class UIService {
     static async syncConfiguredUI(war3Path: string, force = false): Promise<boolean> {
+        if((await getVisionModules(war3Path)).visionMiscUI)return false;
         const settings = configManager.get('modSettings') || {};
         if (!getChannelModEnabled(getSelectedGameChannel()) || settings.graphicsSelection === 'sd' || settings.classicMode === true) return false;
         if (await isThirdPartyQuenchingPaused(war3Path) || !(await isFullPackageInstalled(war3Path))) return false;
@@ -110,6 +112,7 @@ export class UIService {
      * @param uiMode 'classic' | 'quenching' | 'carnival'
      */
     static async applyUISettings(war3Path: string, uiMode = 'classic', force = true): Promise<boolean> {
+        await assertVisionSettingAllowed(war3Path,'ui');
         if (!getChannelModEnabled(getSelectedGameChannel())) return false;
         let stagingPath = '';
 

@@ -12,6 +12,7 @@ const bundled = await build({
     export { SettingsModal } from './src/Renderer/components/MainWindow/SettingsModal';`, resolveDir: process.cwd(), loader: 'ts' },
   platform: 'node', format: 'cjs', packages: 'external', bundle: true, write: false,
   plugins: [{ name: 'graphics-settings-fixture', setup(plugin) {
+    plugin.onLoad({filter:/\.less$/},()=>({contents:'',loader:'text'}));
     plugin.onResolve({ filter: /^reaxes$|^antd$|^react$|(?:useWar3Settings|useWar3Detector|useSound|GlobalLoadingProvider|OverlayModal|i18n)$/ }, args => {
       if (args.namespace === 'fixture' && args.path === 'react') return { path: args.path, external: true };
       if (args.path.endsWith('useWar3Settings') && !args.importer.endsWith('SettingsModal.tsx')) return;
@@ -57,6 +58,7 @@ let treeContent = '';
 const api = {
   getConfig: async (key: string) => key === 'gameChannel' ? 'retail' : { ...fixture.saved },
   setConfig: async (key: string, value: any) => { if (key === 'modSettings') fixture.saved = { ...value }; },
+  getVisionModules: async () => ({}),
   getInstalledModState: async () => null,
   getFullPackageStatus: async () => fixture.fullPackage,
   getBranchModStates: async () => ({ retail: { enabled: fixture.enabled } }),
@@ -123,6 +125,7 @@ const api = {
   updateObjectShader: async () => true,
   updatePostProcessing: async () => true,
   updatePostProcessingGlow: async () => true,
+  updateHdrExposure: async (_path:string,value:number) => {if(fixture.failExposure)throw Error('fixture exposure failure');fixture.writes.push('hdr-exposure');fixture.saved={...fixture.saved,hdrExposure:value};return true;},
   updateHdr: async () => { fixture.writes.push('hdr'); return true; },
   updatePostProcessingOutline: async () => true,
   updateReadability: async () => { fixture.writes.push('readability'); return true; },
@@ -152,6 +155,30 @@ function buttonDisabled(label: string, category: string): boolean {
   return /\bdisabled/.test(button[1]);
 }
 try {
+  const originalSettings={...fixture.saved};
+  fixture.saved={...fixture.saved,resolvedVersion:'v301',graphicsSelection:'hd',hdr:true,hdrExposure:1.2};hook.store.modSettings={...fixture.saved};
+  for(const [mode,value] of [['rpg',0.9],['standard',1.2],['battle',1.8]] as const){
+    await hook.saveModSettings('Z:/fixture-game',{lighting:mode});
+    assert.equal(fixture.saved.hdrExposure,value);assert.equal(hook.store.modSettings.hdrExposure,value);
+  }
+  fixture.writes.length=0;
+  await hook.saveModSettings('Z:/fixture-game',{hdrExposure:2.4});
+  assert.deepEqual(fixture.writes,['hdr-exposure'],'slider release must not resync shaders or DNC');
+  assert.equal(hook.store.modSettings.hdrExposure,2.4);
+  fixture.category='graphics';
+  const graphicsHdr=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+  assert(!graphicsHdr.includes('settings.hdr.title'),'old HDR control removed from graphics page');
+  fixture.category='lighting';
+  const lightingHdr=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+  assert.equal((lightingHdr.match(/aria-label="settings.hdr.title"/g)||[]).length,1);
+  assert(lightingHdr.includes('settings.hdr.brightness'));assert(lightingHdr.includes('min="0.75"'));assert(lightingHdr.includes('max="2.4"'));
+  await hook.saveModSettings('Z:/fixture-game',{hdr:false});
+  assert.equal(hook.store.modSettings.hdrExposure,2.4);
+  const offHdr=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+  assert(!offHdr.includes('settings.hdr.brightness'),'HDR-off hides the exposure slider');
+  fixture.failExposure=true;await assert.rejects(hook.saveModSettings('Z:/fixture-game',{hdrExposure:0.75}),/exposure failure/);fixture.failExposure=false;
+  assert.equal(hook.store.modSettings.hdrExposure,2.4);assert.equal(fixture.saved.hdrExposure,2.4);
+  fixture.category='game';fixture.saved={...originalSettings};hook.store.modSettings={...originalSettings};
   // The exact reported flow, repeated in the same client session.
   for (let round = 0; round < 2; round++) {
     await hook.saveModSettings('Z:/fixture-game', { terrain: 'latest' });
@@ -280,10 +307,10 @@ try {
   fixture.category = 'graphics';
   const graphicsHtml = renderToStaticMarkup(React.createElement(SettingsModal, { open: true, onClose() {}, isFullPackageInstalled: true }));
   assert(graphicsHtml.includes('settings-graphics-grid'));
-  assert.equal((graphicsHtml.match(/data-span="8"/g) || []).length, 10, 'graphics settings retain three columns after moving water and lighting');
+  assert.equal((graphicsHtml.match(/data-span="8"/g) || []).length, 9, 'graphics settings retain three columns after moving HDR to lighting');
   const switches = [...graphicsHtml.matchAll(/<button([^>]*role="switch"[^>]*)>/g)];
-  assert.equal(switches.length, 10, 'graphics Boolean settings use single switches');
-  assert(switches.some(match => match[1].includes('aria-label="settings.hdr.title"')));
+  assert.equal(switches.length, 9, 'graphics Boolean settings use single switches');
+  assert(!switches.some(match => match[1].includes('aria-label="settings.hdr.title"')));
   fixture.category='lighting';
   const lightingHtml=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
   const rotating = [...lightingHtml.matchAll(/<button([^>]*role="switch"[^>]*)>/g)].find(match => match[1].includes('aria-label="settings.rotatingLighting.title"'));

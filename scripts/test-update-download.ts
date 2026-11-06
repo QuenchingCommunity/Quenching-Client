@@ -57,7 +57,9 @@ try {
   const gitlawb = 'https://node.gitlawb.com/example';
   const r2 = 'https://qm.txzy.net/private/example?token=secret';
   const parts = { parts: [{ url: gitlawb, size: 1, sha256: 'a'.repeat(64) }] };
-  assert.equal(UPDATE_DOWNLOAD_POLICY.graceMs + UPDATE_DOWNLOAD_POLICY.windowMs, 15_000, '15 seconds total, not an extra warmup');
+  assert.equal(UPDATE_DOWNLOAD_POLICY.graceMs + UPDATE_DOWNLOAD_POLICY.windowMs, 40_000, 'allow cold connections and sustained progress before switching');
+  assert.equal(UPDATE_DOWNLOAD_POLICY.minimumBytesPerSecond, 32 * 1024);
+  assert.deepEqual(updateDownloadSources([mirror, github, mirror], githubMirrors), [mirror, github, ...mirrors.slice(1)], 'do not retry identical sources under explicit and expanded policies');
   assert.deepEqual(updateDownloadSources([gitlawb, github, parts, r2], githubMirrors), [gitlawb, github, ...mirrors, parts, r2]);
   assert.deepEqual(updateDownloadSources([github]), [github], 'no policy means no hardcoded mirror');
   for (const owner of ['UIZorrot', 'QuenchingCommunity']) {

@@ -13,7 +13,8 @@
 | 客户端上传仓库 | `https://github.com/QuenchingCommunity/Quenching-Client` | Release 上传便携包、机器更新对象／可选差分；具体 tag 由本次清单确定 |
 | 完整包／MOD 上传仓库 | `https://github.com/QuenchingCommunity/Quenching-Assets` | Release 上传完整 A/B、手动覆盖包、自动更新 ZIP；A/B 为两个普通 ZIP |
 | 官网元数据 | `https://qm.txzy.net`，兼容站 `https://www.tianxiazhengyi.net` | 发布门禁和签名清单；是更新选择入口，不以 GitHub latest 创建时间判断目标 |
-| 测试元数据 | `https://qm.txzy.net/quenching/update-test/<候选>/` | 每次显式指定独立 base；测试和正式索引／store 分开 |
+| 匹配服务器（禁止用作更新源） | `https://qmapi-cn1.txzy.net` | 只提供匹配服务；误加更新服务已经撤回，不得复用此服务器承载更新或 TEST |
+| 测试元数据 | `https://www.tianxiazhengyi.net/version-test.que` 及 `*-test.json` | 用户指定独立 TEST 文件名；共用正式更新实现，旧 TEST 目录仅兼容已分发客户端 |
 | GitHub 镜像 | 已验签清单的 `githubMirrors` | 仅代理本项目公共 Release 文件，不代理元数据或私有凭据；不写死历史镜像列表 |
 | R2 | 私有桶经 Worker，具体地址按本次签名配置核对 | 最后备用，独立验证可用才启用；本次未确认实际桶／Worker 地址 |
 | GitLawb／Irys | 历史源；现已停用 | `_irys/` 是现有私有发布工具目录名，不表示仍使用 Irys 存储 |
@@ -32,9 +33,13 @@
 | MOD schema 2 兼容 | 相同前缀下 `mod-sync-manifest.json` |
 | MOD schema 1 兼容 | 相同前缀下 `manifest.json` |
 
-测试 base 下使用相对 `version.que`、`client-manifests/latest.json`、`mod-zip-manifest.json` 和同一 base 的兼容 `mod-sync-manifest.json`。这些是源码配置入口，不表示本次候选已经部署。其他人工网盘分发不能凭既有插件或历史路径视为自动更新源，实际新增时应补齐本表。
+TEST 使用独立 `version-test.que`、`client-manifests/latest-test.json`、`<当前内部版本>-test.json`、`mod-zip-manifest-test.json`、`mod-sync-manifest-test.json` 和 `manifest-test.json`，共用正式的别名和兼容顺序；TEST 标记不绕过发布门禁。旧 TEST 目录中的无后缀路径仅用于已分发客户端兼容。其他人工网盘分发不能凭既有插件或历史路径视为自动更新源。
 
 ## 当前自动更新原理
+
+**网站事故恢复现状**：见 [主站误改绑恢复记录](main-site-restoration-20261106.md)。此前将www绑定到测试文件部署是错误操作，已经撤回；当前两个域名均保持原生产站点，只由三条精确TEST路径规则提供测试配置。旧TEST记录里的域名绑定方式不得复用。
+
+2026-11-06 当前修复见 [3.7.4 TEST 启动与重试记录](update-test-3.7.4-20261106.md)，通道配置见 [3.7.3 共用流程记录](update-test-3.7.3-20261106.md)。CN1 是匹配服务器，误加的更新服务已经撤回；TEST 使用指定 www 网站及独立文件名。正式门禁／索引保持原版本与原字节。修复须随新二进制分发，不能靠服务器换清单宣称旧版已有新能力。
 
 1. 前端启动约 10 秒后检查小型门禁与签名索引，根据真实客户端内部版本、MOD 版本／sequence 判断可更新性。用户确认前不下载／应用大资源；客户端和 MOD 共用确认流程，同时更新先 MOD 后客户端。
 2. 测试包的 EXE 同级 `quenching-update-test.json` 由 `update-test-init.ts` 初始化 `update-channel.ts`，更新后保留测试入口，配置／浏览器缓存隔离。测试失败不切正式。该标记不会隔离游戏目录，自动化必须选独立测试游戏目录。
@@ -42,11 +47,15 @@
 4. 客户端暂存验证后退出，由独立助手执行替换和重启。新的官方快照与应用文件同事务提交，健康确认和回滚保护已安装状态。Windows x64 是目前自动更新范围；Electron 核心变化需新便携包，macOS 当前手动更换。
 5. MOD 优先 schema 3 连续 ZIP，根据 sequence 规划相邻版本路径，每步下载整个 ZIP、验签／验哈希、验证 payload、事务安装和更新标记；默认最多 6 步。失败回滚本步，已经提交的步骤保留。它不是下载前对本地目标逐文件比对后按需取对象的实现。
 6. 旧 MOD schema 2 比较官方快照，只下载官方变化对象；当前代码未像客户端一样先对这些对象逐一判断本地是否已等于目标。schema 1／3.4 特殊迁移继续兼容，不能把官方旧哈希作为更新资格要求。
-7. 下载源以签名清单为准；GitHub 文件可使用清单批准的镜像。15 秒窗口低速／无进展切源，最终源保留完成机会；只有整产物校验通过才记住成功镜像。临时失败不绕过签名或哈希。
+7. 下载源以签名清单为准；GitHub 文件可使用清单批准的镜像。3.7.4 起使用10秒预热＋30秒低速／无进展观察、32KiB/s门限，接近完成时保留传输，最终源保留完成机会。只有整产物校验通过才记住成功镜像，失败不绕过签名或哈希。客户端跨事务复用同卷已验证目标缓存，健康提交后清理。
 8. 安装作用于选定 `_retail_`／`_ptr_`，保留 QMoff 和另一分支。删除资源需显式可信删除记录及可接受旧哈希，玩家额外文件／改动不能因目标清单缺项而被清空。
 9. 启动渲染刷新属于本地附加资源同步，入口 `startup-rendering.ts`、`asset-sync.ts` 和 `shader-handlers.ts`。它与网络版本更新不同，但安装后重应用设置时会交汇。2026-10-25 加入 shaders 目录移动重试及文件级回退／回滚；源码测试通过不等于已经打包上线。
 
 ## 用户新要求与开发缺口
+
+2026-11-06 补充：[完整包／MOD 边界核对](full-package-update-audit-20261106.md) 已修复源码中的尾处理误报失败、版本标记过早写入和失败重试重复拉ZIP；尚未进入当前3.7.4 TEST二进制。手动完整包覆盖仍不具备全部资源事务回滚，MOD ZIP仍非逐文件最小拉取。
+
+同日 [手动／自动更新弹窗统一](update-dialog-unification-20261106.md) 已完成源码、构建和独立Electron样式验证，尚未进入3.7.4 TEST；下一候选一并纳入，不能重建同内部版本覆盖已发布对象。
 
 客户端和完整包／MOD 均须尽量根据本地实际内容与可信目标比较后最小下载；现有实现只部分满足。后续开发依次落实：
 
@@ -60,6 +69,8 @@
 这些是待实施／持续维护的验收要求，不能写作现有功能全部完成。最新用户要求优先于旧文档中固定使用 MOD ZIP／不再逐文件发布的方案约束；新方案仍需验证真实旧客户端升级路径。
 
 ## 中间产物与清理
+
+2026-11-05 用户新增：每次发版后保留一份本地纯净 TEST 便携归档及真实版本、通道、大小／SHA-256；不得启动归档基线，不含设置／浏览器缓存／展开缓存／事务。测试使用新解压的运行副本。此单份压缩基线覆盖旧版“不保留旧客户端”的默认约定，其他可重取的大对象仍按需回收，避免长期保留重复包和整棵展开树。用户已要求废弃文件送入回收站，不以永久删除代替。
 
 开发／打包／验证的临时下载、解压、比较、候选中间文件和日志放 `_tmp/<任务>/`。测试与正式任务分子目录；未完成验收的候选保留到验收结束，不把每版完整旧树长期堆积成历史。
 
@@ -79,6 +90,7 @@
 | 本地标记／快照 | MOD 分支 `_patch/keep.que`、`_patch/qmf-<version>.files.json.gz`、`.quenching/installed-mod.json`；客户端 `resources/assets/updater/client-files.json.gz` |
 | 完整包首装 | `src/Main/services/full-package-install.ts` |
 | 下载与慢源切换 | `src/Main/services/update-download.ts` |
+| 客户端／MOD 已验证重试缓存（源码待发） | `src/Main/services/update-artifact-cache.ts` |
 | 私有发布器 | `_irys/prepare-mod-latest.ts`、`build-mod-zip.ts`、`build-file-sync.mjs`、`export-win-test.mjs`；运行前核对实际参数和硬编码 |
 | 回归 | `scripts/test-file-sync-node.mjs`、`test-mod-zip.ts`、`test-update-download.ts`、`test-update-channel.ts`、`test-portable-update-test.ts`、`test-combined-update-prompt.ts` |
 

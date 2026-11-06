@@ -1,3 +1,4 @@
+import {assertVisionSettingAllowed} from '../services/vision-modules';
 import { getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import fs from 'fs-extra';
@@ -93,6 +94,7 @@ export async function applyTreeSettings(
     resolvedProfile?: ModProfile,
     quenchingDir?: string,
 ) {
+        await assertVisionSettingAllowed(war3Path,'tree');
         console.log('\n\n==================================================');
         console.log(`[Tree] IPC RECEIVED: mode=${treeMode}, path=${war3Path}`);
         try {

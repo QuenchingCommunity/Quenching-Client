@@ -11,6 +11,7 @@ const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-uninstall-'));
 const assets = path.join(root, 'empty-client-assets');
 try {
   await fs.ensureDir(assets);
+  await fs.outputFile(path.join(root, 'NELonstar', 'nested', 'player.txt'), 'unmanaged player directory');
   await fs.outputFile(path.join(root, 't20', 'owned.txt'), 'package');
   await fs.outputFile(path.join(root, 't20', 'custom.txt'), 'player edit');
   await fs.outputFile(path.join(root, 'shaders', 'ps', 'bloomextract.bls'), 'client variant');
@@ -30,6 +31,7 @@ try {
   assert.equal(await fs.pathExists(path.join(root, 't20', 'custom.txt')), false);
   assert.equal(await fs.pathExists(path.join(root, 'shaders', 'ps', 'bloomextract.bls')), false);
   assert.equal(await fs.pathExists(path.join(root, 't20')), false, 'remove empty package folders');
+  assert.equal(await fs.readFile(path.join(root, 'NELonstar', 'nested', 'player.txt'), 'utf8'), 'unmanaged player directory');
 
   const copies = ['', 'QMoff', 'QMoff/.branch-disabled-overlaps', 'QMoff/branch-created', 'QMoff/branch-residuals/test'];
   for (const base of copies) {

@@ -15,6 +15,11 @@ function packagePath(name: string): string {
 type InstallProgress = (percent: number, message: string) => void;
 type BeforeInstall = () => Promise<void>;
 
+function report(onProgress: InstallProgress | undefined, percent: number, message: string): void {
+  try { onProgress?.(percent, message); }
+  catch (error) { console.warn('[FullPackage] Progress listener failed:', error); }
+}
+
 async function listPackageFiles(source: string): Promise<Array<{ relative: string; bytes: number }>> {
   const files: Array<{ relative: string; bytes: number }> = [];
   const visit = async (dir: string) => {
@@ -35,16 +40,35 @@ async function listPackageFiles(source: string): Promise<Array<{ relative: strin
 async function copyPackageFiles(source: string, targetDir: string, onProgress?: InstallProgress, beforeInstall?: BeforeInstall): Promise<number> {
   const files = await listPackageFiles(source);
   if (!files.length) throw new Error('所选资源包中没有可安装的文件。');
+  const markerRank = (relative: string) => {
+    const name = relative.replace(/\\/g, '/').toLowerCase();
+    return name === '_patch/keep.que' ? 2 : name === '.quenching/installed-mod.json' ? 1 : 0;
+  };
+  files.sort((a, b) => markerRank(a.relative) - markerRank(b.relative));
+  const markers = await Promise.all(files.filter(file => markerRank(file.relative)).map(async file => ({
+    target: path.join(targetDir, file.relative),
+    previous: await fs.readFile(path.join(targetDir, file.relative)).catch(error => { if (error.code !== 'ENOENT') throw error; return null; }),
+  })));
   await beforeInstall?.();
-  for (let i = 0; i < files.length; i++) {
-    const relative = files[i].relative;
-    const from = path.join(source, relative), to = path.join(targetDir, relative);
-    if (path.resolve(from).toLowerCase() !== path.resolve(to).toLowerCase()) {
-      await fs.copy(from, to, { overwrite: true, preserveTimestamps: true });
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const relative = files[i].relative;
+      const from = path.join(source, relative), to = path.join(targetDir, relative);
+      if (path.resolve(from).toLowerCase() !== path.resolve(to).toLowerCase()) {
+        await fs.copy(from, to, { overwrite: true, preserveTimestamps: true });
+      }
+      if (i % 100 === 0 || i === files.length - 1) {
+        report(onProgress, 70 + Math.round((i + 1) / files.length * 28), '正在安装资源包');
+      }
     }
-    if (i % 100 === 0 || i === files.length - 1) {
-      onProgress?.(70 + Math.round((i + 1) / files.length * 28), '正在安装资源包');
+  } catch (error) {
+    // Never advertise the new version when resource copying did not finish.
+    // Data files can be retried from the selected local package.
+    for (const marker of markers) {
+      if (marker.previous) await fs.outputFile(marker.target, marker.previous);
+      else await fs.remove(marker.target);
     }
+    throw error;
   }
   return files.reduce((sum, file) => sum + file.bytes, 0);
 }
@@ -56,7 +80,7 @@ export async function installPackageDirectory(source: string, targetDir: string,
   // A downloaded ZIP's outer folder may wrap the actual package once.
   const root = wrapper && !entries.some(entry => entry.isDirectory() && /^(?:units|environment|RUnits|textures|shaders)$/i.test(entry.name))
     ? path.join(source, wrapper.name) : source;
-  onProgress?.(0, '正在读取资源文件夹');
+  report(onProgress, 0, '正在读取资源文件夹');
   return copyPackageFiles(root, targetDir, onProgress, beforeInstall);
 }
 
@@ -97,7 +121,7 @@ export async function installPackageArchives(
       await extractArchive(zipPaths[i], staging, {
         stripLeadingDirectory: ['_retail_', '_ptr_'],
         mapFile: packagePath,
-        onProgress: (percent, name) => onProgress?.(
+        onProgress: (percent, name) => report(onProgress,
           Math.round((i + percent / 100) / zipPaths.length * 70),
           `正在解压 ${i + 1}/${zipPaths.length}：${name}`,
         ),
@@ -105,6 +129,6 @@ export async function installPackageArchives(
     }
     return await copyPackageFiles(staging, targetDir, onProgress, beforeInstall);
   } finally {
-    await fs.remove(staging);
+    await fs.remove(staging).catch(error => console.warn('[FullPackage] Retained busy staging after installation:', error));
   }
 }

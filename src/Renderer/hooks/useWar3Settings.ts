@@ -1,3 +1,5 @@
+import {resolveHdrExposure,validateHdrExposure,withHdrExposure} from '../../shared/hdr-exposure';
+import {VISION_MODULES, visionBlocksSetting} from '../../shared/vision-modules';
 import { useState, useEffect } from 'react';
 import { reaction } from 'mobx';
 import { reaxel, createReaxable } from 'reaxes';
@@ -36,6 +38,7 @@ export interface ModSettings {
   objectShader: boolean; // 物体着色器
   postProcessing: boolean; // 后处理阴影
   postProcessingGlow: boolean; // 后处理辉光（两份 Bloom 和 Gaussian Blur）
+  hdrExposure?: number;
   hdr: boolean; // 独立的色调映射开关
   postProcessingOutline: boolean; // 3.0.1+ 物体描边，AO 强度由光照模式决定
   volumetricFog: boolean; // 体积雾
@@ -54,6 +57,10 @@ export interface ModSettings {
   glow: boolean;         // 英雄光晕弱光晕（true=弱, false=强）
   terrain: 'original' | 'latest' | 'retro' | 'v16' | 'v18' | 'decisive'; // 地形
   tree: 'original' | 'tall' | 'short' | 'retro' | 'v16' | 'v18'; // 树木
+  visionUnits?: boolean;
+  visionDecorations?: boolean;
+  visionTerrain?: boolean;
+  visionMisc?: boolean;
   modelEnhance: boolean; // 模型加强
   improveReadability: boolean; // 3.0.1 HD team-color effects and reversible unit scaling
   visionModPath: string; // VisionMod目录
@@ -84,6 +91,7 @@ export const reaxel_War3Settings = reaxel(() => {
       postProcessing: true,
       postProcessingGlow: true,
       hdr: true,
+      hdrExposure: 1.2,
       postProcessingOutline: false,
       volumetricFog: true,
       water: 'off' as const,
@@ -308,6 +316,7 @@ export const reaxel_War3Settings = reaxel(() => {
       if (loadedSettings.postProcessingGlow === undefined) {
         loadedSettings.postProcessingGlow = loadedSettings.postProcessing !== false;
       }
+      loadedSettings.hdrExposure=resolveHdrExposure({...loadedSettings,hdrExposure:savedVisualSettings?.hdrExposure});
       if (savedVisualSettings && typeof savedVisualSettings.hdr !== 'boolean') {
         loadedSettings.hdr = savedVisualSettings.postProcessing !== false;
       } else if (typeof loadedSettings.hdr !== 'boolean') loadedSettings.hdr = loadedSettings.postProcessing !== false;
@@ -523,6 +532,19 @@ export const reaxel_War3Settings = reaxel(() => {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     try {
+      const module = VISION_MODULES.find(key => Object.hasOwn(newSettings,key));
+      if(module){
+        if(Object.keys(newSettings).length!==1)throw new Error('请逐项切换 Vision Mod 模块');
+        const enabled=!!newSettings[module],source=store.modSettings.visionModPath;
+        if(enabled&&!source)throw new Error('请先选择 Vision Mod 目录');
+        await window.electronAPI.setVisionModule(war3Path,source||'',module,enabled);
+        const next={...previousSettings,[module]:enabled};
+        try{await window.electronAPI.setConfig('modSettings',next);}catch(error){await window.electronAPI.setVisionModule(war3Path,source||'',module,!enabled);throw error;}
+        setState({modSettings:next});return;
+      }
+      const modules=await window.electronAPI.getVisionModules(war3Path);
+      if(Object.keys(newSettings).some(key=>visionBlocksSetting(modules,key)))throw new Error('请先关闭接管该设置的 Vision Mod 模块');
+      if(newSettings.visionModPath && Object.values(modules).some(Boolean))throw new Error('更换目录前请先关闭 Vision Mod 模块');
       // Do not write an old renderer snapshot over a newer applied profile.
       previousSettings = await readResolvedProfile(previousSettings);
       const installed = await window.electronAPI?.getInstalledModState?.(war3Path);
@@ -540,6 +562,14 @@ export const reaxel_War3Settings = reaxel(() => {
       const branchStates = await window.electronAPI?.getBranchModStates?.().catch(() => null);
       const branchEnabled = branchStates?.[selectedChannel === 'ptr' ? 'ptr' : 'retail']?.enabled
         ?? newSettings.modEnabled ?? store.modSettings.modEnabled;
+
+      if(newSettings.hdrExposure !== undefined && Object.keys(newSettings).length===1){
+        const exposure=validateHdrExposure(newSettings.hdrExposure);
+        if(!window.electronAPI?.updateHdrExposure)throw new Error('整体亮度设置不可用');
+        if(await window.electronAPI.updateHdrExposure(war3Path,exposure)===false)throw new Error('整体亮度设置未完成');
+        setState({modSettings:{...previousSettings,hdrExposure:exposure}});
+        reportProgress('finish',100);return;
+      }
 
       if (newSettings.atmosphericLight !== undefined && Object.keys(newSettings).length === 1) {
         if(typeof newSettings.atmosphericLight!=='boolean')throw new Error('Invalid atmospheric light setting');
@@ -596,7 +626,7 @@ export const reaxel_War3Settings = reaxel(() => {
       const previousLightingBrightness = store.modSettings.lightingBrightness ?? 3;
       const previousTerrain =
         newSettings.terrain !== undefined ? store.modSettings.terrain : undefined;
-      let updatedSettings = { ...previousSettings, ...newSettings };
+      let updatedSettings = withHdrExposure(previousSettings, newSettings);
       if (newSettings.graphicsSelection === 'de' && previousSettings.graphicsSelection !== 'de') {
         updatedSettings.tree = 'original';
       }
@@ -950,6 +980,7 @@ objectShader=${settings.objectShader ? '1' : '0'}
 postProcessing=${settings.postProcessing ? '1' : '0'}
 postProcessingGlow=${settings.postProcessingGlow ? '1' : '0'}
 hdr=${settings.hdr ? '1' : '0'}
+hdrExposure=${resolveHdrExposure(settings)}
 postProcessingOutline=${settings.postProcessingOutline ? '1' : '0'}
 volumetricFog=${settings.volumetricFog ? '1' : '0'}
 water=${settings.water === 'realistic' ? '1' : settings.water === 'transparent' ? '2' : '0'}

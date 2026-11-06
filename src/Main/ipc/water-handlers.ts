@@ -1,3 +1,4 @@
+import {assertVisionSettingAllowed} from '../services/vision-modules';
 import { getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import path from 'path';
@@ -10,6 +11,7 @@ import { removeActiveWaterOverrides, stripWaterForDe } from '../services/graphic
 import { copyWaterModeFromAssets, verifyWaterModeAssets } from '../services/water-assets-service';
 
 export async function applyWaterSettings(war3Path: string, waterMode: string): Promise<void> {
+    await assertVisionSettingAllowed(war3Path,'water');
     if (!war3Path) throw new Error('未提供魔兽路径');
 
     const modSettings = configManager.get('modSettings') || {};

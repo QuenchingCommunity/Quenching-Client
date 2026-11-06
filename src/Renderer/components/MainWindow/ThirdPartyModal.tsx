@@ -1,3 +1,4 @@
+import {VISION_MODULES, VisionModules} from '../../../shared/vision-modules';
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Input, Space, message } from 'antd';
 import { useTranslation } from '../../utils/i18n';
@@ -40,6 +41,7 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
 
   const [activeTab, setActiveTab] = useState<TabId>('vision');
   const [thirdPartyState, setThirdPartyState] = useState<ThirdPartyState | null>(null);
+  const [visionModules,setVisionModules]=useState<VisionModules>({});
   const [busy, setBusy] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
 
@@ -52,11 +54,12 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
     : slot.name;
   const displayedCurrentName = currentSlot ? displaySlotName(currentSlot) : '';
   useEffect(() => { setNameDraft(displayedCurrentName); }, [currentSlot?.id, currentSlot?.name, currentLanguage]);
-  const isClassicMode = !!modSettings?.classicMode;
+  const isClassicMode = !!modSettings?.classicMode || modSettings?.graphicsSelection === 'sd';
   const visionReady = !!modSettings?.visionModPath;
 
   useEffect(() => {
     if (!open || !root) return;
+    window.electronAPI.getVisionModules(root).then(setVisionModules).catch(error=>message.error(error.message));
     window.electronAPI.getThirdPartyState(root)
       .then(setThirdPartyState)
       .catch(error => message.error(error.message));
@@ -183,22 +186,15 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28 }}>
-        <div>
-          <h3 style={TITLE}>{t('settings.half.title')}</h3>
-          <Space>
-            {toggleBtn(t('settings.btn.turnon'), !!modSettings.half, () => handleSettingChange('half', true), !!visionDisabledReason)}
-            {toggleBtn(t('settings.btn.turnoff'), !modSettings.half, () => handleSettingChange('half', false), !!visionDisabledReason)}
-          </Space>
+        {VISION_MODULES.map(key=><div key={key}>
+          <h3 style={TITLE}>{t(`settings.vision.${key}.title`)}</h3>
+          <p style={DESC}>{t(`settings.vision.${key}.desc`)}</p>
+          <Checkbox aria-label={t(`settings.vision.${key}.title`)} checked={!!visionModules[key]} disabled={busy||isLoading||(!visionModules[key]&&!!visionDisabledReason)}
+            onChange={async event=>{const enabled=event.target.checked;setBusy(true);try{await handleSettingChange(key,enabled);setVisionModules(await window.electronAPI.getVisionModules(root!));}catch(error:any){message.error(error?.message||String(error));}finally{setBusy(false);}}}>
+            {t(visionModules[key]?'settings.btn.turnon':'settings.btn.turnoff')}
+          </Checkbox>
           {statusHint(visionDisabledReason)}
-        </div>
-        <div>
-          <h3 style={TITLE}>{t('settings.modelenhance.title')}</h3>
-          <Space>
-            {toggleBtn(t('settings.btn.turnon'), !!modSettings.modelEnhance, () => handleSettingChange('modelEnhance', true), !!visionDisabledReason)}
-            {toggleBtn(t('settings.btn.turnoff'), !modSettings.modelEnhance, () => handleSettingChange('modelEnhance', false), !!visionDisabledReason)}
-          </Space>
-          {statusHint(visionDisabledReason)}
-        </div>
+        </div>)}
       </div>
     </div>
   );

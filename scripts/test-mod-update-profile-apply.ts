@@ -9,6 +9,7 @@ const fixture = {
   calls,
   result: { applied: true, status: { decision: 'patch' } } as { applied: boolean; status: { decision: string }; appliedPatches?: number },
   warnings: ['missing shader pack'],
+  profileError: '',
 };
 (globalThis as any).__modUpdateProfileFixture = fixture;
 
@@ -34,7 +35,7 @@ const bundled = await build({
               ? 'export const getChannelModEnabled = () => true; export const getSelectedGameChannel = () => "retail"; export const getSelectedGameDir = p => p;'
               : args.path.endsWith('branch-mod-toggle')
                 ? 'export const isBranchModDisabled = async () => false;'
-                : 'export async function applyInstalledProfile() { globalThis.__modUpdateProfileFixture.calls.push("profile"); return globalThis.__modUpdateProfileFixture.warnings; }',
+                : 'export async function applyInstalledProfile() { const f=globalThis.__modUpdateProfileFixture; f.calls.push("profile"); if(f.profileError)throw new Error(f.profileError); return f.warnings; }',
     }));
   } }],
 });
@@ -53,6 +54,14 @@ assert.equal(updated.applied, true);
 assert.equal(updated.configurationError, 'missing shader pack');
 assert.deepEqual(calls, ['patch', 'profile']);
 assert.deepEqual(progress.map(({ phase, percent }) => [phase, percent]), [['finalizing', 99], ['complete', 100]]);
+
+fixture.profileError = 'unexpected post-commit profile error';
+const warning = await apply(event, 'game');
+assert.equal(warning.applied, true, 'committed MOD files cannot become failed because configuration throws');
+assert.match(warning.configurationError, /post-commit profile/);
+fixture.profileError = '';
+const closed = await apply({ sender: { isDestroyed: () => false, send: () => { throw new Error('renderer closed between check and send'); } } }, 'game');
+assert.equal(closed.applied, true, 'racing renderer teardown cannot invalidate an update');
 
 calls.length = 0;
 progress.length = 0;

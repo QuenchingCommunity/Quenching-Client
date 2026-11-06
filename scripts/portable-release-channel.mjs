@@ -21,8 +21,8 @@ export function portableTestMarker(baseUrl) {
   const url = new URL(base);
   const loopback = url.protocol === 'http:' && url.hostname === '127.0.0.1';
   if ((url.protocol !== 'https:' && !loopback) || url.username || url.password || url.search || url.hash ||
-      !base.endsWith('/') || (!loopback && !url.pathname.startsWith('/quenching/update-test/'))) {
-    throw new Error('Test base must be a dedicated HTTPS /quenching/update-test/ directory (or an isolated loopback fixture)');
+      !base.endsWith('/') || (!loopback && url.href !== 'https://www.tianxiazhengyi.net/' && !url.pathname.startsWith('/quenching/update-test/'))) {
+    throw new Error('Test base must be the TEST website root, a dedicated HTTPS /quenching/update-test/ directory or an isolated loopback fixture');
   }
   return { schema: 1, enabled: true, baseUrl: base };
 }

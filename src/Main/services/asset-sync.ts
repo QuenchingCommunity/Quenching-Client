@@ -1,3 +1,5 @@
+import {resolveHdrExposure} from '../../shared/hdr-exposure';
+import {getVisionModules, assertVisionSettingAllowed} from './vision-modules';
 import { resourceArchiveExists } from './bundled-packages';
 import { getSelectedGameChannel, getChannelModEnabled, hasGameChannelDirectory } from './game-channel';
 import fs from 'fs-extra';
@@ -72,6 +74,8 @@ function postProcessingAoFor(profile: ModProfile, lighting: unknown): boolean {
 /** Compose public environment and selected foliage for profiles that use it. */
 async function syncPublicEnvironment(retailDir: string, quenchingDir: string, profile: ModProfile, modSettings: Record<string, unknown>, force = false, onProgress?: (percent: number) => void): Promise<void> {
   onProgress?.(0);
+  const vision=await getVisionModules(path.dirname(retailDir));
+  if(vision.visionTerrain || vision.visionMisc)return;
   const environmentDir = path.join(retailDir, 'environment');
   const environmentMarker = path.join(environmentDir, PROFILE_ENV_MARKER);
   if (!profile.usesPublicEnvironment) {
@@ -128,6 +132,7 @@ export async function syncLightingResources(
   resolvedProfile?: ModProfile,
   options: { forceEnvironment?: boolean; onProgress?: SettingsProgress } = {},
 ): Promise<void> {
+  await assertVisionSettingAllowed(war3Path,'lighting');
   const report = createSettingsProgressReporter(options.onProgress);
   report('sync-start', 12);
   if (!getChannelModEnabled(getSelectedGameChannel())) return;
@@ -199,7 +204,7 @@ export async function syncLightingResources(
       }
     });
     await AssetSyncService.ensurePostProcessingConfig(war3Path, postProcessingAoFor(profile, lighting),
-      supportsHdr(profile) && (modSettings?.hdr ?? modSettings?.postProcessing !== false));
+      supportsHdr(profile) && (modSettings?.hdr ?? modSettings?.postProcessing !== false), undefined, resolveHdrExposure(modSettings || {}));
     report('shaders', 90);
     let replacedInPlace = false;
     if (existing) {
@@ -241,6 +246,7 @@ export async function syncProfileResources(
   modSettings: any,
   onProgress?: (step: string, percent: number) => void,
 ): Promise<void> {
+  if(Object.values(await getVisionModules(war3Path)).some(Boolean))throw new Error('请先关闭 Vision Mod 模块后再切换完整画面配置');
   const lighting = modSettings?.lighting || 'standard';
   const profile = await resolveModProfile(war3Path, {
     versionSelection: modSettings?.versionSelection,
@@ -337,7 +343,7 @@ export class AssetSyncService {
   /** Called after the renderer's first paint; never awaited by window creation. */
   static async prepareStartupAssets(notify: (progress: { firstRun: boolean; percent: number }) => void,
     onClientReady?:()=>void|Promise<void>): Promise<void> {
-    const assets=await this.getAssetsDir();
+    const assets=await this.getAssetsDir([], false);
     await onClientReady?.();
     const developmentSources=!app.isPackaged && (await Promise.all(UNPACKED_RESOURCE_DIRS.map(dir=>fs.pathExists(path.join(assets,'unpacked',dir))))).every(Boolean);
     if(developmentSources)return;
@@ -349,7 +355,7 @@ export class AssetSyncService {
       onProgress:percent=>notify({firstRun,percent}),
     });
   }
-  static async getAssetsDir(resources: string[] = []): Promise<string> {
+  static async getAssetsDir(resources: string[] = [], prepare = true): Promise<string> {
     const appPath = app.getAppPath();
     const resourcesPath = (process as any).resourcesPath as string | undefined;
     const candidates = [
@@ -372,7 +378,7 @@ export class AssetSyncService {
         throw error;
       }))?.isDirectory()) {
         const developmentSources = !app.isPackaged && (await Promise.all(UNPACKED_RESOURCE_DIRS.map(dir => fs.pathExists(path.join(p, 'unpacked', dir))))).every(Boolean);
-        if (!developmentSources && (app.isPackaged || await fs.pathExists(path.join(p, 'quenching', 'resources.manifest.json')))) {
+        if (prepare && !developmentSources && (app.isPackaged || await fs.pathExists(path.join(p, 'quenching', 'resources.manifest.json')))) {
           await prepareBundledAssets(p, { ...resourceCacheLocation(app.isPackaged,app.getPath('exe'),p), required: app.isPackaged, selections: resources });
         }
         return p;
@@ -396,6 +402,7 @@ export class AssetSyncService {
 
   /** Synchronize client-owned WebUI files independently of graphics/profile settings. */
   static async syncClientWebUIAssets(war3Path: string): Promise<boolean> {
+    if((await getVisionModules(war3Path)).visionMiscUI)return false;
     const settings = configManager.get('modSettings');
     if (settings?.graphicsSelection === 'sd' || settings?.classicMode === true) return false;
     if (await isThirdPartyQuenchingPaused(war3Path)) {
@@ -426,7 +433,7 @@ export class AssetSyncService {
    * The other branch stays vanilla. An existing file keeps its values except
    * AO and Tonemap, which follow the selected profile/settings. A full package is not required.
    */
-  static async ensurePostProcessingConfig(war3Path: string, aoEnabled?: boolean, hdrEnabled?: boolean, glowEnabled?: boolean): Promise<void> {
+  static async ensurePostProcessingConfig(war3Path: string, aoEnabled?: boolean, hdrEnabled?: boolean, glowEnabled?: boolean, hdrExposure?: number): Promise<void> {
     const root = normalizeWar3RootPath(war3Path);
     if (!root) return;
     const settings = configManager.get('modSettings');
@@ -454,7 +461,7 @@ export class AssetSyncService {
       console.log(`[AssetSync] ${POST_PROCESSING_CONFIG_FILE}: AO ${ao ? 'enabled' : 'disabled'}`);
     }
     await setPostProcessingTonemapEnabled(buildDir, supportsHdr(profile) &&
-      (hdrEnabled ?? settings?.hdr ?? settings?.postProcessing !== false));
+      (hdrEnabled ?? settings?.hdr ?? settings?.postProcessing !== false), hdrExposure ?? resolveHdrExposure(settings || {}));
     const bloom = glowEnabled ?? settings?.postProcessingGlow !== false;
     await setPostProcessingBloomEnabled(buildDir, bloom);
   }
@@ -495,8 +502,8 @@ export class AssetSyncService {
     console.log('[AssetSync] Applying explicitly selected resource settings');
     console.log(`[AssetSync] Target War3 Path: ${war3Path}`);
 
-    if (await isThirdPartyQuenchingPaused(war3Path)) {
-      console.log('[AssetSync] Third-party support has parked Quenching resources; skipping automatic extraction.');
+    if (await isThirdPartyQuenchingPaused(war3Path) || Object.values(await getVisionModules(war3Path)).some(Boolean)) {
+      console.log('[AssetSync] Third-party resources active; skipping full automatic resource transition.');
       return 'third-party-paused';
     }
 

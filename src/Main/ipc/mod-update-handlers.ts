@@ -20,6 +20,10 @@ export function registerModUpdateHandlers() {
 
   ipcMain.handle('mod-update:apply', async (event, war3Path: string) => {
     assertWar3Path(war3Path);
+    const notifyProgress = (value: any) => {
+      try { if (!event.sender.isDestroyed()) event.sender.send('mod-update:progress', value); }
+      catch (error) { console.warn('[ModUpdate] Could not notify renderer:', error); }
+    };
     if (!getChannelModEnabled(getSelectedGameChannel()) || await isBranchModDisabled(getSelectedGameDir(war3Path))) {
       throw new Error('Enable the selected branch MOD before applying an update');
     }
@@ -27,17 +31,19 @@ export function registerModUpdateHandlers() {
     const result = await applyModUpdate(war3Path, {
       onProgress: (progress) => {
         // File installation finishes before the selected profile is reapplied.
-        if (progress.phase !== 'complete' && !event.sender.isDestroyed()) event.sender.send('mod-update:progress', progress);
+        if (progress.phase !== 'complete') notifyProgress(progress);
       },
     });
     if (!result.applied && !result.appliedPatches) return result;
     // The patch is already committed. Report profile failures separately so
     // users never mistake "updated files" for "settings applied".
-    if (!event.sender.isDestroyed()) event.sender.send('mod-update:progress', {
+    notifyProgress({
       phase: 'finalizing', percent: 99, message: '正在应用当前资源设置',
     });
-    const warnings = await applyInstalledProfile(war3Path);
-    if (result.applied && !event.sender.isDestroyed()) event.sender.send('mod-update:progress', {
+    let warnings: string[];
+    try { warnings = await applyInstalledProfile(war3Path); }
+    catch (error: any) { warnings = [`资源包已更新，配置应用失败：${error?.message || String(error)}`]; }
+    if (result.applied) notifyProgress({
       phase: 'complete', percent: 100, message: warnings.length ? '更新完成，部分设置未生效' : 'MOD 更新完成',
     });
     return { ...result, configurationError: warnings.join('；') || undefined };

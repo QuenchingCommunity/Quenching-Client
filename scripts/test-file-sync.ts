@@ -215,18 +215,44 @@ export async function run() {
       assert.equal(await fs.readFile(path.join(install, 'resources/assets/player-custom.txt'), 'utf8'), 'custom');
       const outputSnapshot = path.join(stage, 'new/resources/assets/updater/client-files.json.gz');
       assert.equal(decodeSnapshot(await fs.readFile(outputSnapshot), 'quenching-client', '3.8.0').filesDigest, clientLatest.filesDigest);
+      server.requests.length = 0;
+      const retryStage = path.join(install, '.quenching-client-update', '1123456789abcdef01234567');
+      await stageClientFileSync(clientManifest, install, retryStage, prior.version);
+      assert(server.requests.every(name => /\.gz$/.test(name)), 'retry reuses verified payloads without downloading objects, deltas or parts');
+      const retrySummary = await fs.readJson(path.join(retryStage, 'download-summary.json'));
+      assert(retrySummary.files.some((file: any) => file.method === 'verified-cache'));
+      assert.equal(retrySummary.files.reduce((sum: number, file: any) => sum + file.bytes, 0), 0);
+      await fs.writeFile(path.join(install, '_tmp/client-update-cache', hash(newAsar) + '.bin'), 'corrupt cache');
+      server.requests.length = 0;
+      await stageClientFileSync(clientManifest, install, path.join(install, '.quenching-client-update', '2123456789abcdef01234567'), prior.version);
+      assert(server.requests.includes('client-part0'), 'corrupt retry cache never bypasses signed hash verification');
       const helperText = await fs.readFile(path.join(process.cwd(), 'assets/updater/client-update-helper.cjs'), 'utf8');
       const module = { exports: {} as any }; let healthy = true; let restartCount = 0;
       const actualRequire = createRequire(path.join(process.cwd(), 'package.json'));
-      const testRequire = (name: string) => name !== 'node:child_process' ? actualRequire(name) : {
+      let now = 0;
+      let pendingAck: { path: string; token: string; due: number } | undefined;
+      const clock = { now: () => {
+        now += 10000;
+        if (pendingAck && now >= pendingAck.due) fs.writeFileSync(pendingAck.path, pendingAck.token);
+        return now;
+      } };
+      const actualFs = actualRequire('node:fs');
+      const testRequire = (dependency: string) => dependency === 'node:fs' ? {
+        ...actualFs, rmSync: (file: string, options: any) => {
+          if (healthy && file === path.join(stage, 'backup')) throw new Error('fixture antivirus cleanup lock');
+          return actualFs.rmSync(file, options);
+        },
+      } : dependency !== 'node:child_process' ? actualRequire(dependency) : {
         spawn: (_exe: string, _args: string[], options: any) => {
-          if (options.env.QUENCHING_CLIENT_UPDATE_ACK && healthy) fs.writeFileSync(options.env.QUENCHING_CLIENT_UPDATE_ACK, options.env.QUENCHING_CLIENT_UPDATE_TOKEN);
+          if (options.env.QUENCHING_CLIENT_UPDATE_ACK && healthy) pendingAck = {
+            path: options.env.QUENCHING_CLIENT_UPDATE_ACK, token: options.env.QUENCHING_CLIENT_UPDATE_TOKEN, due: now + 90000,
+          };
           else restartCount++;
           return { unref() {}, pid: 123, exitCode: healthy ? null : 1 };
         }, spawnSync() {},
       };
-      new Function('require', 'module', 'process', helperText.slice(0, helperText.indexOf('(process.argv[4]')) + '\nmodule.exports = { run };')
-        (testRequire, module, { env: { QUENCHING_CLIENT_UPDATE_TEST: '1' }, kill() { throw new Error('not alive'); } });
+      new Function('require', 'module', 'process', 'Date', 'setTimeout', helperText.slice(0, helperText.indexOf('(process.argv[4]')) + '\nmodule.exports = { run };')
+        (testRequire, module, { env: { QUENCHING_CLIENT_UPDATE_TEST: '1' }, kill() { throw new Error('not alive'); } }, clock, (callback: () => void) => queueMicrotask(callback));
       const plan = { root: install, stage, token: 'a'.repeat(32), relaunchArgs: [], files: files.map(({ path, oldSha256, newSha256 }) => ({ path, oldSha256, newSha256 })) };
       const planPath = path.join(stage, 'plan.json'); await fs.writeJson(planPath, plan);
       if (name === 'client35') {
@@ -241,6 +267,8 @@ export async function run() {
         assert.equal(await fs.readFile(path.join(install, 'resources/assets/new/nested.txt'), 'utf8'), 'new nested');
         assert.equal(await fs.readFile(path.join(install, 'QMClient.exe'), 'utf8'), 'same launcher');
         assert.equal((await fs.readJson(path.join(stage, 'journal.json'))).state, 'complete');
+        assert(await fs.pathExists(path.join(stage, 'backup')), 'cleanup lock retains backup without rolling back a healthy update');
+        assert(pendingAck && now >= pendingAck.due, 'health reported after 90 seconds still commits with a valid token');
       }
     }
     // Exercise the private publisher twice, including a historical file reverting.

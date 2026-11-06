@@ -1,3 +1,4 @@
+import {getVisionModules,assertVisionSettingAllowed} from './vision-modules';
 import { resourceArchiveExists } from './bundled-packages';
 import { getSelectedGameFolder } from './game-channel';
 import fs from 'fs-extra';
@@ -97,6 +98,7 @@ export async function applyFoliageSettings(
     terrainMode?: string,
     onProgress?: (percent: number) => void,
 ): Promise<void> {
+        await assertVisionSettingAllowed(war3Path,'foliage');
     // Reserve request order before asynchronous path checks can reorder callers.
     return withResourceDirectory(war3Path, () => applyFoliageSettingsUnlocked(war3Path, enabled, terrainMode, onProgress));
 }
@@ -176,6 +178,7 @@ async function syncFoliageForTerrainUnlocked(
 }
 
 export async function syncFoliageOnStartup(war3Path: string, modSettings: Record<string, unknown>): Promise<void> {
+    if((await getVisionModules(war3Path)).visionTerrain)return;
     return withResourceDirectory(war3Path, () => syncFoliageOnStartupUnlocked(war3Path, modSettings));
 }
 

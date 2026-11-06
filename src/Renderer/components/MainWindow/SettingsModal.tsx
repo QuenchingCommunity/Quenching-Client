@@ -1,3 +1,5 @@
+import {HDR_EXPOSURE_MIN,HDR_EXPOSURE_MAX,resolveHdrExposure} from '../../../shared/hdr-exposure';
+import {VisionModules, visionBlocksSetting} from '../../../shared/vision-modules';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Typography, Button, Space, Row, Col, message, Spin, Slider, InputNumber } from 'antd';
 import { useTranslation } from '../../utils/i18n';
@@ -50,6 +52,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   const { currentInstallation, detectInstallations } = useWar3Detector();
   const { playSmall, playHover } = useSound();
   const { showLoading, hideLoading } = useGlobalLoading();
+  const [visionModules,setVisionModules]=useState<VisionModules>({});
+  useEffect(()=>{if(!open||!currentInstallation?.path)return;let active=true;window.electronAPI.getVisionModules(currentInstallation.path).then(value=>{if(active)setVisionModules(value);}).catch(()=>{if(active)setVisionModules({});});return()=>{active=false;};},[open,currentInstallation?.path]);
   const [selectedCategory, setSelectedCategory] = useState<'graphics' | 'game' | 'lighting' | 'basic'>('graphics');
   const [previewInfo, setPreviewInfo] = useState<{ title: string; desc: string; image: string | null }>({
     title: '',
@@ -263,6 +267,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   );
 
   const getSettingStatus = (key: string) => {
+    if(visionBlocksSetting(visionModules,key))return {disabled:true,reason:t('settings.vision.managed')};
     // 1. Full Package Check (Highest Priority)
     const requiresFullPackage = ['water'];
     if (requiresFullPackage.includes(key) && !isFullPackageInstalled) {
@@ -270,11 +275,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     }
 
     // 2. Classic Mode Check
-    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'postProcessingOutline', 'hdr', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'lightingAngle', 'rotatingLighting', 'atmosphericLight', 'improveReadability', 'ui', 'glow'];
+    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'postProcessingOutline', 'hdr', 'hdrExposure', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'lightingAngle', 'rotatingLighting', 'atmosphericLight', 'improveReadability', 'ui', 'glow'];
     if (restrictedInClassic.includes(key) && visualSettingsDisabled) {
       return { disabled: true, reason: t('settings.basic.classicMode.disabled') };
     }
-    if (key === 'hdr' && (modSettings.resolvedVersion || modSettings.versionSelection) === 'v30') {
+    if (['hdr','hdrExposure'].includes(key) && (modSettings.resolvedVersion || modSettings.versionSelection) === 'v30') {
       return { disabled: true, reason: t('settings.hdr.unsupported') };
     }
 
@@ -332,7 +337,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     const sShader = getSettingStatus('objectShader');
     const sPost = getSettingStatus('postProcessing');
     const sPostGlow = getSettingStatus('postProcessingGlow');
-    const sHdr = getSettingStatus('hdr');
     const sOutline = getSettingStatus('postProcessingOutline');
     const sReadability = getSettingStatus('improveReadability');
     const readabilityAvailable = !visualSettingsDisabled &&
@@ -391,14 +395,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
               Boolean(modSettings.postProcessingGlow) ? (() => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.on.desc', '只开启辉光，控制两份 Bloom 和 Gaussian Blur。'), image: './assets/quenching/set9.png' })) : (() => setPreviewInfo({ title: t('settings.postprocessing.glow.title', '后处理辉光'), desc: t('settings.postprocessing.glow.off.desc', '关闭后处理辉光。'), image: './assets/quenching/set9.png' })),
               sPostGlow.disabled)}
             {renderStatusPlaceholder(sPostGlow.reason)}
-          </Col>
-          <Col span={8}>
-            <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.hdr.title')}</h3>
-            {renderSettingSwitch(t('settings.hdr.title'), Boolean(modSettings.hdr),
-              enabled => handleSettingChange('hdr', enabled),
-              () => setPreviewInfo({ title: t('settings.hdr.title'), desc: t(modSettings.hdr ? 'settings.hdr.on.desc' : 'settings.hdr.off.desc'), image: null }),
-              sHdr.disabled)}
-            {renderStatusPlaceholder(sHdr.reason)}
           </Col>
           <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.readability.title')}</h3>
@@ -505,7 +501,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   const commitLightingAngle = (angle: number) => {
     if (angle !== modSettings.lightingAngle) void handleSettingChange('lightingAngle', angle);
   };
+  const [hdrExposureDraft,setHdrExposureDraft]=useState(resolveHdrExposure(modSettings));
+  useEffect(()=>{setHdrExposureDraft(resolveHdrExposure(modSettings));},[modSettings.hdrExposure,modSettings.lighting,open]);
+  const commitHdrExposure=(value:number)=>{if(value!==resolveHdrExposure(modSettings))void handleSettingChange('hdrExposure',value);};
   const renderLightingSettings = () => {
+    const sHdr=getSettingStatus('hdr');
+    const sExposure=getSettingStatus('hdrExposure');
     const sAtmospheric = getSettingStatus('atmosphericLight');
     const sRotating = getSettingStatus('rotatingLighting');
     const sLighting = getSettingStatus('lighting');
@@ -538,7 +539,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
 
           </Col>
       <Col span={24}>
-            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.brightness')}</h3>
+        <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.title')}</h3>
+        {renderSettingSwitch(t('settings.hdr.title'),Boolean(modSettings.hdr),enabled=>handleSettingChange('hdr',enabled),
+          ()=>setPreviewInfo({title:t('settings.hdr.title'),desc:t(modSettings.hdr?'settings.hdr.on.desc':'settings.hdr.off.desc'),image:null}),sHdr.disabled)}
+        {renderStatusPlaceholder(sHdr.reason)}
+        {modSettings.hdr && <div className="settings-hdr-exposure">
+          <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.brightness')}</h3>
+          <Slider min={HDR_EXPOSURE_MIN} max={HDR_EXPOSURE_MAX} step={0.01} value={hdrExposureDraft}
+            aria-label={t('settings.hdr.brightness')} disabled={sExposure.disabled||isLoading}
+            marks={{[HDR_EXPOSURE_MIN]:t('settings.hdr.minimum'),[HDR_EXPOSURE_MAX]:t('settings.hdr.maximum')}}
+            tooltip={{formatter:value=>`${Math.round(((value??HDR_EXPOSURE_MIN)-HDR_EXPOSURE_MIN)/(HDR_EXPOSURE_MAX-HDR_EXPOSURE_MIN)*100)}%`}}
+            onChange={setHdrExposureDraft} onChangeComplete={commitHdrExposure}/>
+          <p style={BASIC_SETTINGS_DESC}>{t('settings.hdr.brightness.desc')}</p>
+          {renderStatusPlaceholder(sExposure.reason)}
+        </div>}
+      </Col>
+      <Col span={24}>
+            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.strength')}</h3>
             <div className="settings-lighting-brightness">
               {([1, 2, 3, 4, 5] as const).map((lvl) =>
                 renderSettingButton(

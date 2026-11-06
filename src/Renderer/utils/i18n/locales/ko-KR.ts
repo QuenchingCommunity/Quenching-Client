@@ -268,6 +268,8 @@ const messages = {
   'main.home.combinedUpdateManual': '확인하면 해당 다운로드 페이지가 열립니다.',
   'main.home.combinedUpdateMixed': '확인하면 자동 업데이트를 적용하고 수동 다운로드가 필요한 페이지를 엽니다.',
   'main.home.combinedUpdateOrder': '확인하면 MOD 리소스 팩을 먼저 업데이트한 다음 클라이언트를 업데이트하고 자동으로 재시작합니다.',
+  'main.home.combinedUpdateAutomatic': "확인하면 표시된 업데이트를 다운로드하고 설치합니다.",
+  'main.home.clientCurrentModPending': "클라이언트는 최신 버전입니다. 아래 MOD 리소스 업데이트는 아직 완료되지 않았습니다.",
   'main.home.combinedUpdateTitle': '업데이트가 있습니다',
   'main.home.confirmUpdate': '확인 및 업데이트',
   'main.home.currentVersion': '현재 버전',
@@ -298,6 +300,7 @@ const messages = {
   'msg.update.full_required': '이 버전은 패치로 업데이트할 수 없습니다. 전체 패키지를 다운로드하세요.',
   'msg.update.unknown_install': '설치된 버전을 확인할 수 없습니다. 전체 패키지를 다시 설치하세요.',
   'msg.update.up_to_date': 'MOD가 최신 버전입니다',
+  'msg.update.none_available': "최신 버전을 사용 중입니다.",
   'main.channel.launchOnly': '모든 MOD 파일(QMoff 포함)이 선택한 분기로 이동하고, 다른 분기는 원래 상태로 돌아갑니다.',
   'main.channel.launchOnlyHint': 'MOD는 한 분기에만 있으며 선택에 따라 이동합니다',
   'main.channel.modHint': '각 분기를 별도로 설치하고 켜세요. 끄면 관리되는 MOD 파일이 해당 분기의 QMoff 폴더로 이동합니다',
@@ -347,7 +350,7 @@ const messages = {
   'main.home.fullUpdateAvailable': '새 MOD 버전 사용 가능',
   'main.home.fullUpdateVersion': '최신 MOD 버전',
   'main.home.fullUpdateGuide': '플레이어 페이지에서 해당 전체 패키지를 확인하세요.',
-  'main.home.fullUpToDate': 'MOD 버전이 온라인 버전과 같습니다. 새 전체 패키지는 플레이어 페이지에서 확인하세요.',
+  'main.home.fullUpToDate': "최신 버전을 사용 중입니다.",
   'main.home.fullCheckFailed': '전체 패키지 업데이트 확인 실패',
   'main.home.config': '실행 설정',
   'main.home.ready': '게임 시작 준비',
@@ -1376,6 +1379,22 @@ const messages = {
   "settings.hdr.on.desc": "밝기와 색상을 조정하여 밝은 부분과 그림자의 전환을 부드럽게 합니다.",
   "settings.hdr.off.desc": "게임의 기본 톤 매핑으로 복원합니다.",
   "settings.hdr.unsupported": "워크래프트 3.0의 기존 셰이더에서는 이 효과를 사용할 수 없습니다.",
+
+  'settings.vision.visionUnits.title': 'Unit enhancements',
+  'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
+  'settings.vision.visionDecorations.title': 'Doodads',
+  'settings.vision.visionDecorations.desc': 'Use Vision Mod doodads and replaceable textures; pause Quenching tree settings.',
+  'settings.vision.visionTerrain.title': 'Terrain',
+  'settings.vision.visionTerrain.desc': 'Use Vision Mod terrain and foliage; pause Quenching terrain, foliage and water settings.',
+  'settings.vision.visionMisc.title': 'Other resources',
+  'settings.vision.visionMisc.desc': 'Use other game resources; keep Quenching day/night lighting files.',
+  'settings.vision.managed': 'Managed by Vision Mod. Turn off the matching module first.',
+
+  'settings.hdr.brightness': 'Overall brightness',
+  'settings.hdr.minimum': 'Minimum',
+  'settings.hdr.maximum': 'Maximum',
+  'settings.hdr.brightness.desc': 'Adjust the brightness of the whole scene. Changing the lighting type restores its default brightness.',
+  'settings.lighting.strength': 'Light intensity',
 };
 
 export default messages;

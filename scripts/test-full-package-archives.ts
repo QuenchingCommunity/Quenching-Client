@@ -33,6 +33,7 @@ try {
   assert.deepEqual(await resolvePackageArchives(a), [a, b]);
   assert.deepEqual(await resolvePackageArchives(b), [b, a]);
   const target = path.join(root, '_retail_');
+  await fs.outputFile(path.join(target, 'NELonstar', 'nested', 'player.txt'), 'unmanaged player directory');
   await fs.outputFile(path.join(target, 'units/player-custom.txt'), 'keep me');
   const progress: number[] = [];
   await installPackageArchives(await resolvePackageArchives(a), target, p => progress.push(p));
@@ -40,6 +41,7 @@ try {
   assert.equal(await fs.readFile(path.join(target, 'units/unitskin.txt'), 'utf8'), 'skin B');
   assert.equal(await fs.readFile(path.join(target, 'textures/shared.txt'), 'utf8'), 'second');
   assert.equal(await fs.readFile(path.join(target, 'units/player-custom.txt'), 'utf8'), 'keep me');
+  assert.equal(await fs.readFile(path.join(target, 'NELonstar', 'nested', 'player.txt'), 'utf8'), 'unmanaged player directory');
   assert.equal(await fs.pathExists(path.join(target, 'environment/environmentmap/portraits/portraitdefault_ibl.dds')), false);
   assert.equal(progress.at(-1), 98);
 
@@ -86,6 +88,35 @@ try {
   await fs.outputFile(path.join(failedTarget, 'player.txt'), 'untouched');
   await assert.rejects(installPackageArchives([a, broken], failedTarget));
   assert.deepEqual(await fs.readdir(failedTarget), ['player.txt']);
+  const originalCopy = fs.copy;
+  await fs.outputFile(path.join(failedTarget, '_patch/keep.que'), '-v3.4-\n');
+  (fs as any).copy = async (source: string, destination: string, ...args: any[]) => {
+    if (destination === path.join(failedTarget, 'units/unitskin.txt')) throw new Error('injected resource copy failure');
+    return (originalCopy as any)(source, destination, ...args);
+  };
+  try { await assert.rejects(installPackageArchives([a, b], failedTarget), /resource copy failure/); }
+  finally { fs.copy = originalCopy; }
+  assert.equal(await fs.readFile(path.join(failedTarget, '_patch/keep.que'), 'utf8'), '-v3.4-\n', 'partial resource copy cannot advertise a new version');
+
+  (fs as any).copy = async (source: string, destination: string, ...args: any[]) => {
+    await (originalCopy as any)(source, destination, ...args);
+    if (destination === path.join(failedTarget, '_patch/keep.que')) throw new Error('injected marker copy failure');
+  };
+  try { await assert.rejects(installPackageArchives([a, b], failedTarget), /marker copy failure/); }
+  finally { fs.copy = originalCopy; }
+  assert.equal(await fs.readFile(path.join(failedTarget, '_patch/keep.que'), 'utf8'), '-v3.4-\n', 'failed metadata copy restores the previous marker');
+
+  const originalRemove = fs.remove;
+  (fs as any).remove = async (file: string) => {
+    if (path.basename(file).startsWith('package-install-')) throw new Error('fixture cleanup lock');
+    return originalRemove(file);
+  };
+  try {
+    await installPackageArchives([a, b], failedTarget, percent => {
+      if (percent === 98) throw new Error('fixture closed progress window');
+    });
+  } finally { fs.remove = originalRemove; }
+  assert.equal(await fs.readFile(path.join(failedTarget, '_patch/keep.que'), 'utf8'), '-v3.5-\n', 'cleanup/progress failures cannot undo completed installation');
   console.log('PASS: A/B and folder installation; sources/custom files preserved; wrong client ZIP/folder rejected before mutation; failed extraction leaves target unchanged.');
 
   if (process.argv.includes('--real')) {

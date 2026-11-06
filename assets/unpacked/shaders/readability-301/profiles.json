@@ -7,8 +7,8 @@
       "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
       "files": {
         "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
-        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
-        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+        "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
+        "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
     },
     "ao_066": {
@@ -16,8 +16,8 @@
       "baseHdSha256": "08764aa535221c293cb094c11cd5d6d139f36d8009dd2e65995585e039240595",
       "files": {
         "ps/hd.bls": "479322caac7b1ddafec28b416cfe51a3846931ac67fd78ac1d1baf71b58e231e",
-        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
-        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+        "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
+        "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
     },
     "ao_080_outline": {
@@ -25,8 +25,8 @@
       "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
       "files": {
         "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
-        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
-        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+        "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
+        "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }
     },
     "ao_066_outline": {
@@ -34,8 +34,8 @@
       "baseHdSha256": "08764aa535221c293cb094c11cd5d6d139f36d8009dd2e65995585e039240595",
       "files": {
         "ps/hd.bls": "479322caac7b1ddafec28b416cfe51a3846931ac67fd78ac1d1baf71b58e231e",
-        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
-        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+        "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
+        "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }
     },
     "de_ao_080": {
@@ -43,8 +43,8 @@
       "baseHdSha256": "df22326794d29342e9b7897f3bbaea55ec8690385021912207978304570febc5",
       "files": {
         "ps/hd.bls": "2b3df0370d959a4264d46b7fd50563fbedfbecb6b02f6965c16ff89d6ed439cf",
-        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
-        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+        "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
+        "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
     },
     "de_ao_080_outline": {
@@ -52,8 +52,8 @@
       "baseHdSha256": "df22326794d29342e9b7897f3bbaea55ec8690385021912207978304570febc5",
       "files": {
         "ps/hd.bls": "2b3df0370d959a4264d46b7fd50563fbedfbecb6b02f6965c16ff89d6ed439cf",
-        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
-        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+        "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
+        "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }
     },
     "rpg_ao_080": {
@@ -61,8 +61,8 @@
       "baseHdSha256": "92a1e6a6ab9130d28055847f47c06590e28e5e0d9964279c0bdf69711a483ea5",
       "files": {
         "ps/hd.bls": "9e4cda3610279a73b909c0f8dbc7137d52293bc1d4cd098a0b32f31f5c52664c",
-        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
-        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+        "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
+        "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
     },
     "rpg_ao_080_outline": {
@@ -70,8 +70,8 @@
       "baseHdSha256": "92a1e6a6ab9130d28055847f47c06590e28e5e0d9964279c0bdf69711a483ea5",
       "files": {
         "ps/hd.bls": "9e4cda3610279a73b909c0f8dbc7137d52293bc1d4cd098a0b32f31f5c52664c",
-        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
-        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+        "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
+        "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }
     },
     "de_ao_066": {
@@ -79,8 +79,8 @@
       "baseHdSha256": "a8a11debfd79c52dfa96f5246caab6b9034b4144d8a8aad6d7e28d388d8a1353",
       "files": {
         "ps/hd.bls": "043a9fcdc4b0784d772fb49b0a9759b9a35d83096ee586afde21ca308cb6d5a4",
-        "ps/fog.bls": "07d828c81e65ee269386677119f4787fe7e7ab61c121acc63e7dbe658eb033b6",
-        "ps/volumetricfog.bls": "a7b9c6bbf3d919424b3b306da9a65a151b0dfb58e26d90cdd88dd31981915f86"
+        "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
+        "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
     },
     "de_ao_066_outline": {
@@ -88,8 +88,8 @@
       "baseHdSha256": "a8a11debfd79c52dfa96f5246caab6b9034b4144d8a8aad6d7e28d388d8a1353",
       "files": {
         "ps/hd.bls": "043a9fcdc4b0784d772fb49b0a9759b9a35d83096ee586afde21ca308cb6d5a4",
-        "ps/fog.bls": "c5b13b7c70a66f9882caac807fb6e513f7c5ae6438dde2a27d8d94830cb594d8",
-        "ps/volumetricfog.bls": "bfd29705667ebf4c3c82556be20f3c3d3c9288d81c10fa6bb822400327e641c0"
+        "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
+        "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }
     }
   },
@@ -119,5 +119,6 @@
   "team_outline_writer_repair": "restore_missing_team_before_native_fow_20261028_v1",
   "team_outline_depth_coordinates": "native_texcoord0_times_depth_dimensions_20261029",
   "team_fow_priority_repair": "preserve_nonhidden_team_carrier_20261029",
-  "team_fog_input_repair": "declare_existing_uv_and_cover_no_distance_fog_pass_20261029"
+  "team_fog_input_repair": "declare_existing_uv_and_cover_no_distance_fog_pass_20261029",
+  "outline_implementation_fix": "native_io_reused_temps_optional_uv_20261106"
 }

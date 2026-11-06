@@ -141,13 +141,25 @@ async function run(planPath, oldPid) {
     child.unref();
     journal.newPid = child.pid;
     await writeJournal(journalPath, journal);
-    const end = Date.now() + 60000;
+    // Cold startup, antivirus and slower disks can legitimately delay the
+    // renderer. Health still requires the exact transaction token.
+    const end = Date.now() + 180000;
     while (Date.now() < end) {
       if (fs.existsSync(ack) && fs.readFileSync(ack, 'utf8') === plan.token) {
         journal.state = 'complete';
         await writeJournal(journalPath, journal);
-        fs.rmSync(backup, { recursive: true, force: true });
-        fs.rmSync(activePath, { force: true });
+        // Health committed the release. Antivirus/file locks during cleanup
+        // must never turn a healthy installation into a rollback.
+        try {
+          fs.rmSync(activePath, { force: true });
+          fs.rmSync(backup, { recursive: true, force: true });
+          for (const file of plan.files) {
+            const relative = '_tmp/client-update-cache/' + file.newSha256 + '.bin';
+            assertNoLinks(root, relative);
+            const cached = path.join(root, relative);
+            if (fs.existsSync(cached) && hash(cached) === file.newSha256) fs.rmSync(cached);
+          }
+        } catch (error) { console.warn('Update committed; cleanup will retry later:', String(error)); }
         return;
       }
       if (child.exitCode !== null) {

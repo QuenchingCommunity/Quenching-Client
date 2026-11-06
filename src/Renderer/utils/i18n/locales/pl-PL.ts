@@ -615,6 +615,7 @@ const messages = {
   "msg.update.full_required": "Ta wersja nie obsługuje aktualizacji częściowych. Pobierz pełny pakiet.",
   "msg.update.unknown_install": "Nie można zweryfikować zainstalowanej wersji. Zainstaluj ponownie pełny pakiet.",
   "msg.update.up_to_date": "MOD jest aktualny",
+  'msg.update.none_available': "Twoja wersja jest aktualna.",
   "main.tips.toggle": "Kliknij ikonę, aby przełączyć Quenching",
   "main.status.full_installed": "Pełny pakiet zainstalowany",
   "main.status.full_not_installed": "Pełny pakiet nie jest zainstalowany",
@@ -679,7 +680,7 @@ const messages = {
   "main.home.fullUpdateAvailable": "Dostępna nowa wersja MOD",
   "main.home.fullUpdateVersion": "Najnowsza wersja MOD",
   "main.home.fullUpdateGuide": "Odpowiedni pełny pakiet znajdziesz na stronie dla graczy.",
-  "main.home.fullUpToDate": "Twoja wersja MOD jest zgodna z wersją online. Nowe wydania pełnego pakietu znajdziesz na stronie dla graczy",
+  'main.home.fullUpToDate': "Twoja wersja jest aktualna.",
   "main.home.fullCheckFailed": "Nie udało się sprawdzić aktualizacji pełnego pakietu",
   "main.home.config": "Konfiguracja uruchamiania",
   "main.home.ready": "GOTOWE DO GRY",
@@ -1322,6 +1323,8 @@ const messages = {
   "main.home.combinedUpdateManual": "Potwierdź, aby otworzyć odpowiednie strony pobierania.",
   "main.home.combinedUpdateMixed": "Potwierdź, aby zastosować aktualizacje automatyczne i otworzyć strony dla aktualizacji wymagających ręcznego pobrania.",
   "main.home.combinedUpdateOrder": "Potwierdź, aby najpierw zaktualizować zasoby MOD, a następnie klienta i automatycznie uruchomić go ponownie.",
+  'main.home.combinedUpdateAutomatic': "Potwierdź, aby pobrać i zainstalować wymienione aktualizacje.",
+  'main.home.clientCurrentModPending': "Klient jest aktualny. Poniższa aktualizacja zasobów MOD nadal oczekuje na instalację.",
   "main.home.combinedUpdateTitle": "Dostępne aktualizacje",
   "main.home.confirmUpdate": "Potwierdź i aktualizuj",
   "main.home.currentVersion": "Aktualna wersja",
@@ -1344,6 +1347,22 @@ const messages = {
   "settings.hdr.on.desc": "Dostosowuje jasność i kolory, wygładzając przejścia świateł i cieni.",
   "settings.hdr.off.desc": "Przywraca oryginalne mapowanie tonów gry.",
   "settings.hdr.unsupported": "Ten efekt nie jest dostępny w starszych shaderach Warcraft 3.0.",
+
+  'settings.vision.visionUnits.title': 'Unit enhancements',
+  'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
+  'settings.vision.visionDecorations.title': 'Doodads',
+  'settings.vision.visionDecorations.desc': 'Use Vision Mod doodads and replaceable textures; pause Quenching tree settings.',
+  'settings.vision.visionTerrain.title': 'Terrain',
+  'settings.vision.visionTerrain.desc': 'Use Vision Mod terrain and foliage; pause Quenching terrain, foliage and water settings.',
+  'settings.vision.visionMisc.title': 'Other resources',
+  'settings.vision.visionMisc.desc': 'Use other game resources; keep Quenching day/night lighting files.',
+  'settings.vision.managed': 'Managed by Vision Mod. Turn off the matching module first.',
+
+  'settings.hdr.brightness': 'Overall brightness',
+  'settings.hdr.minimum': 'Minimum',
+  'settings.hdr.maximum': 'Maximum',
+  'settings.hdr.brightness.desc': 'Adjust the brightness of the whole scene. Changing the lighting type restores its default brightness.',
+  'settings.lighting.strength': 'Light intensity',
 };
 
 export default messages;

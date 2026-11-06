@@ -1,3 +1,4 @@
+import {defaultHdrExposure,resolveHdrExposure} from '../../shared/hdr-exposure';
 import { ipcMain } from 'electron';
 import path from 'path';
 import { configManager } from '../services/config-manager';
@@ -97,7 +98,8 @@ export function registerMdlHandlers() {
                 console.log(`[MDL] Updating lighting mode: ${lightingMode}, brightness level: ${brightnessLevel}`);
 
                 const modSettings = configManager.get('modSettings') || {};
-                const settings = { ...modSettings, lighting: lightingMode, lightingBrightness: brightnessLevel };
+                const settings = { ...modSettings, lighting: lightingMode, lightingBrightness: brightnessLevel,
+                    hdrExposure:lightingMode!==modSettings.lighting?defaultHdrExposure(lightingMode):resolveHdrExposure(modSettings) };
                 // Shaders and DNC are selected per lighting mode; DNC is restored
                 // from the bundle and patched, so brightness never compounds.
                 const assetsDir = await AssetSyncService.getAssetsDir(["dnc","skin"]);
