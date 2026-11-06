@@ -1,4 +1,6 @@
 const messages = {
+  "common.close": "닫기",
+  "msg.update.incomplete": "업데이트 미완료",
   "main.offlineTest.button": "오프라인 테스트",
   "main.offlineTest.hint": "TEST: 게임 폴더의 offline.exe로 Starter Map Lost Temple 실행 (Retail 3.0.1)",
   "main.offlineTest.unavailable": "오프라인 테스트를 사용할 수 없습니다",

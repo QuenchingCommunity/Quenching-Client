@@ -1,4 +1,6 @@
 const messages = {
+  "common.close": "关闭",
+  "msg.update.incomplete": "更新未完成",
   "main.offlineTest.button": "离线测试",
   "main.offlineTest.hint": "测试版：读取魔兽根目录 offline.exe，启动 Starter Map Lost Temple（仅 Retail 3.0.1）",
   "main.offlineTest.unavailable": "离线测试入口不可用",

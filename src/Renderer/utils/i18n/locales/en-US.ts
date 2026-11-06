@@ -1,4 +1,6 @@
 const messages = {
+  "common.close": "Close",
+  "msg.update.incomplete": "Update incomplete",
   "main.offlineTest.button": "Offline test",
   "main.offlineTest.hint": "TEST: use offline.exe from the game root to launch Starter Map Lost Temple (Retail 3.0.1 only)",
   "main.offlineTest.unavailable": "Offline test is unavailable",
