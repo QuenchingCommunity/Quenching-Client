@@ -18,6 +18,7 @@ import { validateMacNative, smokeMacNative } from './mac-native.mjs';
 import { signMacApp } from './sign-mac-app.js';
 import { downloadElectronZip } from './lib/electron-download.mjs';
 import { createPortable7z } from './lib/portable-7z.mjs';
+import { checkProductionBuild } from './check-production-build.mjs';
 import { isDistributableAsset, RESOURCE_ARCHIVES, RESOURCE_MANIFEST } from '../src/shared/bundled-resource-paths.mjs';
 
 const require = createRequire(import.meta.url);
@@ -188,6 +189,7 @@ async function main() {
         throw new Error('This Mac package needs native darwin modules and codesign. Run .github/workflows/build-mac.yml on a macOS runner; Windows copies of node_modules cannot produce a working signed Mac app.');
     }
     validateMacNative(root, arch);
+	if (release.channel === 'production') await checkProductionBuild(root);
 	if (!fs.existsSync(path.join(root, 'dist', 'main.js'))) {
 		throw new Error('dist/main.js is missing. Run npm run build first.');
 	}

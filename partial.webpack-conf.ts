@@ -1,5 +1,6 @@
 import { LOCAL_APP_TITLE } from './src/shared/local-release';
 import releaseVersion from './release-version.json';
+import { buildChannelPlugins, buildChannelRules } from './scripts/lib/build-channel-policy.mjs';
 const { ProvidePlugin } = webpack;
 
 export const main = (
@@ -25,7 +26,7 @@ export const main = (
 			}
 		},
 		plugins: [
-			...(releaseVersion.channel === 'test' ? [] : [new webpack.NormalModuleReplacementPlugin(/offline-test-launcher$/, path.join(subProjectRootPath,'src/Main/services/offline-test-disabled.ts'))]),
+			...buildChannelPlugins(webpack, subProjectRootPath, releaseVersion.channel === 'test'),
 			new CopyPlugin({
 				patterns: [
 					{
@@ -52,6 +53,7 @@ export const renderer = (repoRootPath: string, subProjectRootPath: string): Webp
 			topLevelAwait: true,  // 启用顶层 await
 		},
 		entry: path.resolve(subProjectRootPath, "src/Renderer/index.tsx"),
+		module: { rules: buildChannelRules(subProjectRootPath, releaseVersion.channel === 'test') },
 
 		output: {
 			path: path.join(subProjectRootPath, "dist/renderer"),
@@ -68,6 +70,7 @@ export const renderer = (repoRootPath: string, subProjectRootPath: string): Webp
 			}
 		},
 		plugins: [
+			...buildChannelPlugins(webpack, subProjectRootPath, releaseVersion.channel === 'test'),
 			new CopyPlugin({
 				patterns: [
 					{
@@ -105,6 +108,9 @@ export const renderer = (repoRootPath: string, subProjectRootPath: string): Webp
 export const preload = (repoRootPath: string, subProjectRootPath: string): WebpackConfiguration => {
 	return {
 		entry: path.join(subProjectRootPath, "src/Main/preload.ts"),
+		mode: releaseVersion.channel === 'test' ? 'development' : 'production',
+		devtool: releaseVersion.channel === 'test' ? 'cheap-source-map' : false,
+		plugins: buildChannelPlugins(webpack, subProjectRootPath, releaseVersion.channel === 'test'),
 		output: {
 			path: path.join(subProjectRootPath, "dist"),
 			filename: 'preload.cjs',

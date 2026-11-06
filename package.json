@@ -1,9 +1,14 @@
 {
 	"name": "quenching-electron-client",
 	"productName": "Quenching Mod Client",
-	"version": "3.7.5",
+	"version": "3.7.0",
 	"main": "dist/main.js",
 	"scripts": {
+		"build:production": "node scripts/set-build-channel.mjs production && npm run build && node scripts/check-production-build.mjs",
+		"build:test": "node scripts/set-build-channel.mjs test && npm run build",
+		"dist:win:production": "node scripts/package-production.mjs win",
+		"dist:mac:production": "node scripts/package-production.mjs mac",
+		"test:build-channel": "node scripts/test-build-channel.mjs",
 		"postinstall": "patch-package --patch-dir build-patches --error-on-fail",
 		"test:hdr-exposure": "tsx scripts/test-hdr-exposure.ts && tsx scripts/test-hdr-exposure-ipc.ts",
 		"test:vision-modules": "tsx scripts/test-vision-modules.ts",

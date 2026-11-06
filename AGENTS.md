@@ -45,3 +45,7 @@ TEST 门禁使用 `version-test.que`，正式使用 `version.que`；客户端和
 ## Windows 正式包签名（用户 2026-11-07 明确要求）
 
 当前 Windows 正式版允许不做 Authenticode 代码签名，不再把可信证书作为正式构建的必需输入；如配置了代码签名仍验证签后文件和 ASAR，显式 forceCodeSigning 继续生效。此约定不影响自动更新清单的 Ed25519 签名、下载大小和 SHA-256 校验。发布记录必须如实注明 Windows 包未签名，不能宣称已具备可信发布者身份。
+
+## 正式构建开关与版本（用户 2026-11-07 明确要求）
+
+正式 3.7 的内部版本为 3.7.0，不能因为 TEST 曾使用 3.7.1～3.7.4 就擅自将正式版改成 3.7.5；两个通道的版本记录独立。`npm run build:production`、`dist:win:production`、`dist:mac:production` 显式选择正式构建。正式编译移除 TEST 标记初始化、测试通道选择／预览覆盖、离线测试按钮／文案／样式及其 IPC 实现；不能仅隐藏界面或删除包外标记。`check-production-build.mjs` 必须通过。测试构建使用 `build:test`，不能把正式构建反过来添加标记当作完整 TEST 客户端。
