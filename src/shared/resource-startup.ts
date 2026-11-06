@@ -6,14 +6,19 @@ export interface ResourceStartupStatus {
   error?: string;
 }
 
-/** Two frames let the initial page paint before requesting native extraction. */
+/** Prefer two painted frames; occluded windows may never receive animation frames. */
 export function afterResourceFirstPaint(host:{requestAnimationFrame:(callback:()=>void)=>number;cancelAnimationFrame:(id:number)=>void},start:()=>void):()=>void {
-  let active=true,second=0;
-  const first=host.requestAnimationFrame(()=>{second=host.requestAnimationFrame(()=>{if(active)start();});});
-  return ()=>{active=false;host.cancelAnimationFrame(first);host.cancelAnimationFrame(second);};
+  let active=true,first=0,second=0;
+  const cancel=()=>{active=false;clearTimeout(timeout);host.cancelAnimationFrame(first);host.cancelAnimationFrame(second);};
+  const run=()=>{if(!active)return;cancel();start();};
+  // The mounted renderer still performs the normal startup IPC and native
+  // validation. A covered/minimized window must not prevent its health ACK.
+  const timeout=setTimeout(run,1000);
+  first=host.requestAnimationFrame(()=>{second=host.requestAnimationFrame(run);});
+  return cancel;
 }
 
-/** No work begins until the visible renderer explicitly starts the task. */
+/** No work begins until the mounted renderer explicitly starts the task. */
 export class ResourceStartupTask {
   private state: ResourceStartupStatus = {phase:'idle',firstRun:false,percent:0,revision:0};
   private running: Promise<void> | null = null;

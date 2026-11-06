@@ -22,6 +22,12 @@ visible=true;paint();await Promise.resolve();assert.equal(started,1);task.start(
 assert.equal(completed,0);finish();await task.settled();assert.equal(completed,1);assert.equal(task.getStatus().phase,'ready');
 assert.equal(updates.filter(s=>s.firstRun && s.percent===50).length,1,'duplicate progress suppressed');
 const cancel=afterResourceFirstPaint(host,()=>{throw new Error('cancelled paint started work');});cancel();paint();paint();
+let occludedStarts=0;
+afterResourceFirstPaint(host,()=>{occludedStarts++;});
+const cancelOccluded=afterResourceFirstPaint(host,()=>{throw new Error('unmounted occluded renderer started work');});cancelOccluded();
+await new Promise(resolve=>setTimeout(resolve,1100));
+assert.equal(occludedStarts,1,'mounted occluded renderer starts without animation frames');
+paint();paint();assert.equal(occludedStarts,1,'late paint must not repeat startup');
 const failed=new ResourceStartupTask({prepare:async notify=>{notify({firstRun:true,percent:10});throw new Error('decoder failed');},
   publish:()=>{},complete:()=>{throw new Error('failed preparation acknowledged healthy');},failure:()=>{failures++;}});
 failed.start();await failed.settled();assert.equal(failed.getStatus().phase,'failed');assert.equal(failures,1);

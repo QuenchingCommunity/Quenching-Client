@@ -8,4 +8,6 @@
 
 正式 renderer／preload 移除离线启动按钮及 IPC，正式语言包和样式也剔除该入口。正式 preload 使用 production 优化，避免只保留条件隐藏、仍打包测试 IPC 字符串。`check-production-build.mjs` 检查编译输出和构建身份；Windows beforePack 和 Mac 打包器也执行检查。包外测试标记、缓存、运行事务由既有便携导出检查拒绝。
 
+正式包不依赖已剔除的 headless 测试钩子报告健康。渲染器挂载后优先等待两次绘制回调；窗口被其他窗口遮挡、最小化或绘制回调被暂停时，一秒后仍发起同一资源准备 IPC。主进程继续实际校验必要资源并写入事务健康确认；这不是跳过启动验收。取消挂载同时取消定时器和回调，迟到的绘制不重复启动。`test-resource-startup.ts` 覆盖没有绘制回调、取消及迟到回调的情形。
+
 `test-build-channel.mjs` 实际编译两种开关：正式包即使继承 TEST 环境也保持正式选择，TEST 仍能使用独立 `version-test.que`；同时验证八种语言与样式清理、正式产物检查拒绝残留 IPC。纯净 TEST 基线必须来自完整 TEST 编译，不能给正式包加一个标记冒充 TEST。
