@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import JSZip from 'jszip';
-import { prepareReleaseAssets, renderWebUI, UI_ARCHIVES, updateUiVersionText } from './prepare-release-assets.mjs';
+import { prepareReleaseAssets, renderWebUI, UI_ARCHIVES, UI_VERSION_FILES, updateUiVersionText } from './prepare-release-assets.mjs';
+import { resourceInventory } from './prepare-resource-bundle.mjs';
 import { UI_PUBLIC_ARCHIVE } from './split-ui-archives.mjs';
 import { releaseLabel } from './lib/release-label.mjs';
 
@@ -14,8 +16,7 @@ const work = await fs.mkdtemp(path.join(taskRoot, 'release-assets-'));
 const q = path.join(work, 'assets/quenching');
 const template = await fs.readFile('scripts/templates/quenching-webui.html', 'utf8');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-const versionedPaths = ['ui-que/framedef/ui/commandbar.fdf', 'ui-que/framedef/backup/commandbar.fdf',
-  'framedef/ui/commandbar.fdf', 'framedef/backup/commandbar.fdf'];
+const versionedPaths = UI_VERSION_FILES;
 const originalFrame = '\uFEFFFrame "SIMPLEFRAME" "CommandBarFrame" {\r\n String "QuenchingVersionText" {\r\n  Font "MasterFont", 0.01,\r\n  Text "V3.5",\r\n }\r\n}\r\n';
 const expectedFrame = version => originalFrame.replace('"CommandBarFrame" {', '"CommandBarFrame" {\r\n\tDecorateFileNames,').replace('V3.5', `V${version}`);
 try {
@@ -44,7 +45,7 @@ try {
   }
   const latestRoot = path.join(work, 'Latest');
   const first = await prepareReleaseAssets({ root: work, latestRoot });
-  assert.deepEqual(first.ui.map(item => item.changedFiles), [4, 4]);
+  assert.deepEqual(first.ui.map(item => item.changedFiles), [2, 2]);
   const html = await fs.readFile(path.join(q, 'index.html'), 'utf8');
   assert.match(html, /data-quenching-version="3\.7"/);
   assert.match(html, /Version 3\.7 By 天下正义/);
@@ -98,7 +99,55 @@ try {
   await fs.writeFile(path.join(work, 'package.json'), '{"version":"3.8.0"}');
   await fs.unlink(path.join(q, UI_PUBLIC_ARCHIVE));
   await assert.rejects(prepareReleaseAssets({ root: work }), /ENOENT/);
-  console.log('PASS: single public version; 8 UIQUE text fields and parent font decoration; missing/invisible fonts rejected; test/production labels; unchanged PNGs/other ZIP payloads; idempotent generation and read-only checks');
+
+  // Reproduce a fresh clone: only Git-tracked FDFs, no ignored local backups or ZIPs.
+  const clean = path.join(work, 'clean-checkout'), cleanQ = path.join(clean, 'assets/quenching');
+  await fs.mkdir(cleanQ, { recursive: true });
+  await fs.mkdir(path.join(clean, 'scripts/templates'), { recursive: true });
+  await fs.writeFile(path.join(clean, 'scripts/templates/quenching-webui.html'), template);
+  await fs.writeFile(path.join(clean, 'package.json'), '{"version":"3.8.0"}');
+  await fs.writeFile(path.join(clean, 'release-version.json'), '{"displayVersion":"3.8","channel":"test"}');
+  await fs.mkdir(path.join(clean, 'assets/unpacked/tx'), { recursive: true });
+  for (const name of ['QuenchingOnCN.png', 'QuenchingOnEN.png']) {
+    await fs.copyFile(resourcePath(q, 'tx', name), path.join(clean, 'assets/unpacked/tx', name));
+  }
+  const publicSource = path.join(clean, 'assets/unpacked/packages/zip-ui-pub/ui-que/console');
+  await fs.mkdir(publicSource, { recursive: true });
+  await fs.writeFile(path.join(publicSource, 'image.bin'), 'shared-ui');
+  for (const archive of UI_ARCHIVES) {
+    const prefix = `assets/unpacked/packages/${archive.slice(0, -4)}`;
+    const tracked = execFileSync('git', ['ls-files', '-z', prefix], { maxBuffer: 1024 * 1024 }).toString().split('\0').filter(Boolean);
+    assert(tracked.length > 0);
+    for (const file of tracked) {
+      assert(!file.includes('/backup/'), 'Fresh Git checkout must not depend on ignored backups');
+      const output = path.join(clean, file);
+      await fs.mkdir(path.dirname(output), { recursive: true });
+      await fs.writeFile(output, execFileSync('git', ['show', `HEAD:${file}`], { maxBuffer: 1024 * 1024 }));
+    }
+    assert.equal(await fs.stat(path.join(cleanQ, archive)).catch(() => null), null);
+  }
+  const cleanResult = await prepareReleaseAssets({ root: clean });
+  assert.deepEqual(cleanResult.ui.map(item => item.frames), [2, 2]);
+  assert.equal((await prepareReleaseAssets({ root: clean, check: true })).label, '3.8 TEST');
+  for (const archive of UI_ARCHIVES) for (const file of UI_VERSION_FILES) {
+    const body = await fs.readFile(path.join(clean, 'assets/unpacked/packages', archive.slice(0, -4), file), 'utf8');
+    assert.equal(updateUiVersionText(body, '3.8 TEST', true).frames, 1);
+  }
+  // Local backup directories cannot change field counts or enter the generated bundle.
+  const backup = path.join(clean, 'assets/unpacked/packages/zip-ui-20/framedef/backup');
+  await fs.mkdir(backup, { recursive: true });
+  await fs.writeFile(path.join(backup, 'commandbar.fdf'), 'invalid old backup');
+  await fs.writeFile(path.join(backup, 'notes.bin'), 'not a shipping resource');
+  assert.equal((await prepareReleaseAssets({ root: clean, check: true })).ui[0].frames, 2);
+  assert(Object.keys(await resourceInventory(path.join(clean, 'assets/unpacked'))).every(name => !name.includes('/backup/')));
+  const requiredFrame = path.join(clean, 'assets/unpacked/packages/zip-ui-20', UI_VERSION_FILES[0]);
+  const savedFrame = await fs.readFile(requiredFrame);
+  await fs.unlink(requiredFrame);
+  await assert.rejects(prepareReleaseAssets({ root: clean }), /expected 2 active UIQUE version fields/);
+  await fs.writeFile(requiredFrame, savedFrame);
+  await fs.writeFile(path.join(path.dirname(requiredFrame), 'unexpected.fdf'), savedFrame);
+  await assert.rejects(prepareReleaseAssets({ root: clean }), /unexpected UIQUE version field/);
+  console.log('PASS: fresh Git FDF sources with 2 active fields per variant, no physical ZIPs or backups; required paths/font validation; backup exclusion; historical ZIP compatibility; TEST/production labels; unchanged PNGs; idempotent generation and read-only checks');
 } finally {
   assert.equal(path.dirname(work), taskRoot);
   assert(!(await fs.lstat(work)).isSymbolicLink());

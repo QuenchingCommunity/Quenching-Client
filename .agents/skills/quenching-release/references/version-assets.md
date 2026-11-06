@@ -1,6 +1,6 @@
 # 发布版本文字与无版本图片
 
-**2026-10-28 当前布局：** 见 [统一资源流程](resource-bundle.md)。UI 三组已展开到 `assets/unpacked/packages/zip-ui-{pub,20,30}`，随五个独立 `resources-*.7z` 分发；下文旧 ZIP 名是逻辑组名。两个版本组仍各含四处版本字段，版本生成器直接编辑展开 FDF，不再重压独立 UI ZIP。PNG 源移到 `assets/unpacked/tx`，其构图和版本策略不变。
+**当前布局（2026-11-06 修正）：** 见 [统一资源流程](resource-bundle.md)。UI 三组已展开到 `assets/unpacked/packages/zip-ui-{pub,20,30}`，随五个独立 `resources-*.7z` 分发；下文旧 ZIP 名是逻辑组名。两个版本组各含两处有效版本字段，版本生成器直接编辑展开 FDF，不再重压独立 UI ZIP。`backup/` 被 Git 忽略，不参与当前版本字段检查或资源归档。此前要求每组四处时误计了两处本机备份，导致干净 Git 检出构建失败。PNG 源移到 `assets/unpacked/tx`，其构图和版本策略不变。
 
 2026-10-24 用户决定：每次发布除了应用／MOD 标记，也必须对齐 UIQUE 的版本字段和 WebUI 安装提示。PNG 不再烧入版本，底部版本和署名由 HTML 文字显示，避免每版更换中英文两张图。
 
@@ -20,7 +20,7 @@
 | UI 共用贴图／模型 | `assets/quenching/zip-ui-pub.zip`；只含非 FDF 资源，必须与两个 FDF 版本包一同进入客户端 |
 | 完整包工作源 | Latest 的 `webui/index.html`、默认中文 `webui/QuenchingOn.png`；由显式资源同步更新，发布仍只读取 Latest |
 
-每份 UI ZIP 有四处字段：`ui-que/framedef/ui/commandbar.fdf`、`ui-que/framedef/backup/commandbar.fdf`、`framedef/ui/commandbar.fdf`、`framedef/backup/commandbar.fdf`，总计八处，测试统一 `V3.7 TEST`，正式为 `V3.7`。不按全局字符串替换其他 UI／游戏版本；字段数量或结构变化时工具拒绝，先审查布局。
+每个展开 UI 版本组的有效字段位于 `ui-que/framedef/ui/commandbar.fdf` 和 `framedef/ui/commandbar.fdf`，两组合计四处；测试统一 `V3.7 TEST`，正式为 `V3.7`。生成器按这两个精确路径验证，缺失、额外版本字段或错误字体／父级均拒绝。历史实体 ZIP 可继续读取，但同样只检查这两处有效字段，不要求或计入备份。不得靠提交备份或手工复制旧 ZIP 修复干净构建。
 
 2026-10-28 UI 资源拆分：两个版本包各自保留 38 个 FDF，公共包保存 135 个相同的非 FDF 文件。安装和经典反馈补丁先解压 `zip-ui-pub.zip`，再叠加 `resolveUiZipName` 选择的 20／30 包；路径和文件内容不变。不要再从单独的 20／30 包寻找贴图或模型。生成器检查公共包存在、公共包无 FDF、版本包只含 FDF；版本更新只修改两个 FDF 包，不重压公共包。`node scripts/split-ui-archives.mjs` 可从完整旧包拆分或对现有拆分包幂等检查，发现非 FDF 差异即拒绝，不静默丢弃版本资源；首次拆分保留定点回滚备份。
 
@@ -40,9 +40,9 @@ node scripts/prepare-release-assets.mjs --sync-latest
 node scripts/prepare-release-assets.mjs --check --sync-latest
 ```
 
-`npm run build` 和 `npm run pack` 均先运行生成器；生成器更新 HTML、UI ZIP 内的八处版本文字和对应父级字体解析设置，不编辑 PNG 或其他 ZIP 内容。`--check` 不写入。显式 `--sync-latest` 只复制上述 HTML、默认中文 PNG 及现有本地构建身份 JSON，不复制 UI ZIP、不反向覆盖 assets，不改完整包其他资源或发布元数据。以后按本次实际修改范围决定是否同步。
+`npm run build` 和 `npm run pack` 均先运行生成器；生成器更新 HTML、两个展开 UI 组内的四处有效版本文字和对应父级字体解析设置，不编辑 PNG。`dist:mac:app` 共用这条构建链，不需手工准备 ZIP 或单独运行资源生成命令。`--check` 不写入。显式 `--sync-latest` 只复制上述 HTML、默认中文 PNG 及现有本地构建身份 JSON，不复制 UI ZIP、不反向覆盖 assets，不改完整包其他资源或发布元数据。以后按本次实际修改范围决定是否同步。
 
-A 本地测试、B 测试更新目标、C 正式候选都检查：对外 JSON、客户端显示、HTML 文字、八处 UIQUE 字段一致，字体和父级解析有效，生成资源进入实际包；在 UI-que 的游戏内命令面板确认版本文字实际可见，不能用 ZIP 文本扫描或 WebUI 浏览器预览替代。测试包显示 TEST，正式包不含 TEST。游戏中关闭通知时图片和版本文字一起消失，中英文 PNG 底部没有旧版本文字。测试／正式标记仍按独立流程处理，不因 UI 文字一致省略两次人工验收。
+A 本地测试、B 测试更新目标、C 正式候选都检查：对外 JSON、客户端显示、HTML 文字、四处有效 UIQUE 字段一致，字体和父级解析有效，生成资源进入实际包；在 UI-que 的游戏内命令面板确认版本文字实际可见，不能用 ZIP 文本扫描或 WebUI 浏览器预览替代。测试包显示 TEST，正式包不含 TEST。游戏中关闭通知时图片和版本文字一起消失，中英文 PNG 底部没有旧版本文字。测试／正式标记仍按独立流程处理，不因 UI 文字一致省略两次人工验收。
 
 验证入口：`npm run test:release-assets`、`npm run test:webui-asset-sync`、`node --import tsx scripts/test-ui-default.ts`。2026-10-24 还逐项比较 Git 中原始两份 ZIP：每份仅四个版本字段变化，其余 169 个文件内容不变。浏览器预览不能替代 Warcraft 内实际 WebUI／FDF 运行验收。
 

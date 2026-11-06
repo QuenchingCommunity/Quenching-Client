@@ -12,7 +12,7 @@ description: 准备、验收和发布淬火客户端及 MOD 资源版本，维�
 - 客户端资源准备／打包入口维护：先读 [统一资源源目录与按需 7z](references/resource-bundle.md)。2026-10-28 最新源为 `assets/unpacked`，分发五个按素材种类固定分组的独立 `resources-*.7z`；旧 shader ZIP 和 UI 独立 ZIP 描述按历史方案理解。
 
 - 每次发布：先读 [测试优先流程与资源／Git 历史](references/test-first-workflow.md)，按“带标记本地包 → 用户人工通过 → 独立测试自动更新 → 用户再次通过 → 正式大包及验证”执行；再完整阅读 [准备与验收清单](references/preparation.md)，按其中的输入表建立本次记录。
-- 每次版本变化同时核对 [UIQUE／WebUI 版本文字](references/version-assets.md)：根 `release-version.json` 统一对外版本，构建生成 HTML 和两份 UI ZIP 的八处字段；还须验证版本 String 的字体及父级 `DecorateFileNames`，不能只搜到版本字符串就判为可见。中英文 PNG 不再带版本，不每版重做图片。
+- 每次版本变化同时核对 [UIQUE／WebUI 版本文字](references/version-assets.md)：根 `release-version.json` 统一对外版本，构建生成 HTML 和两个展开 UI 组的四处有效字段（每组两处，不计本机备份）；还须验证版本 String 的字体及父级 `DecorateFileNames`，不能只搜到版本字符串就判为可见。中英文 PNG 不再带版本，不每版重做图片。
 - 生成产物或交接网站：阅读 [协议、代码与工具位置](references/contracts-and-code.md) 的对应章节，核对源码中的实际参数、路径和协议。
 - 涉及跨版本更新：阅读仓库 `wiki/file-sync-updates.md`；涉及已分发 3.5／3.51：同时阅读 `wiki/3.51-client-bugfix-verification.md` 中的发布验证、基线调查和未发布改动。
 - 涉及 MOD 后续资源更新：阅读 `wiki/mod-zip-updates.md`。2026-10-09 用户决定 MOD 改为逐资源版本普通 ZIP，客户端保留已验收的按文件差异更新；旧同协议描述仅作为兼容历史。

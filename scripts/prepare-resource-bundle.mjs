@@ -17,7 +17,7 @@ export async function fileHash(file) {
 export async function resourceInventory(root) {
   const files = {};
   async function walk(relative) {
-    if(path.basename(relative).toLowerCase()==='offline.exe')return;
+    if(['offline.exe', 'backup'].includes(path.basename(relative).toLowerCase()))return;
     const absolute = path.join(root, relative);
     const stat = await fs.lstat(absolute);
     if (stat.isSymbolicLink()) throw new Error(`Resource source contains a link: ${relative}`);

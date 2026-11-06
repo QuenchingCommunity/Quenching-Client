@@ -9,7 +9,14 @@ import { UI_PUBLIC_ARCHIVE, UI_VARIANT_ARCHIVES } from './split-ui-archives.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const UI_ARCHIVES = UI_VARIANT_ARCHIVES;
+export const UI_VERSION_FILES = Object.freeze(['framedef/ui/commandbar.fdf', 'ui-que/framedef/ui/commandbar.fdf']);
 const uiFrame = /(\bString\s+"QuenchingVersionText"\s*\{)([^}]*)(\})/g;
+const isBackup = name => name.split('/').some(part => part.toLowerCase() === 'backup');
+function validateVersionFiles(file, frames, versionFiles) {
+  if (frames !== UI_VERSION_FILES.length || UI_VERSION_FILES.some(name => !versionFiles.has(name))) {
+    throw new Error(`${path.basename(file)}: expected ${UI_VERSION_FILES.length} active UIQUE version fields at ${UI_VERSION_FILES.join(', ')}, found ${frames}`);
+  }
+}
 
 function endOfFrame(text, open) {
   let depth = 0;
@@ -69,13 +76,14 @@ export function updateUiVersionText(text, displayVersion, check = false) {
   return { text: result, frames };
 }
 
-export async function prepareUiArchive(file, displayVersion, { check = false } = {}) {
+export async function prepareUiArchive(file, displayVersion, { check = false, validateOnly = false } = {}) {
   const expanded = path.resolve(path.dirname(file), '..', 'unpacked/packages', path.basename(file, '.zip'));
   if ((await fs.stat(expanded).catch(() => null))?.isDirectory()) {
     let frames = 0, changedFiles = 0;
-    const pending = [];
+    const pending = [], versionFiles = new Set();
     const visit = async folder => {
       for (const entry of await fs.readdir(folder, { withFileTypes: true })) {
+        if (entry.name.toLowerCase() === 'backup') continue;
         const full = path.join(folder, entry.name);
         if (entry.isSymbolicLink()) throw new Error('UI source cannot contain links');
         if (entry.isDirectory()) await visit(full);
@@ -83,32 +91,42 @@ export async function prepareUiArchive(file, displayVersion, { check = false } =
           if (!/\.fdf$/i.test(entry.name)) throw new Error(`${path.basename(file)} must contain only version-specific FDF files`);
           const before = await fs.readFile(full, 'utf8');
           const updated = updateUiVersionText(before, displayVersion, check);
+          const relative = path.relative(expanded, full).split(path.sep).join('/');
+          if (updated.frames) {
+            if (!UI_VERSION_FILES.includes(relative)) throw new Error(`${path.basename(file)}: unexpected UIQUE version field in ${relative}`);
+            versionFiles.add(relative);
+          }
           frames += updated.frames;
           if (updated.text !== before) { pending.push([full, updated.text]); changedFiles++; }
         }
       }
     };
     await visit(expanded);
-    if (frames !== 4) throw new Error(`${path.basename(file)}: expected 4 UIQUE version fields, found ${frames}`);
-    if (!check) for (const [full, text] of pending) await fs.writeFile(full, text);
+    validateVersionFiles(file, frames, versionFiles);
+    if (!check && !validateOnly) for (const [full, text] of pending) await fs.writeFile(full, text);
     return { archive: path.basename(file), frames, changedFiles };
   }
   const original = await fs.readFile(file);
   const zip = await JSZip.loadAsync(original);
   let frames = 0, changedFiles = 0;
+  const versionFiles = new Set();
   for (const entry of Object.values(zip.files)) {
-    if (entry.dir || !entry.name.toLowerCase().endsWith('.fdf')) continue;
+    if (entry.dir || isBackup(entry.name) || !entry.name.toLowerCase().endsWith('.fdf')) continue;
     const before = await entry.async('nodebuffer');
     const updated = updateUiVersionText(before.toString('utf8'), displayVersion, check);
     frames += updated.frames;
+    if (updated.frames) {
+      if (!UI_VERSION_FILES.includes(entry.name)) throw new Error(`${path.basename(file)}: unexpected UIQUE version field in ${entry.name}`);
+      versionFiles.add(entry.name);
+    }
     if (updated.frames && updated.text !== before.toString('utf8')) {
       changedFiles++;
       zip.file(entry.name, Buffer.from(updated.text), { date: entry.date, comment: entry.comment,
         unixPermissions: entry.unixPermissions, dosPermissions: entry.dosPermissions, createFolders: false });
     }
   }
-  if (frames !== 4) throw new Error(`${path.basename(file)}: expected 4 UIQUE version fields, found ${frames}`);
-  if (!check && changedFiles) {
+  validateVersionFiles(file, frames, versionFiles);
+  if (!check && !validateOnly && changedFiles) {
     // JSZip normalizes the old './' root directory to '/'; don't emit an absolute entry.
     delete zip.files['/'];
     const bytes = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
@@ -151,6 +169,7 @@ export async function prepareReleaseAssets({ root = projectRoot, check = false, 
   if (expandedUi) {
     const visit = async folder => {
       for (const entry of await fs.readdir(folder, { withFileTypes: true })) {
+        if (entry.name.toLowerCase() === 'backup') continue;
         if (entry.isSymbolicLink()) throw new Error('UI source cannot contain links');
         if (entry.isDirectory()) await visit(path.join(folder, entry.name));
         else publicFiles.push({ name: entry.name });
@@ -170,32 +189,15 @@ export async function prepareReleaseAssets({ root = projectRoot, check = false, 
   for (const archive of UI_ARCHIVES) {
     if (expandedUi) {
       // Inspect before any generated output is changed; writes occur below.
-      await prepareUiArchive(path.join(q, archive), label, { check: true }).catch(async error => {
-        if (check) throw error;
-        // Validate editable FDF layouts without requiring the old version text to match.
-        const folder = path.resolve(q, '../unpacked/packages', archive.slice(0, -4));
-        let frames = 0;
-        const visit = async dir => { for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-          const full = path.join(dir, entry.name);
-          if (entry.isSymbolicLink()) throw new Error('UI source cannot contain links');
-          if (entry.isDirectory()) await visit(full);
-          else { if (!/\.fdf$/i.test(entry.name)) throw new Error('UI variant must contain only FDF'); frames += updateUiVersionText(await fs.readFile(full, 'utf8'), label, false).frames; }
-        } };
-        await visit(folder);
-        if (frames !== 4) throw error;
-      });
+      await prepareUiArchive(path.join(q, archive), label, { check, validateOnly: true });
       continue;
     }
     const bytes = await fs.readFile(path.join(q, archive));
     const z = await JSZip.loadAsync(bytes);
-    let frames = 0;
-    for (const entry of Object.values(z.files)) if (!entry.dir && entry.name.toLowerCase().endsWith('.fdf')) {
-      frames += updateUiVersionText(await entry.async('string'), label, check).frames;
-    }
-    if (Object.values(z.files).some(entry => !entry.dir && !/\.fdf$/i.test(entry.name))) {
+    if (Object.values(z.files).some(entry => !entry.dir && !isBackup(entry.name) && !/\.fdf$/i.test(entry.name))) {
       throw new Error(`${archive} must contain only version-specific FDF files`);
     }
-    if (frames !== 4) throw new Error(`${archive}: expected 4 UIQUE version fields, found ${frames}`);
+    await prepareUiArchive(path.join(q, archive), label, { check, validateOnly: true });
   }
   const images = new Map();
   for (const name of ['QuenchingOnCN.png', 'QuenchingOnEN.png']) images.set(name, await fs.readFile(resourcePath(q, 'tx', name)));

@@ -5,7 +5,7 @@
 固定映射在 `src/shared/bundled-resource-paths.mjs`：`resources-core.7z`（着色器／DNC／水面／皮肤／树木／基础资料）、`resources-ui.7z`（UI／tx／字体）、`resources-terrain.7z`（腐地／地形配置）、`resources-foliage-color.7z`（植被颜色／模型）、`resources-foliage-detail.7z`（植被法线／材质）。不能为了每次构建重新均分而自动迁移未改文件到其他包；这会导致不必要的更新。
 
 - `camp/dnc/experimental/shaders/skin/tile/tx/water` 为展开目录。3.0 原字节数据在 `shaders/shaders-300-legacy-hd`、`shaders-300-legacy-de`、`fog_shaders-legacy`，共 57 个原文件。
-- 原 UI、植被、环境、腐地和树木 ZIP 为 `packages/<ZIP 名去扩展名>/` 逻辑组，9 组各自隔离同名文件。UI 公共组先于 20／30 FDF 组叠加；UIQUE 版本仍为两个版本组各四处字段。
+- 原 UI、植被、环境、腐地和树木 ZIP 为 `packages/<ZIP 名去扩展名>/` 逻辑组，9 组各自隔离同名文件。UI 公共组先于 20／30 FDF 组叠加；UIQUE 版本为两个版本组各两处有效字段。`backup/` 不参与版本检查或资源归档，不能依赖被 Git 忽略的本机备份使构建通过。
 - 常规资源编辑直接改展开源。旧 ZIP 迁移工具只用于明确的一次性 intake；不能在每次构建时从过期 ZIP 覆盖新源。
 - `scripts/prepare-client-assets.mjs` 是标准入口：先对齐版本文字，再按实际源内容生成／复用五个 7z 与清单。`electron/start/build/pack` 均调用它；所有 `dist:*` 经该构建入口，electron-builder beforePack 也调用。并发 dev 进程共用锁；旧 `prepare-shader-bundles.mjs` 仅转发，不再创建 shader ZIP。
 - 7z 使用独立文件流，以便原生 7-Zip 只展开选择的文件。schema 3 清单记录总内容 ID、五包各自内容 ID／SHA-256／大小、逐文件归属包／SHA-256／大小、逻辑资源组。源不变时不重压，四个无变化包不改字节／mtime；源有变化时只更新对应包的变化成员。发布为可回滚事务，清单最后提交。
