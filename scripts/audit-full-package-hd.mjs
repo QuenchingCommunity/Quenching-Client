@@ -1,9 +1,9 @@
+import { resourcePath } from "../src/shared/bundled-resource-paths.mjs";
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import yauzl from 'yauzl';
 import { readSkinTable } from './full-package-sync-utils.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -54,35 +54,14 @@ async function sameComposedTree(target, sources) {
   for (const relative of actual) await same(path.join(target, relative), expected.get(relative));
   return actual.length;
 }
-async function verifyPublicEnvironment(zipPath, environmentDir) {
-  return new Promise((resolve, reject) => {
-    yauzl.open(zipPath, { lazyEntries: true }, (openError, zip) => {
-      if (openError) return reject(openError);
-      let checked = 0;
-      zip.on('error', reject);
-      zip.on('end', () => resolve(checked));
-      zip.on('entry', (entry) => {
-        if (entry.fileName.endsWith('/')) return zip.readEntry();
-        const relative = entry.fileName.replaceAll('\\', '/');
-        if (relative.split('/').some((part) => part === '..' || part === '') || !/^(environmentmap|foliage|sky)\//i.test(relative)) {
-          return reject(new Error(`Unexpected environment ZIP entry: ${relative}`));
-        }
-        zip.openReadStream(entry, async (streamError, stream) => {
-          if (streamError) return reject(streamError);
-          const chunks = [];
-          try {
-            for await (const chunk of stream) chunks.push(chunk);
-            const payload = Buffer.concat(chunks);
-            assert.equal(payload.length, entry.uncompressedSize, relative);
-            assert.equal(sha(payload), sha(await fs.readFile(path.join(environmentDir, ...relative.split('/')))), relative);
-            checked += 1;
-            zip.readEntry();
-          } catch (error) { reject(error); }
-        });
-      });
-      zip.readEntry();
-    });
-  });
+async function verifyPublicEnvironment(source, environmentDir) {
+  const files = await filesUnder(source);
+  assert(files.length, 'Public environment source is empty');
+  for (const relative of files) {
+    assert(/^(environmentmap|foliage|sky)\//i.test(relative.replaceAll('\\', '/')), `Unexpected environment resource: ${relative}`);
+    await same(path.join(source, relative), path.join(environmentDir, relative));
+  }
+  return files.length;
 }
 
 for (const relative of [
@@ -96,16 +75,16 @@ for (const relative of [
   'textures/fx/shoreline1.dds', 'textures/fx/shorelineparticlexy.dds',
 ]) assert.equal(await exists(path.join(root, relative)), true, `Missing optional water asset: ${relative}`);
 for (const name of ['water-rel', 'water-trans']) {
-  await sameTree(path.join(root, 'replaceabletextures', name), path.join(assets, 'water', name));
+  await sameTree(path.join(root, 'replaceabletextures', name), resourcePath(assets, 'water', name));
 }
 for (const name of ['shoreline1.dds', 'shorelineparticlexy.dds']) {
-  await same(path.join(root, 'textures', 'fx', name), path.join(assets, 'water', 'shoreline', name));
+  await same(path.join(root, 'textures', 'fx', name), resourcePath(assets, 'water', 'shoreline', name));
 }
 
-await same(path.join(root, 'units/unitskin.txt'), path.join(assets, 'skin/unitskin-new.txt'));
-await same(path.join(root, 'PostProcessingConfig.txt'), path.join(assets, 'PostProcessingConfig.txt'));
-await same(path.join(root, 'webui/index.html'), path.join(assets, 'index.html'));
-await same(path.join(root, 'webui/QuenchingOn.png'), path.join(assets, 'tx/QuenchingOnCN.png'));
+await same(path.join(root, 'units/unitskin.txt'), resourcePath(assets, 'skin/unitskin-new.txt'));
+await same(path.join(root, 'PostProcessingConfig.txt'), resourcePath(assets, 'PostProcessingConfig.txt'));
+await same(path.join(root, 'webui/index.html'), resourcePath(assets, 'index.html'));
+await same(path.join(root, 'webui/QuenchingOn.png'), resourcePath(assets, 'tx/QuenchingOnCN.png'));
 assert.equal(await exists(path.join(root, 'units/unitskin2.txt')), false, 'Obsolete unitskin2.txt is still present');
 const treeSkin = (await fs.readFile(path.join(root, 'units/destructableskin.txt'), 'utf8')).replaceAll('\\', '/').toLowerCase();
 assert.match(treeSkin, /replaceabletextures\/tree\/t20\//);
@@ -113,7 +92,7 @@ assert.match(treeSkin, /doodads\/que\/d20\//);
 for (const relative of ['doodads/que/d20', 'replaceabletextures/tree/t20']) {
   assert.equal(await exists(path.join(root, relative)), true, `Missing HD tree resource: ${relative}`);
 }
-const nativeDestructables = readSkinTable(await fs.readFile(path.join(assets, 'skin/destructableskin.txt'), 'utf8'));
+const nativeDestructables = readSkinTable(await fs.readFile(resourcePath(assets, 'skin/destructableskin.txt'), 'utf8'));
 const packageDestructables = readSkinTable(await fs.readFile(path.join(root, 'units/destructableskin.txt'), 'utf8'));
 assert.deepEqual([...packageDestructables.keys()], [...nativeDestructables.keys()], 'Modern destructable IDs missing or obsolete IDs retained');
 const shortTreeOverrides = JSON.parse(await fs.readFile(path.join(repo, 'scripts/fixtures/destructable-short-overrides.json'), 'utf8')).overrides;
@@ -137,19 +116,19 @@ for (const [id, row] of nativeDestructables) {
   }
 }
 
-await same(path.join(root, 'terrainart/terrain.slk'), path.join(assets, 'tile/terrain20.slk'));
-await same(path.join(root, 'terrainart/clifftypes.slk'), path.join(assets, 'tile/clifftypes20.slk'));
+await same(path.join(root, 'terrainart/terrain.slk'), resourcePath(assets, 'tile/terrain20.slk'));
+await same(path.join(root, 'terrainart/clifftypes.slk'), resourcePath(assets, 'tile/clifftypes20.slk'));
 assert.equal((await fs.readFile(path.join(root, 'terrainart/meta.que'), 'utf8')).trim(), '20');
 for (const name of ['ashenvale', 'cityscape', 'cityscaperuins', 'felwood', 'lordaeronfall', 'lordaeronsummer', 'lordaeronwinter', 'village', 'villagefall']) {
   assert.equal(await exists(path.join(root, 'terrainart', name)), false, `t30 terrain still active: ${name}`);
   assert.equal(await exists(path.join(root, 't30', name)), true, `t30 backup missing: ${name}`);
 }
 
-const dnc = await sameTree(path.join(root, 'environment/dnc'), path.join(assets, 'dnc/dnc30-hd'));
+const dnc = await sameTree(path.join(root, 'environment/dnc'), resourcePath(assets, 'dnc/dnc30-hd'));
 const activeShaders = await sameComposedTree(path.join(root, 'shaders'), [
-  { root: path.join(assets, 'shaders/shaders-300-hd/vs'), prefix: 'vs' },
-  { root: path.join(assets, 'shaders/shaders-300-hd/ps/standard'), prefix: 'ps' },
+  { root: resourcePath(assets, 'shaders/shaders-300-hd/vs'), prefix: 'vs' },
+  { root: resourcePath(assets, 'shaders/shaders-300-hd/ps/standard'), prefix: 'ps' },
 ]);
-const publicEnvironment = await verifyPublicEnvironment(path.join(assets, 'env-20-30-public.zip'), path.join(root, 'environment'));
+const publicEnvironment = await verifyPublicEnvironment(resourcePath(assets, 'packages/env-20-30-public'), path.join(root, 'environment'));
 
 console.log(JSON.stringify({ result: 'HD full-package audit passed', baseline: { gameVersion: '3.01', graphics: 'HD', lighting: 'standard', brightness: 3 }, manualResources: 'removed', dncFiles: dnc, activeShaderFiles: activeShaders, publicEnvironmentFiles: publicEnvironment, destructables: packageDestructables.size, preservedOverrides: expectedOverrides.size, water: 'Warcraft default', terrain: 't20/HD', units: 'unitskin/HD', t30: 'parked' }, null, 2));

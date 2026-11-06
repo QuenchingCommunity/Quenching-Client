@@ -1,3 +1,4 @@
+import { resourcePath } from "../src/shared/bundled-resource-paths.mjs";
 /** Sync the HD 3.01 / Standard / brightness-3 baseline into the QMF maintenance tree.
  * Default is read-only; --write backs up changed destinations before copying.
  * This does not create release ZIPs, modify version markers or publish manifests.
@@ -45,7 +46,7 @@ async function planFile(relative, source) {
     plans.push({ relative: relative.replace(/\\/g, '/'), target, bytes, beforeSha256: before ? sha(before) : null, sha256: sha(bytes) });
 }
 for (const [destination, template] of trees) {
-    const source = path.join(assets, template);
+    const source = resourcePath(assets, template);
     const files = await filesUnder(source);
     const target = path.join(root, destination);
     const extras = await fs.pathExists(target) ? (await filesUnder(target)).filter(file => !files.includes(file)) : [];
@@ -54,15 +55,15 @@ for (const [destination, template] of trees) {
     for (const file of files) await planFile(path.join(destination, file), path.join(source, file));
 }
 for (const name of ['shoreline1.dds', 'shorelineparticlexy.dds']) {
-    for (const folder of ['textures/fx', 'textures/_setting']) await planFile(`${folder}/${name}`, path.join(assets, 'water', 'shoreline', name));
+    for (const folder of ['textures/fx', 'textures/_setting']) await planFile(`${folder}/${name}`, resourcePath(assets, 'water', 'shoreline', name));
 }
-await planFile('units/unitskin.txt', path.join(assets, 'skin', 'unitskin-new.txt'));
-await planFile('PostProcessingConfig.txt', path.join(assets, 'PostProcessingConfig.txt'));
-await planFile('webui/index.html', path.join(assets, 'index.html'));
-await planFile('webui/QuenchingOn.png', path.join(assets, 'tx', 'QuenchingOnCN.png'));
+await planFile('units/unitskin.txt', resourcePath(assets, 'skin', 'unitskin-new.txt'));
+await planFile('PostProcessingConfig.txt', resourcePath(assets, 'PostProcessingConfig.txt'));
+await planFile('webui/index.html', resourcePath(assets, 'index.html'));
+await planFile('webui/QuenchingOn.png', resourcePath(assets, 'tx', 'QuenchingOnCN.png'));
 const skin = alignPackageDestructables(
-    await fs.readFile(path.join(assets, 'skin', 'destructableskin.txt'), 'utf8'),
-    await fs.readFile(path.join(assets, 'skin', 'legacy', 'destructableskin.txt'), 'utf8'),
+    await fs.readFile(resourcePath(assets, 'skin', 'destructableskin.txt'), 'utf8'),
+    await fs.readFile(resourcePath(assets, 'skin', 'legacy', 'destructableskin.txt'), 'utf8'),
     await fs.readFile(path.join(root, 'units', 'destructableskin.txt'), 'utf8'),
 );
 await planFile('units/destructableskin.txt', Buffer.from(skin.content, 'utf8'));
@@ -84,7 +85,7 @@ const tiles = [
     ]),
 ];
 for (const [relative, template] of tiles) {
-    if (await fs.pathExists(path.join(root, relative))) await planFile(relative, path.join(assets, 'tile', template));
+    if (await fs.pathExists(path.join(root, relative))) await planFile(relative, resourcePath(assets, 'tile', template));
 }
 
 const changed = plans.filter(plan => plan.beforeSha256 !== plan.sha256);

@@ -1,6 +1,6 @@
 # 每次版本更新的准备与验收
 
-Windows 签名维护（2026-10-29）：见 `wiki/windows-trust-signing-20261029.md`。正式 Windows 包必须具备可信 Authenticode 签名，不能漏签 .node／DLL；beforePack／afterPack／afterSign 已接入门禁、原生签名、ASAR 完整性维护和签后信任验收。签名完成后才生成更新摘要。TEST 无证书可本地构建，但不得宣称已解决用户的 Smart App Control／SmartScreen 信任问题。
+Windows 签名约定（用户 2026-11-07 更新）：允许未签名的正式 Windows 包，不再要求提供 Authenticode 身份。配置了签名时仍处理 .node／DLL、维护签后 ASAR 并验证信任；显式 forceCodeSigning 仍要求身份。构建完成后才生成更新摘要，发布记录如实标注签名状态。自动更新清单的 Ed25519 签名及下载校验不受此约定影响。此前要求强制可信签名的历史记录见 `wiki/windows-trust-signing-20261029.md`。
 
 先执行 [测试优先流程](test-first-workflow.md)：A 带标记本地包交用户人工验收；通过后才做 B 独立测试自动更新，再交用户验收；两次通过后才做 C 正式大包及验证。以下构建／签名／上传动作只能在其所属阶段执行，不能合并提前完成。历史资源以 Git 追溯，不常驻复制每版旧树。
 
@@ -64,7 +64,7 @@ Windows 签名维护（2026-10-29）：见 `wiki/windows-trust-signing-20261029.
 
 ## 3. 构建客户端便携 ZIP
 
-**当前资源布局以 [统一资源流程](resource-bundle.md) 为准。** 使用 `prepare-client-assets.mjs` 准备展开源和单个 7z，不分发原始 `unpacked` 或 shader／UI 独立 ZIP；下文历史 ZIP 名对应其逻辑组。新源保留旧 3.0 ABI 原字节。首次整体压缩较慢，后续未变内容复用；不要为缩短一次构建时间跳过摘要／完整性检查。
+**当前资源布局以 [统一资源流程](resource-bundle.md) 为准。** 使用 `prepare-client-assets.mjs` 从 Git 中的展开源生成五个独立 `resources-*.7z`，不分发原始 `unpacked` 或 shader／UI 独立 ZIP；下文历史 ZIP 名对应其逻辑组。新源保留旧 3.0 ABI 原字节。首次整体压缩较慢，后续未变内容复用；不要为缩短一次构建时间跳过摘要／完整性检查。
 
 先按 `version-assets.md` 设置根 `release-version.json` 的对外版本，执行 `node scripts/prepare-release-assets.mjs` 和 `--check`。客户端显示、WebUI HTML、UIQUE 两份 ZIP 的八处 `QuenchingVersionText` 必须一致；同时验证 `MasterFont` 和父级 `DecorateFileNames`，游戏内确认 UI-que 命令面板实际显示版本，不能只查文本。测试包带 TEST，正式包去除 TEST。同版本 FDF 布局修复须提高 UI 缓存修订并验证刷新一次。PNG 使用无版本底图，不因升版重画。同步 Latest 的 WebUI／本地身份资源必须显式 `--sync-latest`，不修改 MOD 标记／sequence。A、B、C 的实际产物均复核这些版本文字及显示条件。
 

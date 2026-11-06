@@ -10,8 +10,11 @@ const parent=path.resolve('_tmp/windows-trust-20261029');await fs.ensureDir(pare
 try{
  const win={},config={},context={packager:{config,platformSpecificBuildOptions:win,info:{projectDir:root},appInfo:{productFilename:'Fixture'}},electronPlatformName:'win32',appOutDir:path.join(root,'out')};
  await fs.outputJson(path.join(root,'release-version.json'),{channel:'production'});
+ assert.deepEqual(await configureWindowsSigning(context),{required:false,configured:false});
+ assert.equal(win.forceCodeSigning,undefined);assert(win.signExts.includes('.node'));
+ win.forceCodeSigning=true;
  await assert.rejects(configureWindowsSigning(context),/需要可信 Authenticode/);
- assert.equal(win.forceCodeSigning,true);assert(win.signExts.includes('.node'));
+ delete win.forceCodeSigning;delete config.forceCodeSigning;
  assert(!signingConfigured({},{}));assert(signingConfigured({signtoolOptions:{certificateSha1:'test'}},{}));assert(signingConfigured({},{WIN_CSC_LINK:'not-a-secret-test-path'}));
  context.packager.platformSpecificBuildOptions={signtoolOptions:{sign:()=>{}}};await configureWindowsSigning(context);
  const source=path.join(root,'source'),archive=path.join(context.appOutDir,'resources/app.asar');
@@ -31,5 +34,5 @@ try{
  await context.packager.sign(signed);assert.equal(count,1,'builder must not append another signature after ASAR was refreshed');
  hook.restore(context.packager);assert.equal(context.packager.sign,sign);
  await assert.rejects(require('./check-windows-signatures.cjs')(context),error=>{console.log('Trust-negative result: '+error.message.slice(-1800));return /audit failed/.test(error.message);},'a fake certificate overlay must not pass Windows trust verification');
- console.log('PASS: production signer gate, native addon signing selection, ASAR full size/hash refresh, packed content preserved, source inputs unchanged, duplicate signing prevented. Fake overlay tests mechanics only; no trusted signature claimed.');
+ console.log('PASS: unsigned production allowed, explicit signer requirement enforced, native addon signing selection, ASAR full size/hash refresh, packed content preserved, source inputs unchanged, duplicate signing prevented. Fake overlay tests mechanics only; no trusted signature claimed.');
 }finally{assert.equal(path.dirname(root),parent);await fs.remove(root);}

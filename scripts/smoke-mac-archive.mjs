@@ -1,4 +1,4 @@
-/** Extract the delivered ZIP, verify it and launch the real packaged renderer. */
+/** Extract the delivered tar.7z, verify it and launch the real packaged renderer. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
@@ -6,11 +6,12 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
 import { smokeMacNative, machOArchitectures } from './mac-native.mjs';
+import { run7z } from './lib/portable-7z.mjs';
 
 const arch = process.argv[2] || process.arch;
 assert.equal(process.platform, 'darwin', 'ZIP launch verification requires macOS');
 assert.equal(process.arch, arch, 'Use the target architecture Mac runner');
-const archive = path.resolve(`__Bin/QMClient-darwin-${arch}.zip`);
+const archive = path.resolve(`__Bin/QMClient-darwin-${arch}.tar.7z`);
 const temporaryRoot = path.resolve('_tmp');
 await fs.mkdir(temporaryRoot, { recursive: true });
 const work = await fs.mkdtemp(path.join(temporaryRoot, `mac-roundtrip-${arch}-`));
@@ -23,7 +24,8 @@ await fs.mkdir(configDir);
 let child, socket, output = '', closed = false;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 try {
-  execFileSync('ditto', ['-x', '-k', archive, extracted], { stdio: 'inherit' });
+  await run7z(['x', '-y', '-bso0', '-bsp0', '-o' + extracted, archive]);
+  execFileSync('tar', ['--acls', '--xattrs', '-xf', path.join(extracted, 'QMClient.app.tar'), '-C', extracted], { stdio: 'inherit' });
   const app = path.join(extracted, 'QMClient.app');
   const executable = path.join(app, 'Contents/MacOS/QMClient');
   assert((await fs.stat(executable)).mode & 0o111, 'ZIP lost executable permissions');
@@ -93,7 +95,7 @@ try {
   await fs.writeFile(path.join(work, 'startup-report.json'), JSON.stringify({
     platform: process.platform, arch, commit: process.env.GITHUB_SHA || null, archive,
     bytes: (await fs.stat(archive)).size, sha256: hash.digest('hex'),
-    adHocSignatureVerified: true, nativeBindingsLoaded: true, extractedZipLaunched: true, renderer: state,
+    adHocSignatureVerified: true, nativeBindingsLoaded: true, extractedArchiveLaunched: true, renderer: state,
   }, null, 2));
   console.log(`PASS: ${arch} delivered ZIP extracted; permissions/symlinks/signature/native bindings verified; real renderer + preload + IPC started. Evidence: ${work}`);
 } finally {
