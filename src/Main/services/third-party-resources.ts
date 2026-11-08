@@ -1,4 +1,4 @@
-import { getSelectedGameFolder } from './game-channel';
+import { getSelectedGameFolder, getSelectedGameChannel, getChannelModEnabled } from './game-channel';
 import fs from 'fs-extra';
 import path from 'path';
 import crypto from 'node:crypto';
@@ -56,11 +56,11 @@ const FEATURES: QuenchingFeature[] = [
   { id: 'trees', dirs: [], files: ['units/destructableskin.txt'] },
 ];
 
-function retail(root: string): string { return path.join(root, getSelectedGameFolder()); }
-function statePath(root: string): string { return path.join(retail(root), STATE_FILE); }
+function retail(root: string, buildDir?: string): string { return buildDir || path.join(root, getSelectedGameFolder()); }
+function statePath(root: string, buildDir?: string): string { return path.join(retail(root, buildDir), STATE_FILE); }
 function stageDir(root: string, id: number): string { return path.join(root, `QM Assets ${id}`); }
-function parkRoot(root: string): string { return path.join(retail(root), 'QMoff', 'third-party'); }
-function replacedRoot(root: string, id: number): string { return path.join(parkRoot(root), `replaced-${id}`); }
+function parkRoot(root: string, buildDir?: string): string { return path.join(retail(root, buildDir), 'QMoff', 'third-party'); }
+function replacedRoot(root: string, id: number, buildDir?: string): string { return path.join(parkRoot(root, buildDir), `replaced-${id}`); }
 function norm(value: string): string { return value.replace(/\\/g, '/').replace(/^(?:\.\/)+/, '').replace(/^\/+/, '').replace(/\/{2,}/g, '/'); }
 function first(value: string): string { return value.split('/')[0]; }
 function isBranch(name: string): boolean { return name.toLowerCase() === '_retail_' || name.toLowerCase() === '_ptr_'; }
@@ -160,8 +160,8 @@ function defaults(): ThirdPartyState {
   };
 }
 
-async function readState(root: string): Promise<ThirdPartyState> {
-  const saved = await fs.readJson(statePath(root)).catch((error: NodeJS.ErrnoException) => {
+async function readState(root: string, buildDir?: string): Promise<ThirdPartyState> {
+  const saved = await fs.readJson(statePath(root, buildDir)).catch((error: NodeJS.ErrnoException) => {
     if (error.code === 'ENOENT') return null;
     throw error;
   });
@@ -190,15 +190,16 @@ async function readState(root: string): Promise<ThirdPartyState> {
   return { activeSlotId: saved.activeSlotId ?? null, slots: base.slots.map(slot => byId.get(slot.id) || slot) };
 }
 
-async function writeState(root: string, state: ThirdPartyState): Promise<void> {
+async function writeState(root: string, state: ThirdPartyState, buildDir?: string): Promise<void> {
   const stored = {
     activeSlotId: state.activeSlotId,
     slots: state.slots.map(({ stagingPath: _staging, topLevel: _top, features: _features, ...slot }) => slot),
   };
-  const temp = `${statePath(root)}.tmp`;
+  const temp = `${statePath(root, buildDir)}.tmp`;
   await fs.ensureDir(path.dirname(temp));
   await fs.writeJson(temp, stored, { spaces: 2 });
-  await fs.move(temp, statePath(root), { overwrite: true });
+  try { await fs.rename(temp, statePath(root, buildDir)); }
+  finally { await fs.remove(temp).catch(() => undefined); }
 }
 
 async function assertRetail(root: string): Promise<void> {
@@ -275,18 +276,115 @@ async function restoreParked(root: string, parked: Array<{ featureId: string; pa
   }
 }
 
-async function disableSlot(root: string, state: ThirdPartyState, slot: ResourceSlot): Promise<void> {
+async function disableSlot(root: string, state: ThirdPartyState, slot: ResourceSlot, buildDir?: string): Promise<void> {
   if (!slot.enabled) return;
-  const branch = retail(root);
-  for (const relative of slot.files) await fs.remove(path.join(branch, relative));
-  for (const relative of slot.parked.flatMap(item => item.paths)) await fs.remove(path.join(branch, relative));
-  for (const relative of slot.replaced) await moveRelative(replacedRoot(root, slot.id), branch, relative);
-  await restoreParked(root, slot.parked);
-  await fs.remove(replacedRoot(root, slot.id));
-  slot.enabled = false;
-  slot.parked = [];
-  slot.replaced = [];
-  if (state.activeSlotId === slot.id) state.activeSlotId = null;
+  const branch = retail(root, buildDir);
+  const validPath = (relative: string) => typeof relative === 'string' && !!relative &&
+    !path.isAbsolute(relative) && !relative.includes('\\') &&
+    !['_tmp', '.quenching', 'qmoff', STATE_FILE.toLowerCase(), 'x86_64', 'x86', 'data', 'locales'].includes(first(relative).toLowerCase()) &&
+    !relative.split('/').some(part => !part || part === '.' || part === '..' || part.includes(':'));
+  const files = new Set(slot.files.map(file => file.toLowerCase()));
+  for (const relative of [...slot.files, ...slot.replaced]) {
+    if (!validPath(relative)) throw Error(`第三方资源记录路径无效：${relative}`);
+  }
+  const restores: Array<[string, string]> = [];
+  for (const relative of slot.replaced) {
+    if (!files.has(relative.toLowerCase())) throw Error(`第三方替换记录无效：${relative}`);
+    restores.push([path.join(replacedRoot(root, slot.id, buildDir), relative), path.join(branch, relative)]);
+  }
+  for (const item of slot.parked) {
+    const feature = FEATURES.find(feature => feature.id === item.featureId);
+    if (!feature || !Array.isArray(item.paths)) throw Error('第三方停放记录无效');
+    for (const relative of item.paths) {
+      if (!validPath(relative) || ![...feature.dirs, ...feature.files].some(owned => owned.toLowerCase() === relative.toLowerCase())) {
+        throw Error(`第三方停放记录路径无效：${relative}`);
+      }
+      restores.push([path.join(parkRoot(root, buildDir), item.featureId, relative), path.join(branch, relative)]);
+    }
+  }
+  const safeParents = async (target: string) => {
+    let current = branch;
+    for (const part of path.relative(branch, target).split(path.sep)) {
+      current = path.join(current, part);
+      const info = await fs.lstat(current).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+      if (info?.isSymbolicLink()) throw Error(`第三方资源路径不能为链接：${current}`);
+    }
+  };
+  // Check recorded originals before removing any active override.
+  for (const [from, to] of restores) {
+    await safeParents(from); await safeParents(to);
+    if (!await fs.pathExists(from)) throw Error(`第三方原文件备份缺失：${from}`);
+  }
+  for (const relative of slot.files) {
+    const target = path.join(branch, relative);
+    await safeParents(target);
+    const info = await fs.lstat(target).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+    if (info && !info.isFile()) throw Error(`第三方资源文件类型已改变：${target}`);
+  }
+  const tmp = path.join(branch, '_tmp');
+  await safeParents(tmp); await fs.ensureDir(tmp);
+  const work = await fs.mkdtemp(path.join(tmp, 'third-party-disable-'));
+  const undo: Array<() => Promise<void>> = [];
+  const previous = { enabled: slot.enabled, parked: slot.parked, replaced: slot.replaced, activeSlotId: state.activeSlotId };
+  let preserve = false, index = 0;
+  const move = async (from: string, to: string) => {
+    if (!await fs.pathExists(from)) return;
+    if (await fs.pathExists(to)) throw Error(`第三方恢复目标已存在：${to}`);
+    await fs.ensureDir(path.dirname(to)); await fs.rename(from, to);
+    undo.push(async () => { await fs.ensureDir(path.dirname(from)); await fs.rename(to, from); });
+  };
+  const sameAsStaged = async (active: string, staged: string) => {
+    const a = await fs.stat(active).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+    const b = await fs.lstat(staged).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+    if (!a?.isFile() || !b?.isFile() || b.isSymbolicLink() || a.size !== b.size) return false;
+    const digest = async (file: string) => {
+      const hash = crypto.createHash('sha256');
+      for await (const chunk of fs.createReadStream(file)) hash.update(chunk);
+      return hash.digest('hex');
+    };
+    return await digest(active) === await digest(staged);
+  };
+  try {
+    for (const relative of slot.files) {
+      const target = path.join(branch, relative);
+      await safeParents(target);
+      const unchanged = await sameAsStaged(target, path.join(stageDir(root, slot.id), relative));
+      await move(target, unchanged ? path.join(work, 'removed', String(index++)) : path.join(work, 'preserved', 'modified', relative));
+    }
+    for (const relative of slot.parked.flatMap(item => item.paths)) {
+      const target = path.join(branch, relative);
+      await safeParents(target);
+      await move(target, path.join(work, 'preserved', '_leftovers', relative));
+    }
+    for (const [from, to] of restores) await move(from, to);
+    if (await fs.pathExists(path.join(work, 'preserved'))) {
+      const backups = path.join(root, '.quenching', 'player-file-backups');
+      for (const directory of [path.dirname(backups), backups]) {
+        const info = await fs.lstat(directory).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+        if (info && (!info.isDirectory() || info.isSymbolicLink())) throw Error(`玩家文件备份目录无效：${directory}`);
+      }
+      await move(path.join(work, 'preserved'), path.join(backups, `third-party-${slot.id}-${crypto.randomUUID()}`));
+    }
+    slot.enabled = false; slot.parked = []; slot.replaced = [];
+    if (state.activeSlotId === slot.id) state.activeSlotId = null;
+    await writeState(root, state, buildDir);
+  } catch (error) {
+    Object.assign(slot, { enabled: previous.enabled, parked: previous.parked, replaced: previous.replaced });
+    state.activeSlotId = previous.activeSlotId;
+    for (const rollback of undo.reverse()) try { await rollback(); } catch { preserve = true; }
+    if (preserve) throw new AggregateError([error], `第三方资源恢复未完成，备份保留：${work}`);
+    throw error;
+  } finally {
+    if (!preserve) await fs.remove(work);
+  }
+}
+
+/** Restore this exact branch without temporarily changing the selected channel. */
+export async function disableThirdPartySlotsForBranch(buildDir: string): Promise<void> {
+  const branch = path.resolve(buildDir), folder = path.basename(branch);
+  if (folder !== '_retail_' && folder !== '_ptr_') throw Error('Invalid game branch for third-party restore');
+  const root = path.dirname(branch), state = await readState(root, branch);
+  for (const slot of state.slots) if (slot.enabled) await disableSlot(root, state, slot, branch);
 }
 
 async function enableSlot(root: string, state: ThirdPartyState, slot: ResourceSlot): Promise<void> {
@@ -334,6 +432,7 @@ export async function setThirdPartyEnabled(root: string, id: number, enabled: bo
   await assertRetail(root);
   const state = await readState(root);
   const slot = slotOf(state, id);
+  if (enabled && !getChannelModEnabled(getSelectedGameChannel())) throw Error('请先启用当前分支的淬火 MOD');
   if(enabled && Object.values(await (await import('./vision-modules')).getVisionModules(root)).some(Boolean))throw new Error('请先关闭 Vision Mod 模块，再启用资源槽');
   if (enabled) await enableSlot(root, state, slot);
   else await disableSlot(root, state, slot);

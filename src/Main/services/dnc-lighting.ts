@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { applyUnitLightAngle } from '../../shared/dnc-rotation';
+import { applyUnitLightAngle,applyUnitShadowLength } from '../../shared/dnc-rotation';
+import type {UnitShadowLength} from '../../shared/unit-light-settings';
 
 /** 向上查找当前行是否位于指定 MDL 动画块内（如 Rotation N） */
 function isInsideMdlBlock(lines: string[], lineIndex: number, headerPattern: RegExp): boolean {
@@ -207,7 +208,7 @@ function replaceMdlAnimatedBlock(
     return false;
 }
 
-function applySurfaceBaseline(lines: string[], isUnit: boolean): boolean {
+function applySurfaceBaseline(lines: string[], isUnit: boolean, preserveRotation = false): boolean {
     const baseline = isUnit ? SURFACE_UNIT_BASELINE : SURFACE_TERRAIN_BASELINE;
     let modified = false;
 
@@ -231,7 +232,7 @@ function applySurfaceBaseline(lines: string[], isUnit: boolean): boolean {
         }
 
         const rotationMatch = line.match(/^(\d+):\s*\{\s*([\d.-]+),\s*([\d.-]+),\s*([\d.-]+),\s*([\d.-]+)\s*\},?$/);
-        if (rotationMatch && isInsideMdlBlock(lines, i, ROTATION_HEADER)) {
+        if (!preserveRotation && rotationMatch && isInsideMdlBlock(lines, i, ROTATION_HEADER)) {
             const newVal = formatRotationKeyframe(rotationMatch[1], baseline.rotation);
             if (lines[i].trim() !== newVal.trim()) {
                 lines[i] = newVal;
@@ -247,16 +248,9 @@ export interface DncLightingOptions {
     deMode?: boolean;
     isVersion30?: boolean;
     unitLightAngle?: number;
-}
-
-/** Applied to freshly restored terrain models; other modes keep their source rotation. */
-function applyBattleTerrainRotation(content: string, filePath: string, mode: string): string {
-    const name = path.basename(filePath).toLowerCase();
-    if (!['battle', 'melee'].includes(mode) || !name.includes('terrain') || name.includes('unit')) return content;
-    const newline = content.includes('\r\n') ? '\r\n' : '\n';
-    return content.replace(/^([\t ]*)Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/gm,
-        (_block, indent) => [`${indent}Rotation 1 {`, `${indent}\tDontInterp,`,
-            `${indent}\t0: { 0.25, 0.25, 0.75, 0 },`, `${indent}}`].join(newline));
+    unitShadowLength?: UnitShadowLength;
+    /** Explicit reset: use source unit rotations before independent overrides. */
+    unitLightSourceDefaults?: boolean;
 }
 
 /** Pure transform, also used to recover the current profile's rotation on disable. */
@@ -265,10 +259,11 @@ export function renderDncLighting(content: string, filePath: string, mode: strin
     const brightnessLevel = normalizeBrightnessLevel(brightness);
     const finish = (text: string) => {
         const name=path.basename(filePath).toLowerCase();
-        return name.includes('unit') && !name.includes('terrain') ? applyUnitLightAngle(text, options.unitLightAngle) : text;
+        return name.includes('unit') && !/terrain|portrait/.test(name)
+          ? applyUnitLightAngle(applyUnitShadowLength(text,options.unitShadowLength), options.unitLightAngle) : text;
     };
     if (options.isVersion30) {
-        return finish(applyBattleTerrainRotation(applyFinalizedDncBrightness(content, brightnessLevel, mode), filePath, mode));
+        return finish(applyFinalizedDncBrightness(content, brightnessLevel, mode));
     }
     const lines = content.split(/\r?\n/);
     let modified = false;
@@ -282,7 +277,7 @@ export function renderDncLighting(content: string, filePath: string, mode: strin
     if (category === 'surface' && !options.deMode && !options.isVersion30) {
         const useUnitBaseline = isUnit && !isTerrain;
         const useTerrainBaseline = isTerrain && !isUnit;
-        if ((useUnitBaseline || useTerrainBaseline) && applySurfaceBaseline(lines, useUnitBaseline)) {
+        if ((useUnitBaseline || useTerrainBaseline) && applySurfaceBaseline(lines, useUnitBaseline, useTerrainBaseline || options.unitLightSourceDefaults===true)) {
             modified = true;
         }
     }
@@ -300,7 +295,7 @@ export function renderDncLighting(content: string, filePath: string, mode: strin
         }
 
         const rotationMatch = line.match(/^(\d+):\s*\{\s*([\d.-]+),\s*([\d.-]+),\s*([\d.-]+),\s*([\d.-]+)\s*\},?$/);
-        if (rotationMatch && !options.deMode && !options.isVersion30 && category === 'surface' && isUnit && !isTerrain && mode === 'battle') {
+        if (rotationMatch && !options.unitLightSourceDefaults && !options.deMode && !options.isVersion30 && category === 'surface' && isUnit && !isTerrain && mode === 'battle') {
             if (isInsideMdlBlock(lines, i, ROTATION_HEADER)) {
                 const newVal = formatRotationKeyframe(rotationMatch[1], getSurfaceUnitBattleRotation());
                 if (lines[i].trim() !== newVal.trim()) {
@@ -315,7 +310,7 @@ export function renderDncLighting(content: string, filePath: string, mode: strin
         modified = true;
     }
 
-    return finish(applyBattleTerrainRotation(modified ? lines.join('\n') : content, filePath, mode));
+    return finish(modified ? lines.join('\n') : content);
 }
 
 async function patchDncMdlFile(filePath: string, mode: string, brightnessLevel: number, options: DncLightingOptions) {

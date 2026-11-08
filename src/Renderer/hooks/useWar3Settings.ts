@@ -6,6 +6,9 @@ import { reaxel, createReaxable } from 'reaxes';
 import { EffectiveGraphics, EffectiveVersion, GraphicsSelection, VersionSelection, normalizeVersionSelection, normalizeGraphicsSelection } from '../../shared/mod-profile';
 import { graphicsFromHdValue, hdValueForGraphics, patchWar3Preferences, warcraftPreferencesFolder } from '../../shared/war3-preferences';
 import { createSettingsProgressReporter } from '../../shared/settings-progress';
+import { supportedWar3Version } from '../../shared/war3-support';
+import {resolveUnitLightSettings,unitLightModeDefaults,validateUnitShadowSetting,type UnitShadowSetting} from '../../shared/unit-light-settings';
+import {validateUnitLightAngle} from '../../shared/dnc-rotation';
 
 async function getSelectedGameBuildDir(war3Path: string): Promise<string> {
   const channel = await window.electronAPI?.getConfig('gameChannel');
@@ -50,7 +53,8 @@ export interface ModSettings {
   lightingBrightness: 1 | 2 | 3 | 4 | 5;
   rotatingLighting: boolean; // 实验性：仅地表单位光照旋转，默认关闭
   atmosphericLight?: boolean;
-  lightingAngle?: number; // 单位水平方位角；未设置时保留原模型方向
+  lightingAngle?: number|null; // null explicitly restores the source DNC direction.
+  shadowLength: UnitShadowSetting;
   half: boolean;         // 半透明效果
   ui: 'classic' | 'quenching' | 'carnival'; // UI风格
   cam: boolean;          // 自定义相机
@@ -69,6 +73,7 @@ export interface ModSettings {
 }
 
 export interface War3SettingsState {
+  detectedVersion: EffectiveVersion | null;
   settings: War3Settings;
   cameraSettings: CameraSettings;
   modSettings: ModSettings;
@@ -78,6 +83,7 @@ export interface War3SettingsState {
 // War3设置管理
 export const reaxel_War3Settings = reaxel(() => {
   const { store, setState } = createReaxable<War3SettingsState>({
+    detectedVersion: null,
     settings: {} as War3Settings,
     cameraSettings: {
       enabled: false,
@@ -91,7 +97,7 @@ export const reaxel_War3Settings = reaxel(() => {
       postProcessing: true,
       postProcessingGlow: true,
       hdr: true,
-      hdrExposure: 1.2,
+      hdrExposure: 1.1,
       postProcessingOutline: false,
       volumetricFog: true,
       water: 'off' as const,
@@ -99,6 +105,7 @@ export const reaxel_War3Settings = reaxel(() => {
       blight: true,
       lighting: 'standard' as const,
       lightingBrightness: 3 as const,
+      shadowLength: 50,
       rotatingLighting: false,
       atmosphericLight: false,
       half: false,
@@ -138,7 +145,7 @@ export const reaxel_War3Settings = reaxel(() => {
     } catch (error) {
       console.error('Failed to load War3 settings:', error);
     } finally {
-      setState({ isLoading: false });
+      setState({ isLoading: modSettingsSaving });
     }
   };
 
@@ -248,7 +255,12 @@ export const reaxel_War3Settings = reaxel(() => {
   };
 
   // 加载MOD设置
+  let modSettingsLoadRequest = 0;
+  let modSettingsSaving = false;
   const loadModSettings = async (war3Path: string) => {
+    if (modSettingsSaving) return;
+    const request = ++modSettingsLoadRequest;
+    setState({ detectedVersion: null });
     console.log(`\n>>> [useWar3Settings] loadModSettings START for path: ${war3Path}`);
     try {
       let loadedSettings = { ...store.modSettings };
@@ -286,8 +298,11 @@ export const reaxel_War3Settings = reaxel(() => {
       loadedSettings.blight = loadedSettings.blight !== false;
       loadedSettings.rotatingLighting = loadedSettings.rotatingLighting === true;
       loadedSettings.atmosphericLight = loadedSettings.atmosphericLight === true;
-      if (typeof loadedSettings.lightingAngle !== 'number' || !Number.isFinite(loadedSettings.lightingAngle) ||
-          loadedSettings.lightingAngle < 0 || loadedSettings.lightingAngle > 360) delete loadedSettings.lightingAngle;
+      if (loadedSettings.lightingAngle!==null && (typeof loadedSettings.lightingAngle !== 'number' || !Number.isFinite(loadedSettings.lightingAngle) ||
+          loadedSettings.lightingAngle < 0 || loadedSettings.lightingAngle > 360)) delete loadedSettings.lightingAngle;
+      const unitLight=resolveUnitLightSettings({...loadedSettings,shadowLength:savedVisualSettings?.shadowLength});
+      loadedSettings.shadowLength=savedVisualSettings?.shadowLength==='default'?'default':unitLight.unitShadowLength??50;
+      if(loadedSettings.lightingAngle===undefined&&unitLight.unitLightAngle!==undefined)loadedSettings.lightingAngle=unitLight.unitLightAngle;
 
       // 检测树木模式
       const detectedTree = await detectTreeMode(war3Path);
@@ -300,18 +315,21 @@ export const reaxel_War3Settings = reaxel(() => {
       loadedSettings.water = detectedWater;
 
       // 检测植被模式
+      // Shared folders and identity shaders can exist when an effect is off.
+      // Saved Boolean preferences are authoritative; presence is only a
+      // migration fallback for installations without a saved preference.
       const detectedFoliage = await detectFoliageMode(war3Path);
       console.log(`[useWar3Settings] Detected foliage: ${detectedFoliage}`);
       if (detectedTerrain === 'retro') {
         loadedSettings.foliage = false;
-      } else if (detectedFoliage) {
-        loadedSettings.foliage = true;
-      }
+      } else loadedSettings.foliage = typeof savedVisualSettings?.foliage === 'boolean'
+        ? savedVisualSettings.foliage : detectedFoliage;
 
       // 检测物体着色器
       const detectedObjectShader = await detectObjectShaderMode(war3Path);
       console.log(`[useWar3Settings] Detected objectShader: ${detectedObjectShader}`);
-      loadedSettings.objectShader = detectedObjectShader;
+      loadedSettings.objectShader = typeof savedVisualSettings?.objectShader === 'boolean'
+        ? savedVisualSettings.objectShader : detectedObjectShader;
 
       if (loadedSettings.postProcessingGlow === undefined) {
         loadedSettings.postProcessingGlow = loadedSettings.postProcessing !== false;
@@ -327,21 +345,28 @@ export const reaxel_War3Settings = reaxel(() => {
       // 检测后处理阴影和辉光
       const detectedPostProcessing = await detectPostProcessingMode(war3Path);
       console.log(`[useWar3Settings] Detected postProcessing: ${detectedPostProcessing}`);
-      loadedSettings.postProcessing = detectedPostProcessing;
+      loadedSettings.postProcessing = typeof savedVisualSettings?.postProcessing === 'boolean'
+        ? savedVisualSettings.postProcessing : detectedPostProcessing;
       const detectedPostProcessingGlow = await detectPostProcessingGlowMode(war3Path);
       console.log(`[useWar3Settings] Detected postProcessingGlow: ${detectedPostProcessingGlow}`);
-      loadedSettings.postProcessingGlow = detectedPostProcessingGlow;
+      loadedSettings.postProcessingGlow = typeof savedVisualSettings?.postProcessingGlow === 'boolean'
+        ? savedVisualSettings.postProcessingGlow : detectedPostProcessingGlow;
 
       // 检测英雄光晕
       const detectedGlow = await detectGlowMode(war3Path);
       console.log(`[useWar3Settings] Detected glow: ${detectedGlow}`);
-      loadedSettings.glow = detectedGlow;
+      loadedSettings.glow = typeof savedVisualSettings?.glow === 'boolean'
+        ? savedVisualSettings.glow : detectedGlow;
 
       // Loading settings is read-only. Startup, profile changes, and game launch
       // perform resource sync; opening the UI must not rewrite shader files.
       if (window.electronAPI?.detectWar3Version) {
         const versionInfo = await window.electronAPI.detectWar3Version(war3Path);
         console.log('[useWar3Settings] Detected War3 version:', versionInfo);
+        if (request === modSettingsLoadRequest) {
+          setState({ detectedVersion: versionInfo?.source && versionInfo.source !== 'unknown'
+            ? supportedWar3Version(versionInfo.parts ?? (versionInfo.version || '').split('.').map(Number)) : null });
+        }
       }
 
       // SD and the MOD switch park visual overrides. Keep saved preferences
@@ -357,6 +382,7 @@ export const reaxel_War3Settings = reaxel(() => {
 
       console.log('[useWar3Settings] Final merged settings to be set in store:', loadedSettings);
       loadedSettings = await readResolvedProfile(loadedSettings);
+      if (request !== modSettingsLoadRequest) return;
       setState({ modSettings: loadedSettings });
 
       // Detection is only for displaying the current file state. Persisting it
@@ -501,6 +527,11 @@ export const reaxel_War3Settings = reaxel(() => {
     newSettings: Partial<ModSettings>,
     onProgress?: (step: string, percent: number) => void,
   ) => {
+    newSettings=unitLightModeDefaults(newSettings);
+    if (modSettingsSaving) throw new Error('设置正在应用，请稍候再试');
+    modSettingsSaving = true;
+    // A read started before this write must never restore its old snapshot.
+    ++modSettingsLoadRequest;
     console.log('[useWar3Settings] saveModSettings called:', { war3Path, newSettings });
     const reportProgress = createSettingsProgressReporter(onProgress);
     // Keep the request pending until its worker really settles. A renderer-only
@@ -532,6 +563,8 @@ export const reaxel_War3Settings = reaxel(() => {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     try {
+      if(newSettings.shadowLength!==undefined)validateUnitShadowSetting(newSettings.shadowLength);
+      if(newSettings.lightingAngle!==undefined&&newSettings.lightingAngle!==null)validateUnitLightAngle(newSettings.lightingAngle);
       const module = VISION_MODULES.find(key => Object.hasOwn(newSettings,key));
       if(module){
         if(Object.keys(newSettings).length!==1)throw new Error('请逐项切换 Vision Mod 模块');
@@ -595,9 +628,19 @@ export const reaxel_War3Settings = reaxel(() => {
         return;
       }
 
+      if(newSettings.shadowLength!==undefined&&Object.keys(newSettings).length===1){
+        const shadowLength=validateUnitShadowSetting(newSettings.shadowLength);
+        const next={...previousSettings,shadowLength};
+        if(branchEnabled){
+          if(!window.electronAPI?.updateShadowLength)throw new Error('阴影长度设置不可用');
+          if(await window.electronAPI.updateShadowLength(war3Path,shadowLength)===false)throw new Error('阴影长度设置未完成');
+        }else await window.electronAPI.setConfig('modSettings',next);
+        setState({modSettings:next});reportProgress('finish',100);return;
+      }
+
       if (newSettings.lightingAngle !== undefined && Object.keys(newSettings).length === 1) {
         const angle=newSettings.lightingAngle;
-        if (!Number.isFinite(angle) || angle<0 || angle>360) throw new Error('Invalid unit lighting angle');
+        if (angle!==null)validateUnitLightAngle(angle);
         const next={...previousSettings,lightingAngle:angle};
         if(branchEnabled) {
           if(!window.electronAPI?.updateLightingAngle)throw new Error('光照角度设置不可用');
@@ -779,12 +822,10 @@ export const reaxel_War3Settings = reaxel(() => {
           foliageAppliedByTerrain = newSettings.foliage === true;
           // 切换完成后，重新检测实际文件状态以更新高亮
           const detectedTerrainAfter = await detectTerrainMode(war3Path);
-          const detectedFoliageAfter =
-            detectedTerrainAfter === 'retro' ? false : await detectFoliageMode(war3Path);
           const afterTerrain = {
             ...updatedSettings,
             terrain: detectedTerrainAfter,
-            foliage: detectedFoliageAfter,
+            foliage: detectedTerrainAfter === 'retro' ? false : updatedSettings.foliage,
           };
           setState({ modSettings: afterTerrain });
           if (window.electronAPI?.setConfig) {
@@ -854,9 +895,6 @@ export const reaxel_War3Settings = reaxel(() => {
             await awaitResourceUpdate('foliage', requestId => window.electronAPI.updateFoliageSettings(
               war3Path, updatedSettings.foliage, updatedSettings.terrain, requestId,
             ), 82, 3);
-            const detectedFoliageAfter = await detectFoliageMode(war3Path);
-            console.log(`[useWar3Settings] updateFoliageSettings completed. Detected: ${detectedFoliageAfter}`);
-            setState({ modSettings: { ...store.modSettings, foliage: detectedFoliageAfter } });
           }
         }
       }
@@ -868,8 +906,8 @@ export const reaxel_War3Settings = reaxel(() => {
         if (window.electronAPI?.updateObjectShader) {
           const applied = await window.electronAPI.updateObjectShader(war3Path, updatedSettings.objectShader);
           if (applied === false) throw new Error('当前魔兽版本缺少物体着色器资源，切换未完成');
-          const detectedAfter = await detectObjectShaderMode(war3Path);
-          setState({ modSettings: { ...store.modSettings, objectShader: detectedAfter } });
+          // Off still has identity writers for fog composition. File presence
+          // cannot override the preference after a successful native update.
         } else throw new Error('物体着色器设置不可用');
       }
 
@@ -880,8 +918,6 @@ export const reaxel_War3Settings = reaxel(() => {
         if (window.electronAPI?.updatePostProcessing) {
           const applied = await window.electronAPI.updatePostProcessing(war3Path, updatedSettings.postProcessing);
           if (applied === false) throw new Error('当前魔兽版本缺少后处理阴影资源，切换未完成');
-          const detectedAfter = await detectPostProcessingMode(war3Path);
-          setState({ modSettings: { ...store.modSettings, postProcessing: detectedAfter } });
         } else throw new Error('后处理阴影设置不可用');
       }
 
@@ -903,8 +939,6 @@ export const reaxel_War3Settings = reaxel(() => {
         if (window.electronAPI?.updatePostProcessingGlow) {
           const applied = await window.electronAPI.updatePostProcessingGlow(war3Path, updatedSettings.postProcessingGlow);
           if (applied === false) throw new Error('当前魔兽版本缺少后处理辉光资源，切换未完成');
-          const detectedAfter = await detectPostProcessingGlowMode(war3Path);
-          setState({ modSettings: { ...store.modSettings, postProcessingGlow: detectedAfter } });
         } else throw new Error('后处理辉光设置不可用');
       }
 
@@ -919,9 +953,7 @@ export const reaxel_War3Settings = reaxel(() => {
         reportProgress('layout', 97);
         console.log(`\n>>> [GLOW-FRONTEND] Glow change requested: ${newSettings.glow}`);
         if (window.electronAPI?.updateGlowSettings) {
-          await window.electronAPI.updateGlowSettings(war3Path, updatedSettings.glow);
-          const detectedAfter = await detectGlowMode(war3Path);
-          setState({ modSettings: { ...store.modSettings, glow: detectedAfter } });
+          if (await window.electronAPI.updateGlowSettings(war3Path, updatedSettings.glow) === false) throw new Error('光晕设置未完成');
         }
       }
 
@@ -955,6 +987,10 @@ export const reaxel_War3Settings = reaxel(() => {
           await window.electronAPI.updateModelEnhance(war3Path, updatedSettings.visionModPath, updatedSettings.modelEnhance);
         }
       }
+      if(newSettings.atmosphericLight!==undefined&&!profileChanged){
+        if(!window.electronAPI?.updateAtmosphericLight)throw new Error('大气光设置不可用');
+        if(await window.electronAPI.updateAtmosphericLight(war3Path,updatedSettings.atmosphericLight===true)===false)throw new Error('大气光设置未完成');
+      }
       reportProgress('finish', 100);
     } catch (error) {
       console.error('Failed to save mod settings:', error);
@@ -969,6 +1005,7 @@ export const reaxel_War3Settings = reaxel(() => {
       removeLightingProgress?.();
       // 确保在任何情况下都关闭 loading
       console.log('[useWar3Settings] saveModSettings finished, setting isLoading to false');
+      modSettingsSaving = false;
       setState({ isLoading: false });
     }
   };
@@ -988,7 +1025,8 @@ foliage=${settings.foliage ? '1' : '0'}
 blight=${settings.blight ? '1' : '0'}
 lighting=${settings.lighting === 'enhanced' ? '1' : settings.lighting === 'battle' ? '2' : settings.lighting === 'rpg' ? '3' : '0'}
 lightingBrightness=${settings.lightingBrightness ?? 3}
-lightingAngle=${settings.lightingAngle ?? ''}
+lightingAngle=${settings.lightingAngle===null?'default':settings.lightingAngle ?? ''}
+shadowLength=${settings.shadowLength ?? 50}
 half=${settings.half ? '1' : '0'}
 ui=${settings.ui}
 cam=${settings.cam ? '1' : '0'}
@@ -1160,6 +1198,7 @@ export const useWar3Settings = () => {
   // 获取reaxel实例
   const settings = reaxel_War3Settings();
   const [state, setLocalState] = useState(() => ({
+    detectedVersion: settings.store.detectedVersion,
     settings: settings.store.settings,
     cameraSettings: settings.store.cameraSettings,
     modSettings: settings.store.modSettings,
@@ -1168,10 +1207,11 @@ export const useWar3Settings = () => {
 
   useEffect(() => {
     return reaction(
-      () => [settings.store.settings, settings.store.cameraSettings, settings.store.modSettings, settings.store.isLoading],
+      () => [settings.store.settings, settings.store.cameraSettings, settings.store.modSettings, settings.store.isLoading, settings.store.detectedVersion],
       () => {
         const current = settings.store;
         setLocalState({
+          detectedVersion: current.detectedVersion,
           settings: { ...current.settings },
           cameraSettings: { ...current.cameraSettings },
           modSettings: { ...current.modSettings },
@@ -1183,6 +1223,7 @@ export const useWar3Settings = () => {
   }, [settings.store]);
 
   return {
+    detectedVersion: state.detectedVersion,
     settings: state.settings,
     cameraSettings: state.cameraSettings,
     modSettings: state.modSettings,

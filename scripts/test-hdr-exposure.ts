@@ -5,16 +5,17 @@ import {defaultHdrExposure,resolveHdrExposure,validateHdrExposure,withHdrExposur
 import {renderingPresetSettings} from '../src/shared/rendering-presets';
 import {setPostProcessingTonemapEnabled,setPostProcessingBloomEnabled,setPostProcessingAoEnabled} from '../src/Main/services/post-processing-config';
 
-assert.equal(defaultHdrExposure('rpg'),0.9);assert.equal(defaultHdrExposure('standard'),1.2);assert.equal(defaultHdrExposure('battle'),1.8);
-assert.equal(renderingPresetSettings('standard').hdrExposure,1.2);assert.equal(renderingPresetSettings('battle').hdrExposure,1.8);
+assert.equal(defaultHdrExposure('rpg'),0.85);assert.equal(defaultHdrExposure('standard'),1.1);assert.equal(defaultHdrExposure('battle'),1.4);
+assert.equal(renderingPresetSettings('standard').hdrExposure,1.1);assert.equal(renderingPresetSettings('battle').hdrExposure,1.4);
 for(const value of [0.75,0.9,1.2,1.8,2.4])assert.equal(validateHdrExposure(value),value);
 for(const value of [NaN,Infinity,-1,0.74,2.41,'1.2',null])assert.throws(()=>validateHdrExposure(value));
 const custom={lighting:'standard',hdr:true,hdrExposure:2.2,lightingBrightness:3};
-assert.equal(withHdrExposure(custom,{lighting:'rpg'}).hdrExposure,0.9);
-assert.equal(withHdrExposure(custom,{lighting:'battle'}).hdrExposure,1.8);
+assert.equal(withHdrExposure(custom,{lighting:'rpg'}).hdrExposure,0.85);
+assert.equal(withHdrExposure(custom,{lighting:'battle'}).hdrExposure,1.4);
 assert.equal(withHdrExposure(custom,{lightingBrightness:5}).hdrExposure,2.2);
 assert.equal(withHdrExposure(custom,{hdr:false}).hdrExposure,2.2);
-assert.equal(resolveHdrExposure({lighting:'rpg'}),0.9);assert.equal(resolveHdrExposure({lighting:'battle',hdrExposure:NaN}),1.8);
+assert.equal(resolveHdrExposure({lighting:'rpg'}),0.85);assert.equal(resolveHdrExposure({lighting:'battle',hdrExposure:NaN}),1.4);
+assert.equal(resolveHdrExposure({lighting:'battle',hdrExposure:1.8}),1.8,'preserve saved custom brightness');
 
 const parent=path.resolve('_tmp/hdr-exposure-20261106');await fs.ensureDir(parent);
 const root=await fs.mkdtemp(path.join(parent,'test-')),branch=path.join(root,'_retail_'),ptr=path.join(root,'_ptr_');

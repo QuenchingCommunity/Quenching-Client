@@ -1,14 +1,15 @@
 import fs from 'fs-extra';
 import path from 'node:path';
-import {getSelectedGameFolder,getChannelModEnabled,getSelectedGameChannel} from './game-channel';
+import {getSelectedGameFolder,getChannelModEnabled} from './game-channel';
 import {withResourceDirectory} from './resource-directory-queue';
 import {VISION_MODULES, VisionModule, VisionModules, visionModuleFor, visionBlocksSetting} from '../../shared/vision-modules';
 
 interface Entry { files:string[]; replaced:string[]; backup:string; source:string }
 type State=Partial<Record<VisionModule,Entry>>;
-const stateFile=(root:string)=>path.join(root,getSelectedGameFolder(),'.quenching-vision-modules.json');
-async function read(root:string):Promise<State>{
-  const state=await fs.readJson(stateFile(root)).catch(e=>{if(e.code==='ENOENT')return {};throw e;});
+type BranchFolder = '_retail_' | '_ptr_';
+const stateFile=(root:string,folder:BranchFolder=getSelectedGameFolder())=>path.join(root,folder,'.quenching-vision-modules.json');
+async function read(root:string,folder:BranchFolder=getSelectedGameFolder()):Promise<State>{
+  const state=await fs.readJson(stateFile(root,folder)).catch(e=>{if(e.code==='ENOENT')return {};throw e;});
   for(const [key,entry] of Object.entries(state) as [VisionModule,Entry][]){
     if(!VISION_MODULES.includes(key)||!entry || !/^vision-[\w-]+$/.test(entry.backup)||
       !Array.isArray(entry.files)||!Array.isArray(entry.replaced)||[...entry.files,...entry.replaced].some(n=>!n||n.includes('\\')||n.split('/').some(p=>!p||p==='.'||p==='..'||p.includes(':'))))throw Error('Invalid Vision Mod state');
@@ -30,11 +31,25 @@ async function list(root:string,relative=''):Promise<string[]>{
 }
 /** Each switch has independent backups; unit TXT tables and COS remain owned by Quenching. */
 export async function setVisionModule(root:string,source:string,module:VisionModule,enabled:boolean):Promise<boolean>{
+  return setVisionModuleInBranch(root,source,module,enabled,getSelectedGameFolder());
+}
+
+/** Restore each module before the MOD switch parks the branch's original files. */
+export async function disableVisionModulesForBranch(buildDir:string):Promise<void>{
+  const branch=path.resolve(buildDir),folder=path.basename(branch);
+  if(folder!=='_retail_'&&folder!=='_ptr_')throw Error('Invalid game branch for Vision Mod restore');
+  const root=path.dirname(branch),state=await read(root,folder);
+  for(const module of [...VISION_MODULES].reverse())if(state[module]){
+    await setVisionModuleInBranch(root,'',module,false,folder);
+  }
+}
+
+async function setVisionModuleInBranch(root:string,source:string,module:VisionModule,enabled:boolean,folder:BranchFolder):Promise<boolean>{
   if(!VISION_MODULES.includes(module)||typeof enabled!=='boolean')throw Error('Invalid Vision Mod switch');
-  const branch=path.join(root,getSelectedGameFolder());
+  const branch=path.join(root,folder);
   return withResourceDirectory(path.join(branch,'vision-switch'),async()=>{
     if(!(await fs.stat(branch)).isDirectory())throw Error('未找到游戏分支');
-    const state=await read(root);if(!!state[module]===enabled)return true;
+    const state=await read(root,folder);if(!!state[module]===enabled)return true;
     const tmp=path.join(branch,'_tmp');await fs.ensureDir(tmp);
     if((await fs.lstat(tmp)).isSymbolicLink())throw Error('Vision Mod temporary path cannot be a link');
     const work=await fs.mkdtemp(path.join(tmp,'vision-'));
@@ -49,11 +64,11 @@ export async function setVisionModule(root:string,source:string,module:VisionMod
     };
     try{
       if(enabled){
-        if(!getChannelModEnabled(getSelectedGameChannel()))throw Error('请先启用当前分支的淬火 MOD');
+        if(!getChannelModEnabled(folder==='_ptr_'?'ptr':'retail'))throw Error('请先启用当前分支的淬火 MOD');
         const thirdParty=await fs.readJson(path.join(branch,'_QMThirdParty.json')).catch(e=>{if(e.code==='ENOENT')return null;throw e;});
         if(thirdParty?.slots?.some((slot:any)=>slot.enabled))throw Error('请先关闭其他第三方资源槽');
         let input=path.resolve(source);
-        for(const folder of [...new Set([getSelectedGameFolder(),'_retail_','_ptr_'])])if(await fs.pathExists(path.join(input,folder))){input=path.join(input,folder);break;}
+        for(const candidate of [...new Set([folder,'_retail_','_ptr_'])])if(await fs.pathExists(path.join(input,candidate))){input=path.join(input,candidate);break;}
         if(input===path.resolve(branch)||input===path.resolve(root))throw Error('请选择 Vision Mod 资源目录，而不是游戏目录');
         const relative=path.relative(path.resolve(branch),input);
         if(!relative.startsWith('..'+path.sep)&&!path.isAbsolute(relative))throw Error('不能使用游戏分支内的资源目录');
@@ -85,7 +100,7 @@ export async function setVisionModule(root:string,source:string,module:VisionMod
         }
         delete state[module];
       }
-      const marker=path.join(work,'state.json');await fs.writeJson(marker,state,{spaces:2});await fs.rename(marker,stateFile(root));
+      const marker=path.join(work,'state.json');await fs.writeJson(marker,state,{spaces:2});await fs.rename(marker,stateFile(root,folder));
     }catch(error){
       for(const rollback of undo.reverse())try{await rollback();}catch{preserve=true;}
       if(preserve)throw new AggregateError([error],`Vision Mod 恢复未完成，备份保留：${work}`);

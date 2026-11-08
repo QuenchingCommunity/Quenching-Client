@@ -17,7 +17,6 @@ import { createRequire } from 'module';
 import { validateMacNative, smokeMacNative } from './mac-native.mjs';
 import { signMacApp } from './sign-mac-app.js';
 import { downloadElectronZip } from './lib/electron-download.mjs';
-import { createPortable7z } from './lib/portable-7z.mjs';
 import { checkProductionBuild } from './check-production-build.mjs';
 import { isDistributableAsset, RESOURCE_ARCHIVES, RESOURCE_MANIFEST } from '../src/shared/bundled-resource-paths.mjs';
 
@@ -259,17 +258,23 @@ async function main() {
 			}
 		}
 
-		const archiveOut = path.join(outDir, `${appName}-darwin-${arch}.tar.7z`);
+		const archiveOut = path.join(outDir, `${appName}-darwin-${arch}.zip`);
+        if(await fs.pathExists(archiveOut))throw new Error('Output ZIP already exists: '+archiveOut);
+        const stagedZip=path.join(workRoot,'portable.zip');
         await signMacApp(finalAppPath);
         smokeMacNative(path.join(finalAppPath, 'Contents/MacOS', appName), path.join(resources, 'app.asar'));
-        // PAX keeps signed framework links, Unix modes, ACLs and extended attributes.
-        const tarFile=path.join(workRoot,`${appName}.app.tar`);
-        const tarred=spawnSync('tar',['--format=pax','--acls','--xattrs','-cf',tarFile,'-C',path.dirname(finalAppPath),path.basename(finalAppPath)],{stdio:'inherit'});
-        if(tarred.status!==0)throw new Error('Failed to archive signed Mac app metadata');
-        await createPortable7z(tarFile,archiveOut,path.basename(tarFile));
+        // Native ZIP preserves signed framework symlinks, Unix modes and resource metadata.
+        const zipped=spawnSync('ditto',['-c','-k','--sequesterRsrc','--keepParent',finalAppPath,stagedZip],{stdio:'inherit'});
+        if(zipped.status!==0)throw new Error('Failed to ZIP signed Mac app');
+        const verifyDir=path.join(workRoot,'zip-verification');await fs.ensureDir(verifyDir);
+        const zipExtracted=spawnSync('ditto',['-x','-k',stagedZip,verifyDir],{stdio:'inherit'});
+        if(zipExtracted.status!==0)throw new Error('Failed to extract Mac ZIP');
+        const verified=spawnSync('codesign',['--verify','--deep','--strict','--verbose=2',path.join(verifyDir,path.basename(finalAppPath))],{stdio:'inherit'});
+        if(verified.status!==0)throw new Error('Mac signature/metadata did not survive ZIP round trip');
+        await fs.rename(stagedZip,archiveOut);
         const bytes = (await fs.stat(archiveOut)).size;
 		console.log(`[package-mac-app] .app: ${finalAppPath}`);
-		console.log(`[package-mac-app] 7z: ${archiveOut} (${(bytes / 1024 / 1024).toFixed(1)} MB)`);
+		console.log(`[package-mac-app] ZIP: ${archiveOut} (${(bytes / 1024 / 1024).toFixed(1)} MB)`);
         console.log('Native modules and ad hoc signature passed. This build is not Developer ID notarized.');
 	} finally {
 		await fs.remove(workRoot).catch(() => {});

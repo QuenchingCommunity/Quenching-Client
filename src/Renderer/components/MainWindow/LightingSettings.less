@@ -1,6 +1,28 @@
 .settings-lighting {
   padding: 16px;
 
+  .settings-lighting-control-heading {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 8px;
+
+    h3 { margin-bottom: 0 !important; }
+  }
+
+  .settings-lighting-reset.ant-btn {
+    height: 28px;
+    padding-inline: 12px;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+
+    &:hover, &:focus-visible { background: rgba(212, 175, 55, 0.12); border-color: #ffe58f; color: #ffe58f; }
+    &:disabled { background: transparent; border-color: rgba(212, 175, 55, 0.3); color: rgba(212, 175, 55, 0.4); }
+  }
+
   h3 {
     margin-top: 0;
     margin-bottom: 10px !important;
@@ -53,4 +75,40 @@
   }
 }
 
-.settings-lighting .settings-hdr-exposure { max-width: 540px; margin-top: 18px; padding-inline: 10px; .ant-slider { margin-bottom: 32px; } }
+.settings-lighting {
+  .settings-hdr-row {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 540px);
+    align-items: start;
+    gap: 24px;
+  }
+
+  .settings-hdr-toggle,
+  .settings-hdr-exposure, .settings-shadow-length-controls {
+    min-width: 0;
+  }
+
+  .settings-shadow-length-controls > .ant-slider { margin-block: 10px 28px; }
+
+  .settings-hdr-exposure, .settings-shadow-length-controls {
+    .ant-slider {
+      margin: 10px 8px 28px;
+    }
+
+    .ant-slider-mark-text {
+      color: #aaa;
+      font-size: 12px;
+      white-space: nowrap;
+
+      &:first-child { transform: none !important; }
+      &:last-child { transform: translateX(-100%) !important; }
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .settings-lighting .settings-hdr-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}

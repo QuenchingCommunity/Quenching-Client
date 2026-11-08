@@ -54,7 +54,9 @@ jobs:
         run: |
           test ! -e "$QUENCHING_ELECTRON_CACHE"
           node scripts/test-electron-download.mjs
+          node scripts/set-build-channel.mjs production
           yarn run ${{ matrix.arch == 'arm64' && 'dist:mac:app' || 'dist:mac:app:x64' }}
+          node scripts/check-production-build.mjs
       - name: Extract candidate ZIP and launch the packaged app
         run: node scripts/smoke-mac-archive.mjs ${{ matrix.arch }}
       - name: Save startup evidence
@@ -69,6 +71,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: QMClient-darwin-${{ matrix.arch }}-candidate
-          path: __Bin/QMClient-darwin-${{ matrix.arch }}.tar.7z
+          path: __Bin/QMClient-darwin-${{ matrix.arch }}.zip
           if-no-files-found: error
           retention-days: 14

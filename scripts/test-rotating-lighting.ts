@@ -1,3 +1,5 @@
+import campaign from '../assets/unpacked/experimental/de-campaign-rotations.json';
+import {unitShadowElevation,resolveUnitLightSettings} from '../src/shared/unit-light-settings';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -132,34 +134,21 @@ try {
           const values = frames.map(frame => frame[2].split(',').map(Number));
           assert.equal(Number(frames[0][1]), start);
           assert.equal(Number(frames.at(-1)![1]), start + 60000);
-          assert.deepEqual(values.at(-1), values[0], 'Cycle closes without a direction jump');
-          const atSix = frames.findIndex(frame => Number(frame[1]) === start + 15000);
-          assert(atSix >= 0);
-          assert.deepEqual(values[atSix], requestedStart, `${pack} uses the requested quaternion at 06:00, including nonzero animation starts`);
-          let sweep = 0;
-          let previousAngle: number | undefined;
-          for (const [index, value] of values.entries()) {
-            assert(Math.abs(Math.hypot(...value) - 1) < 1e-10);
-            const direction = vec3.transformQuat(vec3.create(), [0, 0, 1], value);
-            const angle = Math.atan2(direction[1], direction[0]);
-            if (previousAngle !== undefined) {
-              const delta = Math.atan2(Math.sin(angle - previousAngle), Math.cos(angle - previousAngle));
-              assert(delta > 0 && delta < Math.PI / 4, 'Light progresses forward through every azimuth');
-              sweep += delta;
-            }
-            previousAngle = angle;
-            if (index > 0) assert(Number(frames[index][1]) > Number(frames[index - 1][1]));
+          assert.equal(frames.length,campaign.keyframes.length);
+          // Independently check the campaign timing and elevation on all 97 source keys.
+          for(let k=0;k<frames.length;k++){
+            const source=campaign.keyframes[k];
+            assert.equal(Number(frames[k][1]),start+source.frame-campaign.interval[0]);
+            const raw=vec3.transformQuat(vec3.create(),[0,0,1],quat.normalize(quat.create(),source.value));
+            const actualDir=vec3.transformQuat(vec3.create(),[0,0,1],quat.normalize(quat.create(),values[k]));
+            assert(Math.abs(Math.asin(actualDir[2])*180/Math.PI-unitShadowElevation(40,Math.asin(raw[2])*180/Math.PI))<1e-4);
           }
-          assert(Math.abs(sweep - Math.PI * 2) < 1e-5, 'Actual light vector must sweep 360 degrees');
-          for (const key of rotations.keyframes) {
-            const target = start + (key.frame - rotations.interval[0] + 15000) % 60000;
-            const index = frames.findIndex(frame => Number(frame[1]) === target);
-            assert(index >= 0);
-            const sourceDirection = vec3.transformQuat(vec3.create(), [0, 0, 1], quat.normalize(quat.create(), key.value));
-            const actualDirection = vec3.transformQuat(vec3.create(), [0, 0, 1], values[index]);
-            assert(Math.abs(Math.asin(actualDirection[2]) - Math.asin(sourceDirection[2]) - elevationOffset) < 1e-6,
-              'DE relative elevation changes are retained at original keyframes');
-          }
+          const sampled=sample(frames.map((f,k)=>({frame:Number(f[1]),value:values[k]})),start+15000);
+          const facing=direction(sampled);
+          assert(Math.abs(Math.atan2(facing[1],facing[0])-Math.PI/4)<1e-5,'06:00 uses the locked 45-degree direction');
+          const locks=resolveUnitLightSettings({rotatingLighting:true,shadowLength:100,lightingAngle:230});
+          assert.equal(locks.unitShadowLength,40);assert.equal(locks.unitLightAngle,45);
+
         } else assert.equal(actual, content, `${file} must remain byte-identical`);
       }
       await patchRotatingUnitLighting(dnc, baseline, true, mode, level, options);

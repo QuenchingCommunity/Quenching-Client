@@ -1,7 +1,7 @@
 export const HDR_EXPOSURE_MIN = 0.75;
 export const HDR_EXPOSURE_MAX = 2.4;
 export function defaultHdrExposure(lighting: unknown): number {
-  return lighting === 'rpg' ? 0.9 : lighting === 'battle' ? 1.8 : 1.2;
+  return lighting === 'rpg' ? 0.85 : lighting === 'battle' || lighting === 'melee' ? 1.4 : 1.1;
 }
 export function validHdrExposure(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= HDR_EXPOSURE_MIN && value <= HDR_EXPOSURE_MAX;

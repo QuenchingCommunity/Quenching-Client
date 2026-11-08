@@ -9,6 +9,7 @@ import { build } from 'esbuild';
 import { parseSkinSections } from '../src/shared/skin-versions';
 import { renderDncLighting } from '../src/Main/services/dnc-lighting';
 import { lightDirection } from '../src/shared/dnc-rotation';
+import {resolveUnitLightSettings} from '../src/shared/unit-light-settings';
 import { ROTATING_UNIT_FILES, replaceUnitRotation, unitRotationBlock } from '../src/Main/services/rotating-lighting';
 
 const taskRoot = path.resolve('_tmp/rotating-lighting-20261027');
@@ -196,16 +197,23 @@ try {
     const activeDnc = path.join(buildDir, 'environment/dnc');
     for (const [graphics, lighting, level] of [['hd', 'standard', 3], ['de', 'battle', 5], ['hd', 'rpg', 1]] as const) {
       f.settings = { versionSelection: 'v301', graphicsSelection: graphics, lighting,
-        lightingBrightness: level, rotatingLighting: true, hdr: lighting !== 'battle' };
+        lightingBrightness: level, rotatingLighting: true, hdr: lighting !== 'battle',
+        shadowLength:lighting==='battle'?'short':lighting==='standard'?37:'long',lightingAngle:lighting==='battle'?230:45 };
+      const legacyTerrain=path.join(activeDnc,'dnclordaeron/dnclordaeronterrain/dnclordaeronterrain.mdl');
+      if(await fs.pathExists(legacyTerrain)){
+        const text=await fs.readFile(legacyTerrain,'utf8');
+        await fs.writeFile(legacyTerrain,text.replace(/^[\t ]*Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/gm,
+          '\tRotation 1 {\n\t\tDontInterp,\n\t\t0: { 0.25, 0.25, 0.75, 0 },\n\t}'));
+      }
       await syncLightingResources(root, q, f.settings);
       assert.match(await fs.readFile(path.join(buildDir, 'PostProcessingConfig.txt'), 'utf8'),
-        new RegExp('\\[Tonemap\\]\\r?\\nEnabled=' + (f.settings.hdr ? '1' : '0')),
+        new RegExp('\\[Tonemap\\][^\\[]*?^Enabled=' + (f.settings.hdr ? '1' : '0')+'\\r?$','m'),
         'Full sync follows saved HDR without resetting it on lighting changes');
       const selectedProfile = await resolveModProfile(root, f.settings);
       const selectedSource = getDncResourcePath(q, selectedProfile);
       const unit = ROTATING_UNIT_FILES[0];
       const original = renderDncLighting(await fs.readFile(path.join(selectedSource, unit), 'utf8'),
-        path.join(activeDnc, unit), lighting, level, { deMode: graphics === 'de', isVersion30: true });
+        path.join(activeDnc, unit), lighting, level, { deMode: graphics === 'de', isVersion30: true,...resolveUnitLightSettings(f.settings) });
       const actual = await fs.readFile(path.join(activeDnc, unit), 'utf8');
       assert(Number(unitRotationBlock(actual).match(/Rotation (\d+)/)![1]) >= 49, 'The full rotating track survives ordinary profile synchronization');
       assert.equal(replaceUnitRotation(actual, 'ROTATION'), replaceUnitRotation(original, 'ROTATION'), 'Mode/brightness retained outside Rotation');
@@ -214,14 +222,23 @@ try {
         path.join(activeDnc, terrain), lighting, level, { deMode: graphics === 'de', isVersion30: true });
       assert.equal(await fs.readFile(path.join(activeDnc, terrain), 'utf8'), terrainExpected);
       const terrainRotation = (text: string) => text.match(/^[\t ]*Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/m)?.[0];
-      if (lighting === 'battle') assert.match(terrainRotation(terrainExpected)!, /0: \{ 0\.25, 0\.25, 0\.75, 0 \}/);
-      else assert.equal(terrainRotation(terrainExpected), terrainRotation(await fs.readFile(path.join(selectedSource, terrain), 'utf8')),
-        'Leaving battle restores source terrain rotation, including when rotating units stay enabled');
+      assert.equal(terrainRotation(terrainExpected), terrainRotation(await fs.readFile(path.join(selectedSource, terrain), 'utf8')),
+        'Every lighting mode preserves source terrain rotation, including battle and rotating units');
       await syncLightingResources(root, q, f.settings);
       assert.equal(await fs.readFile(path.join(activeDnc, unit), 'utf8'), actual, 'Repeated startup refresh is idempotent');
       f.settings.rotatingLighting = false;
       await syncLightingResources(root, q, f.settings);
-      assert.equal(await fs.readFile(path.join(activeDnc, unit), 'utf8'), original, 'Disabled experiment restores normal sync output');
+      const staticExpected=renderDncLighting(await fs.readFile(path.join(selectedSource,unit),'utf8'),
+        path.join(activeDnc,unit),lighting,level,{deMode:graphics==='de',isVersion30:true,...resolveUnitLightSettings(f.settings)});
+      assert.equal(await fs.readFile(path.join(activeDnc, unit), 'utf8'), staticExpected, 'Disabled experiment restores saved unlocked settings');
+      const beforeSourceReset={...f.settings};
+      f.settings={...f.settings,lightingAngle:null,shadowLength:'default'};
+      await syncLightingResources(root,q,f.settings);
+      const resetSource=await fs.readFile(path.join(selectedSource,unit),'utf8');
+      assert.equal(unitRotationBlock(await fs.readFile(path.join(activeDnc,unit),'utf8')).replaceAll('\r\n','\n'),
+        unitRotationBlock(resetSource).replaceAll('\r\n','\n'),'startup/profile reload retains both source defaults');
+      assert.equal(f.settings.lightingAngle,null);assert.equal(f.settings.shadowLength,'default');
+      f.settings=beforeSourceReset;await syncLightingResources(root,q,f.settings);
     }
     // The real IPC writes only the four units; no shader/environment refresh.
     const liveUnit = path.join(activeDnc, ROTATING_UNIT_FILES[0]);
@@ -245,14 +262,10 @@ try {
     f.enabled = true;
     const updateAngle=f.handlers.get('mdl:update-lighting-angle')!;
     const terrainBeforeAngle=await fs.readFile(terrainPath);
-    await updateAngle({},root,135);
-    assert.equal(f.settings.lightingAngle,135);
-    const angledOrbit=await fs.readFile(liveUnit,'utf8');
-    const interval=angledOrbit.match(/Interval\s*\{\s*(\d+)\s*,\s*(\d+)\s*\}/)!;
-    const dawn=Number(interval[1])+Math.round((Number(interval[2])-Number(interval[1]))/4);
-    const dawnKey=unitRotationBlock(angledOrbit).match(new RegExp('\\b'+dawn+':\\s*\\{([^}]+)'))!;
-    const direction=lightDirection(dawnKey[1].split(',').map(Number));
-    assert(Math.abs(Math.atan2(direction[1],direction[0])*180/Math.PI-135)<1e-8,'angle IPC moves the rotating dawn anchor');
+    const lockedUnits=await fs.readFile(liveUnit,'utf8'),savedAngle=f.settings.lightingAngle;
+    await assert.rejects(updateAngle({},root,135),/旋转光照/);
+    assert.equal(f.settings.lightingAngle,savedAngle,'locked angle keeps saved preference');
+    assert.equal(await fs.readFile(liveUnit,'utf8'),lockedUnits,'rejected angle leaves unit data unchanged');
     assert.deepEqual(await fs.readFile(terrainPath),terrainBeforeAngle);
     assert.equal((await fs.stat(path.join(buildDir, 'shaders/ps/terrain.bls'))).mtimeMs,shaderStat.mtimeMs,'angle IPC never syncs shaders');
     await updateRotatingLighting({},root,false);
@@ -260,6 +273,10 @@ try {
     const angledStatic=await fs.readFile(liveUnit,'utf8');
     await syncLightingResources(root,q,f.settings);
     assert.equal(await fs.readFile(liveUnit,'utf8'),angledStatic,'angle survives ordinary profile/startup synchronization');
+    await f.handlers.get('mdl:update-shadow-length')!({},root,'long');
+    const shadowStatic=await fs.readFile(liveUnit,'utf8');
+    await syncLightingResources(root,q,f.settings);
+    assert.equal(await fs.readFile(liveUnit,'utf8'),shadowStatic,'shadow length and angle survive ordinary startup/profile synchronization');
     await assert.rejects(updateAngle({},root,361),/Invalid unit lighting angle/);
     assert.equal(f.settings.lightingAngle,270);
     assert.equal(await fs.readFile(liveUnit,'utf8'),angledStatic);
@@ -268,6 +285,20 @@ try {
     assert.equal(f.settings.lightingAngle,10);
     assert.equal(await fs.readFile(liveUnit,'utf8'),angledStatic,'parked angle only stores preference');
     f.enabled=true;
+    f.settings={...f.settings,lighting:'standard',rotatingLighting:true,atmosphericLight:true,shadowLength:77,lightingAngle:91,hdr:true,hdrExposure:1.9};
+    const misc=path.join(buildDir,'ui/MiscData.txt'),oldMisc='[TerrainZFog]\nStart=100\nEnd=200\nDensity=0.8\n';
+    await fs.outputFile(misc,oldMisc);
+    await f.handlers.get('mdl:update-lighting')!({sender:{isDestroyed:()=>false,send(){}}},root,'battle',4);
+    assert.equal(f.settings.lighting,'battle');assert.equal(f.settings.hdrExposure,1.4);assert.equal(f.settings.shadowLength,20);
+    assert.equal(f.settings.lightingAngle,230);assert.equal(f.settings.rotatingLighting,false);assert.equal(f.settings.atmosphericLight,false);
+    assert(!await fs.pathExists(misc),'battle mode physically removes the atmospheric override');
+    assert.equal(await fs.readFile(path.join(buildDir,'.quenching-atmospheric-light-disabled.txt'),'utf8'),oldMisc,'removed override has a retained copy');
+    assert.equal([...unitRotationBlock(await fs.readFile(liveUnit,'utf8')).matchAll(/\d+:\s*\{/g)].length,1,'battle mode restores static unit direction');
+    assert.match(await fs.readFile(path.join(buildDir,'PostProcessingConfig.txt'),'utf8'),/Exposure=1.4/);
+    const battleSource=getDncResourcePath(q,await resolveModProfile(root,f.settings));
+    const terrainRotation=(text:string)=>text.match(/^[\t ]*Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/m)?.[0];
+    const terrainRelative='dnclordaeron/dnclordaeronterrain/dnclordaeronterrain.mdl';
+    assert.equal(terrainRotation(await fs.readFile(terrainPath,'utf8')),terrainRotation(await fs.readFile(path.join(battleSource,terrainRelative),'utf8')),'battle preset still preserves source terrain rotation');
   }
   console.log('PASS: actual staged shader/env/DNC writes, split foliage composition/restoration, lighting-only foliage no-op, same-marker refresh, Retail/PTR, HD/DE/2.x, toggle ordering, custom environment retained, coefficient reset and missing-input protection');
 } finally {

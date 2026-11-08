@@ -166,7 +166,8 @@ interface ElectronAPI {
   updateUISettings: (war3Path: string, uiMode: string) => Promise<boolean>;
   updateAtmosphericLight: (war3Path: string, enabled: boolean) => Promise<boolean>;
   updateRotatingLighting: (war3Path: string, enabled: boolean) => Promise<boolean>;
-  updateLightingAngle: (war3Path: string, angle: number) => Promise<boolean>;
+  updateLightingAngle: (war3Path: string, angle: number|null) => Promise<boolean>;
+  updateShadowLength: (war3Path:string,value:'short'|'long'|'default'|number) => Promise<boolean>;
   syncUISettings: (war3Path: string) => Promise<boolean>;
   updateTerrainSettings: (war3Path: string, terrainMode: string, waterMode?: string, previousTerrainMode?: string, requestId?: string) => Promise<boolean>;
   updateTreeSettings: (war3Path: string, treeMode: string) => Promise<boolean>;

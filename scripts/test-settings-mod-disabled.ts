@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'fs-extra';
-import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-settings-off-'));
+const parent=path.resolve('_tmp/settings-toggle-20261107');await fs.ensureDir(parent);
+const root = await fs.mkdtemp(path.join(parent, 'mod-off-'));
 const fixture = { enabled: false, channel: 'retail', extractions: 0, assets: path.join(root, 'assets') };
 (globalThis as any).__settingsOffFixture = fixture;
 const result = await build({
@@ -21,6 +21,7 @@ const result = await build({
           instance??=factory();return typeof instance==='function'?instance():instance;};};
           export const createReaxable=(store)=>({store,setState:(change)=>Object.assign(store,change)});`
         : args.path.endsWith('game-channel') ? `export const getSelectedGameFolder=()=>f.channel==='ptr'?'_ptr_':'_retail_';
+          export const gameChannelFolder=(channel)=>channel==='ptr'?'_ptr_':'_retail_';
           export const getSelectedGameChannel=()=>f.channel;export const getChannelModEnabled=()=>f.enabled;`
         : `export const AssetSyncService={getAssetsDir:async()=>f.assets,extractZip:async(_zip,destination)=>{
           f.extractions++;await require('fs-extra').outputFile(require('path').join(destination,'blight','test.dds'),'blight');}};`
@@ -34,6 +35,7 @@ const { reaxel_War3Settings, applyBlightSettings } = module.exports;
 const writes: string[] = [];
 let saved: any;
 const api: Record<string, any> = {
+  getVisionModules: async () => ({}),
   getConfig: async (key: string) => key === 'gameChannel' ? fixture.channel : saved,
   setConfig: async (key: string, value: any) => { if (key === 'modSettings') saved = { ...value }; },
   getBranchModStates: async () => ({ retail: { enabled: fixture.enabled }, ptr: { enabled: fixture.enabled } }),

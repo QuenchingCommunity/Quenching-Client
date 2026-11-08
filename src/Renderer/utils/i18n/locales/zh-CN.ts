@@ -1,4 +1,10 @@
 const messages = {
+  "settings.lighting.restoreDefault": "恢复默认",
+  "settings.lighting.defaultValue": "默认",
+  "settings.lighting.sourceDefault": "使用 DNC 原始参数",
+  "settings.lighting.shadowLength": "阴影长度",
+  "settings.lighting.shadowShort": "短",
+  "settings.lighting.shadowLong": "长",
   "common.close": "关闭",
   "msg.update.incomplete": "更新未完成",
   "main.offlineTest.button": "离线测试",
@@ -448,7 +454,7 @@ const messages = {
   'settings.tree.original': '原版树木',
   'settings.tree.tall': '高耸',
   'settings.tree.short': '低矮',
-  'settings.lighting.level4': '对战级光照',
+  'settings.lighting.level4': '对战',
   'settings.lighting.brightness': '亮度',
   'settings.lighting.brightness.desc':
     '在上方光照模式基础上调节直射光强度',

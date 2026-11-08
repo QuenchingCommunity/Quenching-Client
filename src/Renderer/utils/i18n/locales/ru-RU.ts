@@ -1,4 +1,10 @@
 const messages = {
+  "settings.lighting.restoreDefault": "Восстановить по умолчанию",
+  "settings.lighting.defaultValue": "По умолчанию",
+  "settings.lighting.sourceDefault": "Используются исходные параметры DNC",
+  "settings.lighting.shadowLength": "Длина теней",
+  "settings.lighting.shadowShort": "Короткие",
+  "settings.lighting.shadowLong": "Длинные",
   "common.close": "Закрыть",
   "msg.update.incomplete": "Обновление не завершено",
   "main.offlineTest.button": "Офлайн-тест",

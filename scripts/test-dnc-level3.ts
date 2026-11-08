@@ -23,10 +23,9 @@ const strip=(text: string)=>text
   .replace(/^([\t ]*(?:Intensity|AmbIntensity)\s+\d+\s*\{)([^{}]*)(\})/gmi,
     (_m,h,b,e)=>h+b.replace(/(^[\t ]*(?:\d+:|InTan|OutTan)\s*)[-+\d.eE]+/gmi,'$1VALUE')+e);
 const round=(n: number)=>Math.round(n*1e6)/1e6;
-const parent=path.resolve('_tmp/battle-terrain-package-20261028');
+const parent=path.resolve('_tmp/terrain-unit-only-20261108');
 await fs.ensureDir(parent);
 const root=await fs.mkdtemp(path.join(parent,'dnc-level3-'));
-const stripRotation=(text:string)=>text.replace(/^[\t ]*Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/gm,'ROTATION');
 let checked=0;
 try {
   for(const deMode of [false,true]) {
@@ -43,10 +42,7 @@ try {
         const before=await fs.readFile(path.join(source,file),'utf8'),after=await fs.readFile(path.join(target,file),'utf8');
         assert.deepEqual(values(after,'Intensity'),values(before,'Intensity').map(n=>round(n*factor)),`${mode}/${level}/${file}: Intensity`);
         assert.deepEqual(values(after,'AmbIntensity'),values(before,'AmbIntensity').map(n=>round(n+offset)),`${mode}/${level}/${file}: AmbIntensity`);
-        if(mode==='battle' && path.basename(file).includes('terrain')) {
-          assert.match(after,/0: \{ 0\.25, 0\.25, 0\.75, 0 \}/,'battle terrain rotation');
-          assert.equal(stripRotation(strip(after)),stripRotation(strip(before)),'only brightness and terrain rotation may change: '+file);
-        } else assert.equal(strip(after),strip(before),'only brightness values may change: '+file);
+        assert.equal(strip(after),strip(before),'only brightness values may change, including battle terrain: '+file);
         if(level===3&&mode==='standard')assert.equal(after,before,'level 3 must be byte-identical');
         checked++;
       }

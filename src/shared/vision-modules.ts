@@ -14,6 +14,6 @@ export function visionBlocksSetting(modules:VisionModules,key:string):boolean {
   if(modules.visionTerrain && ['terrain','foliage','water','blight'].includes(key))return true;
   if(modules.visionDecorations && ['tree','blight'].includes(key))return true;
   if(modules.visionMiscUI && ['ui','atmosphericLight'].includes(key))return true;
-  if(modules.visionMiscShaders && ['objectShader','postProcessing','postProcessingGlow','postProcessingOutline','hdr','hdrExposure','improveReadability','glow','lighting','lightingBrightness','lightingAngle','rotatingLighting','atmosphericLight'].includes(key))return true;
+  if(modules.visionMiscShaders && ['objectShader','postProcessing','postProcessingGlow','postProcessingOutline','hdr','hdrExposure','improveReadability','glow','lighting','lightingBrightness','lightingAngle','shadowLength','rotatingLighting','atmosphericLight'].includes(key))return true;
   return Object.values(modules).some(Boolean) && ['graphicsSelection','versionSelection','classicMode','mode'].includes(key);
 }

@@ -27,14 +27,14 @@ const bundled = await build({
           export const useState=(initial)=>React.useState(initial==='graphics'?f.category:initial);
           export const useEffect=React.useEffect;export const useMemo=React.useMemo;`
         : args.path === 'antd' ? `const React=require('react');const layout=({children})=>React.createElement('div',null,children);
-          export const Button=({children,disabled})=>React.createElement('button',{disabled},children);
+          export const Button=({children,disabled,className,...props})=>{if(props['data-testid'])(f.controls??={})[props['data-testid']]={disabled,...props};return React.createElement('button',{disabled,className},children);};
           export const Row=({children,className})=>React.createElement('div',{className},children);
           export const Col=({children,span})=>React.createElement('div',{'data-span':span},children);
           export const Space=layout,Spin=layout,Typography={Text:layout};
-          export const Slider=({min,max,value})=>React.createElement('input',{type:'range',min,max,value,readOnly:true});
-          export const InputNumber=({min,max,value})=>React.createElement('input',{type:'number',min,max,value,readOnly:true});
+          export const Slider=({min,max,value,tooltip})=>React.createElement('input',{type:'range',min,max,value,readOnly:true,'data-tooltip-open':tooltip?.open});
+          export const InputNumber=({min,max,value,formatter})=>React.createElement('input',{type:'number',min,max,value,readOnly:true,'data-formatted':formatter?.(value)});
           export const message={error(){},success(){},warning(){}};`
-        : args.path.endsWith('useWar3Settings') ? `export const useWar3Settings=()=>({modSettings:f.hook.store.modSettings,
+        : args.path.endsWith('useWar3Settings') ? `export const useWar3Settings=()=>({modSettings:f.hook.store.modSettings,detectedVersion:f.hook.store.detectedVersion,
           settings:f.hook.store.settings,saveModSettings:f.hook.saveModSettings,toggleGameMode(){},isLoading:f.hook.store.isLoading});`
         : args.path.endsWith('useWar3Detector') ? `export const useWar3Detector=()=>({currentInstallation:{path:'Z:/fixture-game'},detectInstallations:async()=>{}});`
         : args.path.endsWith('useSound') ? `export const useSound=()=>({playSmall(){},playHover(){}});`
@@ -56,7 +56,13 @@ let preferences = '[video]\nhd=1\n';
 let terrainMeta = '20';
 let treeContent = '';
 const api = {
-  getConfig: async (key: string) => key === 'gameChannel' ? 'retail' : { ...fixture.saved },
+  detectWar3Version: async () => fixture.detectedVersion ?? {source:'local',version:'3.0.1.24371',parts:[3,0,1,24371]},
+  getConfig: async (key: string) => {
+    if(key==='gameChannel')return 'retail';
+    const snapshot={...fixture.saved};
+    if(fixture.holdRead){fixture.holdRead=false;await new Promise(resolve=>{fixture.releaseRead=resolve;});}
+    return snapshot;
+  },
   setConfig: async (key: string, value: any) => { if (key === 'modSettings') fixture.saved = { ...value }; },
   getVisionModules: async () => ({}),
   getInstalledModState: async () => null,
@@ -110,6 +116,10 @@ const api = {
     if(fixture.failAngle)throw new Error('fixture angle failed');
     fixture.saved={...fixture.saved,lightingAngle:angle};return true;
   },
+  updateShadowLength: async (_path:string,value:string)=>{
+    fixture.writes.push('shadow-length');if(fixture.failShadow)throw Error('fixture shadow failure');
+    fixture.saved={...fixture.saved,shadowLength:value};return true;
+  },
   updateMdlLighting: async (_path: string, _mode: string, _level: number, _previousMode: string, _previousLevel: number, requestId: string) => {
     fixture.writes.push('lighting');
     fixture.lastLightingRequest = requestId;
@@ -122,7 +132,11 @@ const api = {
     emit(100);
     return true;
   },
-  updateObjectShader: async () => true,
+  updateObjectShader: async () => {
+    if(fixture.holdShader){fixture.holdShader=false;await new Promise(resolve=>{fixture.releaseShader=resolve;});}
+    return !fixture.failShader;
+  },
+  updateAtmosphericLight: async (_path:string,enabled:boolean)=>{fixture.actualAtmospheric=enabled;fixture.saved={...fixture.saved,atmosphericLight:enabled};return true;},
   updatePostProcessing: async () => true,
   updatePostProcessingGlow: async () => true,
   updateHdrExposure: async (_path:string,value:number) => {if(fixture.failExposure)throw Error('fixture exposure failure');fixture.writes.push('hdr-exposure');fixture.saved={...fixture.saved,hdrExposure:value};return true;},
@@ -155,9 +169,79 @@ function buttonDisabled(label: string, category: string): boolean {
   return /\bdisabled/.test(button[1]);
 }
 try {
+  // Identity shaders and shared foliage can remain on disk while effects are
+  // off. The current hook must not turn explicit false preferences back on.
+  const beforeSwitchAudit={...hook.store.modSettings};
+  const boolKeys=['objectShader','postProcessing','postProcessingGlow','foliage','glow','hdr',
+    'postProcessingOutline','improveReadability','blight','rotatingLighting','atmosphericLight'] as const;
+  for(const key of boolKeys){
+    await hook.saveModSettings('Z:/fixture-game',{[key]:false});
+    assert.equal(hook.store.modSettings[key],false,`${key}: closing must not bounce despite files remaining`);
+    assert.equal(fixture.saved[key],false,`${key}: persisted off`);
+    await hook.loadModSettings('Z:/fixture-game');
+    assert.equal(hook.store.modSettings[key],false,`${key}: reopening keeps off`);
+    await hook.saveModSettings('Z:/fixture-game',{[key]:true});
+    assert.equal(hook.store.modSettings[key],true,`${key}: reopening toggle still works`);
+  }
+  const endpoints={objectShader:'updateObjectShader',postProcessing:'updatePostProcessing',postProcessingGlow:'updatePostProcessingGlow',foliage:'updateFoliageSettings',glow:'updateGlowSettings',hdr:'updateHdr',postProcessingOutline:'updatePostProcessingOutline',improveReadability:'updateReadability',blight:'updateBlightSettings',rotatingLighting:'updateRotatingLighting',atmosphericLight:'updateAtmosphericLight'};
+  for(const key of boolKeys){
+    await hook.saveModSettings('Z:/fixture-game',{[key]:false});
+    const name=endpoints[key],original=(api as any)[name];
+    (api as any)[name]=async()=>{throw Error('fixture toggle failure');};
+    try{await assert.rejects(hook.saveModSettings('Z:/fixture-game',{[key]:true}),/fixture toggle failure/);}
+    finally{(api as any)[name]=original;}
+    assert.equal(hook.store.modSettings[key],false,`${key}: failed change restores UI`);
+    assert.equal(fixture.saved[key],false,`${key}: failed change restores config`);
+  }
+  fixture.holdRead=true;
+  const oldRead=hook.loadModSettings('Z:/fixture-game');
+  await Promise.resolve();assert(fixture.releaseRead);
+  await hook.saveModSettings('Z:/fixture-game',{objectShader:false});
+  fixture.releaseRead();await oldRead;
+  assert.equal(hook.store.modSettings.objectShader,false,'older background read cannot undo a completed close');
+  await hook.saveModSettings('Z:/fixture-game',{objectShader:true});
+  fixture.holdShader=true;
+  const close=hook.saveModSettings('Z:/fixture-game',{objectShader:false});
+  while(!fixture.releaseShader)await new Promise(resolve=>originalSetTimeout(resolve,0));
+  await hook.loadSettings('Z:/fixture-game');
+  assert.equal(hook.store.isLoading,true,'background load cannot clear an active write loading state');
+  await assert.rejects(hook.saveModSettings('Z:/fixture-game',{objectShader:true}),/正在应用/);
+  fixture.releaseShader();await close;
+  assert.equal(hook.store.modSettings.objectShader,false);assert.equal(fixture.saved.objectShader,false);
+  fixture.failShader=true;
+  await assert.rejects(hook.saveModSettings('Z:/fixture-game',{objectShader:true}),/切换未完成/);
+  fixture.failShader=false;
+  assert.equal(hook.store.modSettings.objectShader,false,'failed IPC restores off in UI');
+  assert.equal(fixture.saved.objectShader,false,'failed IPC restores persisted off');
+  hook.store.modSettings={...beforeSwitchAudit};fixture.saved={...beforeSwitchAudit};
   const originalSettings={...fixture.saved};
+  hook.store.modSettings={...hook.store.modSettings,rotatingLighting:true,atmosphericLight:true};fixture.saved={...fixture.saved,rotatingLighting:true,atmosphericLight:true};fixture.actualAtmospheric=true;
+  await hook.saveModSettings('Z:/fixture-game',{lighting:'battle'});
+  assert.equal(hook.store.modSettings.lightingAngle,230);assert.equal(fixture.saved.lightingAngle,230);
+  assert.equal(hook.store.modSettings.shadowLength,20);assert.equal(fixture.saved.shadowLength,20);
+  assert.equal(fixture.saved.rotatingLighting,false);assert.equal(fixture.saved.atmosphericLight,false);assert.equal(fixture.actualAtmospheric,false,'mode selection actually removes atmospheric light');
+  for(const shadowLength of [0,37,50,100,'long','short'] as const){
+    const before={...hook.store.modSettings},syncs=fixture.syncs;fixture.writes.length=0;
+    await hook.saveModSettings('Z:/fixture-game',{shadowLength});
+    assert.deepEqual(fixture.writes,['shadow-length'],'length alone never syncs terrain, shaders, exposure or brightness');
+    assert.equal(fixture.syncs,syncs);assert.equal(hook.store.modSettings.lightingAngle,before.lightingAngle);
+    assert.equal(hook.store.modSettings.hdrExposure,before.hdrExposure);assert.equal(fixture.saved.shadowLength,shadowLength);
+    await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.shadowLength,shadowLength);
+  }
+  fixture.failShadow=true;
+  await assert.rejects(hook.saveModSettings('Z:/fixture-game',{shadowLength:'long'}),/shadow failure/);
+  fixture.failShadow=false;assert.equal(hook.store.modSettings.shadowLength,'short');assert.equal(fixture.saved.shadowLength,'short');
+  const beforeReset={...fixture.saved};fixture.writes.length=0;
+  await hook.saveModSettings('Z:/fixture-game',{shadowLength:'default'});
+  assert.deepEqual(fixture.writes,['shadow-length']);assert.equal(fixture.saved.lightingAngle,beforeReset.lightingAngle);
+  await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.shadowLength,'default','DNC shadow default survives battle reload');
+  fixture.writes.length=0;await hook.saveModSettings('Z:/fixture-game',{lightingAngle:null});
+  assert.deepEqual(fixture.writes,['lighting-angle']);assert.equal(fixture.saved.shadowLength,'default');
+  await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.lightingAngle,null,'DNC angle reset survives battle reload');
+  assert.equal(hook.store.modSettings.shadowLength,'default');
+  hook.store.modSettings={...originalSettings};fixture.saved={...originalSettings};
   fixture.saved={...fixture.saved,resolvedVersion:'v301',graphicsSelection:'hd',hdr:true,hdrExposure:1.2};hook.store.modSettings={...fixture.saved};
-  for(const [mode,value] of [['rpg',0.9],['standard',1.2],['battle',1.8]] as const){
+  for(const [mode,value] of [['rpg',0.85],['standard',1.1],['battle',1.4]] as const){
     await hook.saveModSettings('Z:/fixture-game',{lighting:mode});
     assert.equal(fixture.saved.hdrExposure,value);assert.equal(hook.store.modSettings.hdrExposure,value);
   }
@@ -313,6 +397,22 @@ try {
   assert(!switches.some(match => match[1].includes('aria-label="settings.hdr.title"')));
   fixture.category='lighting';
   const lightingHtml=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+  assert.equal((lightingHtml.match(/settings-lighting-reset/g)||[]).length,2,'two independent default buttons');
+  const beforeButtonReset={...fixture.saved};fixture.writes.length=0;
+  await fixture.controls['lighting-angle-reset'].onClick();
+  assert.deepEqual(fixture.writes,['lighting-angle']);assert.equal(fixture.saved.lightingAngle,null);
+  assert.equal(fixture.saved.shadowLength,beforeButtonReset.shadowLength);
+  fixture.writes.length=0;await fixture.controls['shadow-length-reset'].onClick();
+  assert.deepEqual(fixture.writes,['shadow-length']);assert.equal(fixture.saved.shadowLength,'default');
+  await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.lightingAngle,null);assert.equal(hook.store.modSettings.shadowLength,'default');
+  const nativeDefaultsHtml=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+  assert(!nativeDefaultsHtml.includes('settings.lighting.sourceDefault'),'no small DNC description under either slider');
+  assert(nativeDefaultsHtml.includes('data-formatted=""'),'native angle shows the default placeholder, without a stray degree suffix');
+  assert(nativeDefaultsHtml.includes('data-formatted="50%"'),'reset shadow displays 50%');
+  assert(!lightingHtml.includes('settings-preview-card'),'lighting never renders the floating explanation panel');
+  assert.equal((lightingHtml.match(/data-tooltip-open="false"/g)||[]).length,3,'all lighting sliders disable floating tooltips');
+  assert(!lightingHtml.includes('settings.hdr.brightness.desc'),'brightness omits the small explanation');
+  assert(graphicsHtml.includes('settings-preview-card'),'other settings retain their explanations');
   const rotating = [...lightingHtml.matchAll(/<button([^>]*role="switch"[^>]*)>/g)].find(match => match[1].includes('aria-label="settings.rotatingLighting.title"'));
   assert(rotating?.[1].includes('aria-checked="false"'), 'Experimental lighting defaults to off');
   assert(lightingHtml.includes('settings.experimental'));
@@ -356,7 +456,8 @@ try {
   await hook.loadModSettings('Z:/fixture-game');
   assert.equal(hook.store.modSettings.rotatingLighting, true, 'Preference survives reloading');
   await hook.saveModSettings('Z:/fixture-game', { ...renderingPresetSettings('battle') });
-  assert.equal(fixture.saved.rotatingLighting, true, 'Battle preset leaves the independent experiment unchanged');
+  assert.equal(fixture.saved.rotatingLighting, false, 'Battle preset disables rotating light');
+  assert.equal(fixture.saved.atmosphericLight,false);assert.equal(fixture.saved.shadowLength,20);assert.equal(fixture.saved.hdrExposure,1.4);
   await hook.saveModSettings('Z:/fixture-game', { rotatingLighting: false });
   hook.store.modSettings = { ...beforeReadabilityUi };
   fixture.saved = { ...beforeReadabilityUi };
@@ -388,7 +489,8 @@ try {
     ['hd', 'v301', false], ['de', 'v301', false], ['de', 'v30', true], ['sd', 'v301', true],
     ['hd', 'v204', true],
   ] as const) {
-    hook.store.modSettings = { ...beforeReadabilityUi, graphicsSelection, resolvedVersion, objectShader: true, postProcessing: true };
+    hook.store.detectedVersion = resolvedVersion;
+    hook.store.modSettings = { ...beforeReadabilityUi, versionSelection:'auto', graphicsSelection, resolvedVersion, objectShader: true, postProcessing: true };
     const html = renderToStaticMarkup(React.createElement(SettingsModal, { open: true, onClose() {}, isFullPackageInstalled: true }));
     const at = html.indexOf('settings.readability.title');
     assert(at >= 0);
@@ -398,6 +500,33 @@ try {
     assert(buttons[0][1].includes('role="switch"'));
     for (const button of buttons) assert.equal(/\bdisabled/.test(button[1]), disabled, `${graphicsSelection}/${resolvedVersion} readability availability`);
   }
+  // Fresh automatic detection must work without an applied-profile record,
+  // and must supersede records from another build/install. Manual choice is
+  // still explicit; failed detection must not reuse an old applied tier.
+  for (const [selection, detected, stale, disabled] of [
+    ['auto','v301',undefined,false], ['auto','v301','v204',false],
+    ['auto','v301','v30',false], ['auto','v30','v301',true],
+    ['auto','v204','v301',true], ['auto',null,'v301',true],
+    ['v301',null,'v204',false], ['v30','v301','v301',true],
+  ] as const) {
+    hook.store.detectedVersion=detected;
+    hook.store.modSettings={...beforeReadabilityUi,versionSelection:selection,resolvedVersion:stale,graphicsSelection:'hd',objectShader:true,postProcessing:true};
+    fixture.category='graphics';
+    const html=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
+    for(const label of ['settings.readability.title','settings.postprocessing.outline.title']){
+      const control=[...html.matchAll(/<button([^>]*role="switch"[^>]*)>/g)].find(m=>m[1].includes(`aria-label="${label}"`));
+      assert(control,label);assert.equal(/\bdisabled/.test(control[1]),disabled,`${label}: ${selection}/${detected}/${stale}`);
+    }
+  }
+  fixture.detectedVersion={source:'local',version:'3.0.1.24371',parts:[3,0,1,24371]};
+  fixture.saved={...fixture.saved,versionSelection:'auto',resolvedVersion:'v204'};
+  await hook.loadModSettings('Z:/fixture-game');
+  assert.equal(hook.store.detectedVersion,'v301','actual load publishes the current detected tier');
+  assert.equal(fixture.saved.detectedVersion,undefined,'detection is not a persisted preference');
+  fixture.detectedVersion={source:'unknown',version:'',parts:[]};
+  await hook.loadModSettings('Z:/fixture-game');
+  assert.equal(hook.store.detectedVersion,null,'failed detection clears the previous tier');
+  fixture.detectedVersion=undefined;
   hook.store.modSettings = beforeReadabilityUi;
   // DE itself and the full-package prerequisite remain restricted.
   fixture.fullPackage = false;

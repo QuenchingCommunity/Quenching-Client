@@ -1,4 +1,10 @@
 const messages = {
+  "settings.lighting.restoreDefault": "기본값 복원",
+  "settings.lighting.defaultValue": "기본값",
+  "settings.lighting.sourceDefault": "DNC 원본 매개변수 사용",
+  "settings.lighting.shadowLength": "그림자 길이",
+  "settings.lighting.shadowShort": "짧게",
+  "settings.lighting.shadowLong": "길게",
   "common.close": "닫기",
   "msg.update.incomplete": "업데이트 미완료",
   "main.offlineTest.button": "오프라인 테스트",

@@ -3,6 +3,7 @@ import path from 'path';
 import zlib from 'zlib';
 import { randomUUID } from 'node:crypto';
 import { enumerateClientModFiles } from './client-mod-files';
+import { disableBranchThirdPartyModules } from './branch-third-party-disable';
 
 // Only loose Quenching override roots. Never touch x86_64, CASC data, or game metadata.
 export const BRANCH_MOD_FOLDERS = [
@@ -220,6 +221,24 @@ export async function recoverBranchModToggle(buildDir: string, options: Recovery
   return false;
 }
 
+/** Recover interrupted moves first, then make an off preference true on disk. */
+export async function recoverBranchModToggleAtStartup(buildDir: string, configuredEnabled: boolean, options: ToggleOptions = {}): Promise<boolean | null> {
+  const restoredEnabled = await recoverBranchModToggle(buildDir, { ...options, reconcileDisabled: false });
+  const enabled = configuredEnabled && restoredEnabled !== false;
+  if (!enabled) {
+    await setBranchModEnabledOnDisk(buildDir, false, options);
+  }
+  return restoredEnabled === null ? null : enabled;
+}
+
+async function hasActiveVisionModules(buildDir: string): Promise<boolean> {
+  const vision = await fs.readJson(path.join(buildDir, '.quenching-vision-modules.json')).catch(error => {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  });
+  return Object.keys(vision).length > 0;
+}
+
 export async function isBranchModDisabled(buildDir: string): Promise<boolean> {
   const state = await readState(buildDir);
   if (state && state.phase !== 'disabled') throw new Error('Branch toggle is incomplete; recover it before continuing');
@@ -266,10 +285,10 @@ export async function applyBranchModFilesForSwitch(buildDir: string, enabled: bo
 }
 
 export async function setBranchModEnabledOnDisk(buildDir: string, enabled: boolean, options: ToggleOptions = {}): Promise<void> {
-  const vision=await fs.readJson(path.join(buildDir,'.quenching-vision-modules.json')).catch(e=>{if(e.code==='ENOENT')return {};throw e;});
-  if(Object.keys(vision).length)throw new Error('请先关闭 Vision Mod 模块，再切换 MOD 总开关');
   let existing = await readState(buildDir);
   if (existing && existing.phase !== 'disabled') throw new Error('Branch toggle is incomplete');
+  if (enabled && await hasActiveVisionModules(buildDir)) throw new Error('请先关闭 Vision Mod 模块，再切换 MOD 总开关');
+  if (!enabled) await disableBranchThirdPartyModules(buildDir);
   if (enabled && !existing) {
     // 3.4 could park a complete package in QMoff without leaving a journal.
     // Restore any client-known files once, then continue with the new journal.

@@ -13,6 +13,6 @@ const pkg=JSON.parse(await fs.readFile('package.json','utf8'));
 const run=(command,args)=>new Promise((resolve,reject)=>{const child=spawn(command,args,{shell:process.platform==='win32'&&command==='npm',windowsHide:true,stdio:'inherit'});child.once('error',reject);child.once('close',code=>code===0?resolve():reject(Error(command+' failed: '+code)));});
 if(platform==='win'){
   await run('npm',['run','dist:win']);await checkProductionBuild();
-  await run(process.execPath,['scripts/export-win-portable.mjs','__Bin/win-unpacked',`__Bin/QMC-${release.displayVersion}-Win-x64.7z`,`QMC-${release.displayVersion}-Win-x64`,'--channel','production']);
+  await run(process.execPath,['scripts/export-win-portable.mjs','__Bin/win-unpacked',`__Bin/QMC-${release.displayVersion}-Win-x64.zip`,`QMC-${release.displayVersion}-Win-x64`,'--channel','production']);
 }else{await run('npm',['run','dist:mac:app']);await checkProductionBuild();}
 console.log(JSON.stringify({channel:'production',version:release.displayVersion,internalVersion:pkg.version,platform,testContentRemoved:true}));

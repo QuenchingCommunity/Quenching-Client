@@ -1,4 +1,5 @@
 import {resolveHdrExposure} from '../../shared/hdr-exposure';
+import {resolveUnitLightSettings} from '../../shared/unit-light-settings';
 import {getVisionModules, assertVisionSettingAllowed} from './vision-modules';
 import { resourceArchiveExists } from './bundled-packages';
 import { getSelectedGameChannel, getChannelModEnabled, hasGameChannelDirectory } from './game-channel';
@@ -194,12 +195,12 @@ export async function syncLightingResources(
         sourceCache, onProgress: (done, total) => report('dnc', 72 + (total ? done / total : 1) * 8),
       });
       await applyDncLighting(dncDir, effectiveLightingMode(profile, lighting), modSettings?.lightingBrightness, {
-        deMode: profile.graphics === 'de', isVersion30: isVersion30OrLater(profile.version), unitLightAngle: modSettings?.lightingAngle,
+        deMode: profile.graphics === 'de', isVersion30: isVersion30OrLater(profile.version), ...resolveUnitLightSettings(modSettings || {}),
       }, (done, total) => report('dnc', 80 + (total ? done / total : 1) * 8));
       if (modSettings?.rotatingLighting === true) {
         await patchRotatingUnitLighting(dncDir, getDncResourcePath(quenchingDir, profile), true,
           effectiveLightingMode(profile, lighting), modSettings?.lightingBrightness, {
-            deMode: profile.graphics === 'de', isVersion30: isVersion30OrLater(profile.version), unitLightAngle: modSettings?.lightingAngle,
+            deMode: profile.graphics === 'de', isVersion30: isVersion30OrLater(profile.version), ...resolveUnitLightSettings(modSettings || {}),
           });
       }
     });

@@ -2,6 +2,7 @@
  * Same convention as the existing offline quaternion-light inspector.
  */
 export type LightQuaternion = [number, number, number, number];
+import {unitShadowElevation,validateUnitShadowLength,type UnitShadowLength} from './unit-light-settings';
 export interface LightRotationKey { frame: number; value: readonly number[] }
 export const ROTATING_LIGHT_START = Object.freeze([0.25, 0.25, 0.7, 0]);
 export const ROTATING_LIGHT_START_HOUR = 6;
@@ -76,6 +77,26 @@ function directionQuaternion(direction: readonly number[]): LightQuaternion {
   ]);
 }
 
+/** Tilt the light in its current vertical plane, retaining azimuth and local roll. */
+export function lightQuaternionForShadow(value:readonly number[],length:UnitShadowLength):LightQuaternion {
+  const q=normalizeLightQuaternion(value),d=lightDirection(q);
+  const azimuth=Math.atan2(d[1],d[0]);
+  const sourceElevation=Math.asin(Math.max(-1,Math.min(1,d[2])));
+  const delta=unitShadowElevation(length,sourceElevation*180/Math.PI)*Math.PI/180-sourceElevation;
+  const s=Math.sin(delta/2);
+  return normalizeLightQuaternion(multiply([Math.sin(azimuth)*s,-Math.cos(azimuth)*s,0,Math.cos(delta/2)],q));
+}
+
+/** Changes rotation key values only; callers restrict this transform to unit DNC. */
+export function applyUnitShadowLength(content:string,length:UnitShadowLength|undefined):string {
+  if(length===undefined)return content;
+  validateUnitShadowLength(length);
+  const scalar='[-+]?(?:\\d*\\.\\d+|\\d+\\.?\\d*)(?:[eE][-+]?\\d+)?';
+  const key=new RegExp(`(^[\\t ]*)(\\d+):\\s*\\{\\s*(${scalar}),\\s*(${scalar}),\\s*(${scalar}),\\s*(${scalar})\\s*\\}`,'gm');
+  return content.replace(/^[\t ]*Rotation\s+\d+\s*\{[^\r\n]*\r?\n[\s\S]*?^[\t ]*\}/gm,block=>block.replace(key,(_m,indent,frame,...values)=>
+    `${indent}${frame}: { ${lightQuaternionForShadow(values.slice(0,4).map(Number),length).join(', ')} }`));
+}
+
 function sampleReference(keys: readonly LightRotationKey[], interval: readonly number[], phase: number): LightQuaternion {
   if (phase === 1) return normalizeLightQuaternion(keys[0].value);
   const frame = interval[0] + phase * (interval[1] - interval[0]);
@@ -94,6 +115,8 @@ function sampleReference(keys: readonly LightRotationKey[], interval: readonly n
 export function buildRotatingLightTrack(
   reference: readonly LightRotationKey[], sourceInterval: readonly number[], targetInterval: readonly number[],
   unitLightAngle?: number,
+  shadowLength?: UnitShadowLength,
+  sourceStart?: readonly number[],
 ): LightRotationKey[] {
   const validInterval = (range: readonly number[]) => range.length === 2 && range.every(Number.isSafeInteger) && range[1] > range[0];
   if (!validInterval(sourceInterval) || !validInterval(targetInterval) || reference.length < 2 ||
@@ -105,12 +128,14 @@ export function buildRotatingLightTrack(
   const duration = end - start;
   const startPhase = ROTATING_LIGHT_START_HOUR / 24;
   const wrapPhase = (phase: number) => (phase % 1 + 1) % 1;
-  const initial = unitLightAngle === undefined ? normalizeLightQuaternion(ROTATING_LIGHT_START)
-    : lightQuaternionAtAzimuth(ROTATING_LIGHT_START, unitLightAngle);
+  const originalStart=sourceStart??ROTATING_LIGHT_START;
+  const base = shadowLength===undefined?normalizeLightQuaternion(originalStart):lightQuaternionForShadow(originalStart,shadowLength);
+  const initial = unitLightAngle === undefined ? base : lightQuaternionAtAzimuth(base, unitLightAngle);
   const firstDirection = lightDirection(initial);
   const firstAzimuth = Math.atan2(firstDirection[1], firstDirection[0]);
   const firstElevation = Math.asin(firstDirection[2]);
   const referenceElevation = Math.asin(lightDirection(reference[0].value)[2]);
+  const sourceElevation=Math.asin(lightDirection(originalStart)[2]);
   const minimalStart = directionQuaternion(firstDirection);
   // Keep the user's full starting orientation, including roll. A fixed local
   // roll does not change the light direction or introduce an end-of-cycle flip.
@@ -126,7 +151,8 @@ export function buildRotatingLightTrack(
     // Move the whole orbit/elevation curve, rather than starting at enable time.
     const phase = wrapPhase((frame - start) / duration - startPhase);
     const direction = lightDirection(sampleReference(reference, sourceInterval, phase));
-    const elevation = firstElevation + Math.asin(Math.max(-1, Math.min(1, direction[2]))) - referenceElevation;
+    const elevation = shadowLength===undefined?firstElevation + Math.asin(Math.max(-1, Math.min(1, direction[2]))) - referenceElevation
+      : unitShadowElevation(shadowLength,(sourceElevation+Math.asin(Math.max(-1,Math.min(1,direction[2])))-referenceElevation)*180/Math.PI)*Math.PI/180;
     const height = Math.sin(elevation);
     const horizontal = Math.cos(elevation);
     const azimuth = firstAzimuth + phase * Math.PI * 2;

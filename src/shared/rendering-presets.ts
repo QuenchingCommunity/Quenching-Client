@@ -1,11 +1,15 @@
 import type { ModProfile } from './mod-profile';
 import {defaultHdrExposure} from './hdr-exposure';
+import {resolveUnitLightSettings,unitShadowSliderValue} from './unit-light-settings';
 
 export type RenderingPreset = 'standard' | 'battle';
 export function renderingPresetSettings(preset: RenderingPreset) {
   const battle = preset === 'battle';
   return {
     lighting: battle ? 'battle' as const : 'standard' as const,
+    lightingAngle: battle ? 230 : 45,
+    shadowLength: battle ? 20 : 50,
+    ...(battle?{rotatingLighting:false,atmosphericLight:false}:{}),
     hdrExposure: defaultHdrExposure(battle ? 'battle' : 'standard'),
     lightingBrightness: battle ? 4 as const : 3 as const,
     tree: battle ? 'v16' as const : 'tall' as const,
@@ -17,7 +21,12 @@ export function renderingPresetSettings(preset: RenderingPreset) {
 }
 
 export function matchesRenderingPreset(settings: object, preset: RenderingPreset): boolean {
-  return Object.entries(renderingPresetSettings(preset)).every(([key, value]) => (settings as Record<string, unknown>)[key] === value);
+  const saved=settings as {lightingAngle?:unknown;shadowLength?:unknown};
+  if(saved.lightingAngle===null||saved.shadowLength==='default')return false;
+  const direction=resolveUnitLightSettings(settings);
+  const shadow=direction.unitShadowLength===undefined?50:unitShadowSliderValue(direction.unitShadowLength);
+  const values={...settings,lightingAngle:direction.unitLightAngle??45,shadowLength:shadow===0?'short':shadow===100?'long':shadow};
+  return Object.entries(renderingPresetSettings(preset)).every(([key, value]) => (values as Record<string, unknown>)[key] === value);
 }
 
 export function supportsReadability(profile: Pick<ModProfile, 'graphics' | 'shaderPack'>): boolean {

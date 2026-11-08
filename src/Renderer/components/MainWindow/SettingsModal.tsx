@@ -1,4 +1,5 @@
 import {HDR_EXPOSURE_MIN,HDR_EXPOSURE_MAX,resolveHdrExposure} from '../../../shared/hdr-exposure';
+import {unitShadowSliderValue} from '../../../shared/unit-light-settings';
 import {VisionModules, visionBlocksSetting} from '../../../shared/vision-modules';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Typography, Button, Space, Row, Col, message, Spin, Slider, InputNumber } from 'antd';
@@ -48,7 +49,9 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isFullPackageInstalled = false, onModDeleteFinished }) => {
   const { t } = useTranslation();
-  const { modSettings, settings: war3Settings, saveModSettings, toggleGameMode, isLoading } = useWar3Settings();
+  const { modSettings, detectedVersion, settings: war3Settings, saveModSettings, toggleGameMode, isLoading } = useWar3Settings();
+  // Applied profiles may belong to an earlier installation or game build.
+  const effectiveVersion = modSettings.versionSelection === 'auto' ? detectedVersion : modSettings.versionSelection;
   const { currentInstallation, detectInstallations } = useWar3Detector();
   const { playSmall, playHover } = useSound();
   const { showLoading, hideLoading } = useGlobalLoading();
@@ -275,11 +278,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     }
 
     // 2. Classic Mode Check
-    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'postProcessingOutline', 'hdr', 'hdrExposure', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'lightingAngle', 'rotatingLighting', 'atmosphericLight', 'improveReadability', 'ui', 'glow'];
+    const restrictedInClassic = ['foliage', 'blight', 'objectShader', 'postProcessing', 'postProcessingGlow', 'postProcessingOutline', 'hdr', 'hdrExposure', 'half', 'modelEnhance', 'water', 'terrain', 'tree', 'lighting', 'lightingBrightness', 'lightingAngle', 'shadowLength', 'rotatingLighting', 'atmosphericLight', 'improveReadability', 'ui', 'glow'];
     if (restrictedInClassic.includes(key) && visualSettingsDisabled) {
       return { disabled: true, reason: t('settings.basic.classicMode.disabled') };
     }
-    if (['hdr','hdrExposure'].includes(key) && (modSettings.resolvedVersion || modSettings.versionSelection) === 'v30') {
+    if (['hdr','hdrExposure'].includes(key) && effectiveVersion === 'v30') {
       return { disabled: true, reason: t('settings.hdr.unsupported') };
     }
 
@@ -340,7 +343,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     const sOutline = getSettingStatus('postProcessingOutline');
     const sReadability = getSettingStatus('improveReadability');
     const readabilityAvailable = !visualSettingsDisabled &&
-      (modSettings.resolvedVersion ?? modSettings.versionSelection) === 'v301' &&
+      effectiveVersion === 'v301' &&
       modSettings.objectShader && modSettings.postProcessing;
     const sGlow = getSettingStatus('glow');
 
@@ -385,7 +388,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
             {renderSettingSwitch(t('settings.postprocessing.outline.title'), Boolean(modSettings.postProcessingOutline ?? false),
               enabled => handleSettingChange('postProcessingOutline', enabled),
               () => setPreviewInfo({ title: t('settings.postprocessing.outline.title'), desc: t(modSettings.postProcessingOutline ? 'settings.postprocessing.outline.on.desc' : 'settings.postprocessing.outline.off.desc'), image: null }),
-              sOutline.disabled || !modSettings.postProcessing || (modSettings.resolvedVersion ?? modSettings.versionSelection) !== 'v301')}
+              sOutline.disabled || !modSettings.postProcessing || effectiveVersion !== 'v301')}
             {renderStatusPlaceholder(sOutline.reason)}
           </Col>
           <Col span={8}>
@@ -496,10 +499,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     );
   };
 
-  const [lightingAngleDraft, setLightingAngleDraft] = useState(modSettings.lightingAngle ?? 45);
-  useEffect(() => { setLightingAngleDraft(modSettings.lightingAngle ?? 45); }, [modSettings.lightingAngle]);
+  const [lightingAngleDraft, setLightingAngleDraft] = useState<number|null>(modSettings.lightingAngle ?? null);
+  useEffect(() => { setLightingAngleDraft(modSettings.lightingAngle ?? null); }, [modSettings.lightingAngle,open]);
   const commitLightingAngle = (angle: number) => {
     if (angle !== modSettings.lightingAngle) void handleSettingChange('lightingAngle', angle);
+  };
+  const [shadowLengthDraft,setShadowLengthDraft]=useState<number|null>(unitShadowSliderValue(modSettings.shadowLength));
+  useEffect(()=>{setShadowLengthDraft(unitShadowSliderValue(modSettings.shadowLength));},[modSettings.shadowLength,open]);
+  const commitShadowLength=(value:number)=>{
+    if(value!==unitShadowSliderValue(modSettings.shadowLength))void handleSettingChange('shadowLength',value);
   };
   const [hdrExposureDraft,setHdrExposureDraft]=useState(resolveHdrExposure(modSettings));
   useEffect(()=>{setHdrExposureDraft(resolveHdrExposure(modSettings));},[modSettings.hdrExposure,modSettings.lighting,open]);
@@ -512,12 +520,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     const sLighting = getSettingStatus('lighting');
     const sLightingBrightness = getSettingStatus('lightingBrightness');
     const sAngle = getSettingStatus('lightingAngle');
+    if(modSettings.rotatingLighting===true)sAngle.disabled=true;
+    const sShadowLength = getSettingStatus('shadowLength');
+    if(modSettings.rotatingLighting===true)sShadowLength.disabled=true;
     return <div className="settings-lighting"><Row gutter={[32, 22]}>
           <Col xs={12} md={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.rotatingLighting.title')}</h3>
             {renderSettingSwitch(t('settings.rotatingLighting.title'), modSettings.rotatingLighting === true,
               enabled => handleSettingChange('rotatingLighting', enabled),
-              () => setPreviewInfo({ title: t('settings.rotatingLighting.title'), desc: t('settings.rotatingLighting.desc'), image: null }),
+              undefined,
               sRotating.disabled)}
             {renderStatusPlaceholder(sRotating.reason || t('settings.experimental'))}
           </Col>
@@ -525,34 +536,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
             <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.atmosphericLight.title')}</h3>
             {renderSettingSwitch(t('settings.atmosphericLight.title'),modSettings.atmosphericLight===true,
               enabled=>handleSettingChange('atmosphericLight',enabled),
-              ()=>setPreviewInfo({title:t('settings.atmosphericLight.title'),desc:t('settings.atmosphericLight.desc'),image:null}),sAtmospheric.disabled)}
+              undefined,sAtmospheric.disabled)}
             {renderStatusPlaceholder(sAtmospheric.reason)}
           </Col>
           <Col span={24}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.lighting')}</h3>
             <Space wrap>
-              {renderSettingButton(t('settings.lighting.standard'), modSettings.lighting, 'standard', () => handleSettingChange('lighting', 'standard'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.standard.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
-              {renderSettingButton(t('settings.lighting.rpg'), modSettings.lighting, 'rpg', () => handleSettingChange('lighting', 'rpg'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.rpg.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
-              {renderSettingButton(t('settings.lighting.level4'), modSettings.lighting, 'battle', () => handleSettingChange('lighting', 'battle'), () => setPreviewInfo({ title: t('settings.lighting'), desc: t('settings.lighting.level4.desc'), image: './assets/quenching/set3.png' }), sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.standard'), modSettings.lighting, 'standard', () => handleSettingChange('lighting', 'standard'), undefined, sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.rpg'), modSettings.lighting, 'rpg', () => handleSettingChange('lighting', 'rpg'), undefined, sLighting.disabled)}
+              {renderSettingButton(t('settings.lighting.level4'), modSettings.lighting, 'battle', () => handleSettingChange('lighting', 'battle'), undefined, sLighting.disabled)}
             </Space>
             {renderStatusPlaceholder(sLighting.reason)}
 
           </Col>
       <Col span={24}>
-        <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.title')}</h3>
-        {renderSettingSwitch(t('settings.hdr.title'),Boolean(modSettings.hdr),enabled=>handleSettingChange('hdr',enabled),
-          ()=>setPreviewInfo({title:t('settings.hdr.title'),desc:t(modSettings.hdr?'settings.hdr.on.desc':'settings.hdr.off.desc'),image:null}),sHdr.disabled)}
-        {renderStatusPlaceholder(sHdr.reason)}
-        {modSettings.hdr && <div className="settings-hdr-exposure">
-          <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.brightness')}</h3>
-          <Slider min={HDR_EXPOSURE_MIN} max={HDR_EXPOSURE_MAX} step={0.01} value={hdrExposureDraft}
-            aria-label={t('settings.hdr.brightness')} disabled={sExposure.disabled||isLoading}
-            marks={{[HDR_EXPOSURE_MIN]:t('settings.hdr.minimum'),[HDR_EXPOSURE_MAX]:t('settings.hdr.maximum')}}
-            tooltip={{formatter:value=>`${Math.round(((value??HDR_EXPOSURE_MIN)-HDR_EXPOSURE_MIN)/(HDR_EXPOSURE_MAX-HDR_EXPOSURE_MIN)*100)}%`}}
-            onChange={setHdrExposureDraft} onChangeComplete={commitHdrExposure}/>
-          <p style={BASIC_SETTINGS_DESC}>{t('settings.hdr.brightness.desc')}</p>
-          {renderStatusPlaceholder(sExposure.reason)}
-        </div>}
+        <div className="settings-hdr-row">
+          <div className="settings-hdr-toggle">
+            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.title')}</h3>
+            {renderSettingSwitch(t('settings.hdr.title'),Boolean(modSettings.hdr),enabled=>handleSettingChange('hdr',enabled),
+              undefined,sHdr.disabled)}
+            {renderStatusPlaceholder(sHdr.reason)}
+          </div>
+          {modSettings.hdr && <div className="settings-hdr-exposure">
+            <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.brightness')}</h3>
+            <Slider min={HDR_EXPOSURE_MIN} max={HDR_EXPOSURE_MAX} step={0.01} value={hdrExposureDraft}
+              aria-label={t('settings.hdr.brightness')} disabled={sExposure.disabled||isLoading}
+              marks={{[HDR_EXPOSURE_MIN]:t('settings.hdr.minimum'),[HDR_EXPOSURE_MAX]:t('settings.hdr.maximum')}}
+              tooltip={{open:false}}
+              onChange={setHdrExposureDraft} onChangeComplete={commitHdrExposure}/>
+            {renderStatusPlaceholder(sExposure.reason)}
+          </div>}
+        </div>
       </Col>
       <Col span={24}>
             <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.strength')}</h3>
@@ -563,12 +577,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
                   modSettings.lightingBrightness ?? 3,
                   lvl,
                   () => handleSettingChange('lightingBrightness', lvl),
-                  () =>
-                    setPreviewInfo({
-                      title: t('settings.lighting.brightness'),
-                      desc: t('settings.lighting.brightness.desc'),
-                      image: './assets/quenching/set3.png'
-                    }),
+                  undefined,
                   sLightingBrightness.disabled
                 )
               )}
@@ -576,20 +585,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
             {renderStatusPlaceholder(sLightingBrightness.reason)}
       </Col>
       <Col span={24}>
-        <div className="settings-lighting-angle"
-          onMouseEnter={() => setPreviewInfo({title:t('settings.lighting.angle'),desc:t('settings.lighting.angle.desc'),image:null})}
-          onFocus={() => setPreviewInfo({title:t('settings.lighting.angle'),desc:t('settings.lighting.angle.desc'),image:null})}
-          onMouseLeave={() => setPreviewInfo({title:'',desc:t('settings.preview.default'),image:null})}>
-        <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.angle')}</h3>
+        <div className="settings-lighting-control-heading">
+          <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.shadowLength')}</h3>
+          <Button className="settings-lighting-reset" data-testid="shadow-length-reset"
+            aria-label={`${t('settings.lighting.shadowLength')}: ${t('settings.lighting.restoreDefault')}`}
+            disabled={sShadowLength.disabled||isLoading} onMouseDown={event=>event.preventDefault()}
+            onClick={()=>handleSettingChange('shadowLength','default')}>{t('settings.lighting.restoreDefault')}</Button>
+        </div>
+        <div className="settings-lighting-angle-controls settings-shadow-length-controls">
+          <Slider min={0} max={100} step={1} value={shadowLengthDraft??50}
+            aria-label={t('settings.lighting.shadowLength')} disabled={sShadowLength.disabled||isLoading}
+            marks={{0:t('settings.lighting.shadowShort'),100:t('settings.lighting.shadowLong')}} tooltip={{open:false}}
+            onChange={setShadowLengthDraft} onChangeComplete={commitShadowLength}/>
+          <InputNumber min={0} max={100} precision={0} value={modSettings.rotatingLighting?40:shadowLengthDraft} disabled={sShadowLength.disabled||isLoading}
+            aria-label={t('settings.lighting.shadowLength')} placeholder={t('settings.lighting.defaultValue')}
+            formatter={value=>value==null||String(value)===''?'':`${value}%`} parser={value=>Number(value?.replace('%','')||0)}
+            onChange={value=>{if(typeof value==='number')setShadowLengthDraft(value);}}
+            onBlur={()=>{if(shadowLengthDraft!==null)commitShadowLength(shadowLengthDraft);}}
+            onPressEnter={event=>{if(event.target instanceof HTMLInputElement)event.target.blur();}}/>
+        </div>
+        {renderStatusPlaceholder(sShadowLength.reason)}
+      </Col>
+      <Col span={24}>
+        <div className="settings-lighting-angle">
+        <div className="settings-lighting-control-heading">
+          <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.lighting.angle')}</h3>
+          <Button className="settings-lighting-reset" data-testid="lighting-angle-reset"
+            aria-label={`${t('settings.lighting.angle')}: ${t('settings.lighting.restoreDefault')}`}
+            disabled={sAngle.disabled||isLoading} onMouseDown={event=>event.preventDefault()}
+            onClick={()=>handleSettingChange('lightingAngle',null)}>{t('settings.lighting.restoreDefault')}</Button>
+        </div>
         <div className="settings-lighting-angle-controls">
-          <Slider min={0} max={360} step={1} value={lightingAngleDraft} disabled={sAngle.disabled || isLoading}
+          <Slider min={0} max={360} step={1} value={modSettings.rotatingLighting?45:lightingAngleDraft??45} disabled={sAngle.disabled || isLoading}
             aria-label={t('settings.lighting.angle')}
+            tooltip={{open:false}}
             onChange={setLightingAngleDraft} onChangeComplete={commitLightingAngle} />
-          <InputNumber min={0} max={360} precision={0} value={lightingAngleDraft} disabled={sAngle.disabled || isLoading}
-            aria-label={t('settings.lighting.angle')} formatter={value => `${value}°`}
+          <InputNumber min={0} max={360} precision={0} value={modSettings.rotatingLighting?45:lightingAngleDraft} disabled={sAngle.disabled || isLoading}
+            placeholder={t('settings.lighting.defaultValue')}
+            aria-label={t('settings.lighting.angle')} formatter={value => value==null||String(value)===''?'':`${value}°`}
             parser={value => Number(value?.replace('°', '') || 0)}
             onChange={value=>{if(typeof value==='number')setLightingAngleDraft(value);}}
-            onBlur={()=>commitLightingAngle(lightingAngleDraft)} onPressEnter={event=>event.currentTarget.blur()} />
+            onBlur={()=>{if(lightingAngleDraft!==null)commitLightingAngle(lightingAngleDraft);}} onPressEnter={event=>{
+              if(event.target instanceof HTMLInputElement)event.target.blur();
+            }} />
         </div>
         {renderStatusPlaceholder(sAngle.reason)}
         </div>
@@ -676,7 +714,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           backgroundRepeat: 'no-repeat',
           /* 💡 backgroundPosition: 'right bottom' 让图片靠右下 */
           backgroundPosition: 'right',
-          opacity: previewInfo.image ? 0.7 : 0,
+          opacity: selectedCategory !== 'lighting' && previewInfo.image ? 0.7 : 0,
           transition: 'all 0.5s ease',
           zIndex: 0,
           filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))'
@@ -741,7 +779,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           </div>
 
           {/* 底部说明区 - 悬浮设计，解决太靠下的问题 */}
-          <div style={{
+          {selectedCategory !== 'lighting' && <div className="settings-preview-card" style={{
             position: 'absolute',
             bottom: '0', // 向上浮动，离开底部边缘
             left: '40px',
@@ -776,7 +814,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
             }}>
               {previewInfo.desc}
             </Text>
-          </div>
+          </div>}
         </div>
       </div>
     </OverlayModal>

@@ -2,8 +2,9 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import rotations from '../../../assets/unpacked/experimental/de-unit-rotations.json';
+import campaign from '../../../assets/unpacked/experimental/de-campaign-rotations.json';
 import { DncLightingOptions, renderDncLighting } from './dnc-lighting';
-import { buildRotatingLightTrack } from '../../shared/dnc-rotation';
+import { applyUnitLightAngle, applyUnitShadowLength } from '../../shared/dnc-rotation';
 
 // Deliberate allowlist: terrain, portraits, underground, dungeon and custom DNC
 // models can never become write targets of this experiment.
@@ -54,7 +55,7 @@ export function replaceUnitRotation(content: string, block: string): string {
   return content.slice(0, start) + block + content.slice(end);
 }
 
-function deRotationBlock(content: string, angle?: number): string {
+function deRotationBlock(content: string): string {
   const intervals = [...content.matchAll(/\bInterval\s*\{\s*(\d+)\s*,\s*(\d+)\s*\}/g)];
   if (intervals.length !== 1) throw new Error('Unsupported DNC animation interval');
   const start = Number(intervals[0][1]);
@@ -62,9 +63,13 @@ function deRotationBlock(content: string, angle?: number): string {
   if (duration <= 0) throw new Error('Invalid DNC animation interval');
   const indent = unitRotationBlock(content).match(/^[\t ]*/)?.[0] ?? '\t';
   const newline = content.includes('\r\n') ? '\r\n' : '\n';
-  const keys = buildRotatingLightTrack(rotations.keyframes, rotations.interval, [start, start + duration], angle)
+  const sourceDuration=campaign.interval[1]-campaign.interval[0];
+  const keys = campaign.keyframes.map(key=>({frame:start+Math.round((key.frame-campaign.interval[0])*duration/sourceDuration),value:key.value}))
     .map(key => `${indent}\t${key.frame}: { ${key.value.join(', ')} },`);
-  return [`${indent}Rotation ${keys.length} {`, `${indent}\tLinear,`, ...keys, `${indent}}`].join(newline);
+  const block=[`${indent}Rotation ${keys.length} {`, `${indent}\tLinear,`, ...keys, `${indent}}`].join(newline);
+  // Use the actual campaign path; the two user controls are locked while rotating.
+  const interval=`Anim "Campaign" { Interval { ${start}, ${start+duration} } }${newline}`;
+  return applyUnitLightAngle(applyUnitShadowLength(interval+block,40),45).slice(interval.length);
 }
 
 async function ordinaryPath(root: string, relative: string): Promise<string> {
@@ -115,12 +120,13 @@ export async function patchRotatingUnitLighting(
   for (const relative of files) {
     const file = await ordinaryPath(dncDir, relative);
     const before = await fs.readFile(file, 'utf8');
-    const baseline = renderDncLighting(await fs.readFile(path.join(baselineDir, relative), 'utf8'),
+    const source = await fs.readFile(path.join(baselineDir, relative), 'utf8');
+    const baseline = renderDncLighting(source,
       file, mode, brightness, options);
     // Even when enabling, verify that the model has the expected baseline layout.
     const baselineRotation = unitRotationBlock(baseline);
     const after = replaceUnitRotation(before, enabled && ROTATING_UNIT_FILES.includes(relative)
-      ? deRotationBlock(before, options.unitLightAngle) : baselineRotation);
+      ? deRotationBlock(before) : baselineRotation);
     if (after !== before) edits.push({ file, before, after });
   }
   const written: typeof edits = [];

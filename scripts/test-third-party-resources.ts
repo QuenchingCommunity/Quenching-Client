@@ -1,9 +1,21 @@
 import assert from 'node:assert/strict';
-import os from 'node:os';
 import path from 'path';
 import fs from 'fs-extra';
 import JSZip from 'jszip';
-import { getThirdPartyState, importThirdPartySource, peelToGamePaths, setThirdPartyEnabled, setThirdPartyFeature, setThirdPartyName } from '../src/Main/services/third-party-resources';
+import { build } from 'esbuild';
+import { createRequire } from 'node:module';
+const compiled = await build({
+  entryPoints: ['src/Main/services/third-party-resources.ts'], bundle: true, write: false, platform: 'node', format: 'cjs', packages: 'external',
+  plugins: [{ name: 'third-party-fixture', setup(plugin) {
+    plugin.onResolve({ filter: /^\.\/(game-channel|full-package-service)$/ }, args => ({ path: args.path, namespace: 'fixture' }));
+    plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: args.path.endsWith('full-package-service')
+      ? 'export const isFullPackageInstalled=async()=>false;'
+      : 'export const getSelectedGameFolder=()=>"_retail_";export const getSelectedGameChannel=()=>"retail";export const getChannelModEnabled=()=>true;' }));
+  } }],
+});
+const loaded = { exports: {} as any };
+new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(createRequire(import.meta.url), loaded, loaded.exports);
+const { getThirdPartyState, importThirdPartySource, peelToGamePaths, setThirdPartyEnabled, setThirdPartyFeature, setThirdPartyName } = loaded.exports;
 
 assert.deepEqual(
   peelToGamePaths(['VisionMod/Install Guide.txt', 'VisionMod/_retail_/units/hero.mdx', 'VisionMod/_retail_/terrainart/terrain.slk']),
@@ -16,7 +28,9 @@ assert.deepEqual(
   ['t00/b.txt']
 );
 
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'quenching-third-party-'));
+const parent = path.resolve('_tmp/branch-startup-recovery-20261107');
+await fs.ensureDir(parent);
+const root = await fs.mkdtemp(path.join(parent, 'third-party-'));
 const retail = path.join(root, '_retail_');
 try {
   await fs.ensureDir(path.join(retail, 't00'));
@@ -66,6 +80,24 @@ try {
   const backup = path.join(root, '.quenching', 'player-file-backups', backupNames.find(name => name.startsWith('third-party-1-'))!);
   assert.equal(await fs.readFile(path.join(backup, 'modified', 'units', 'hero.mdx'), 'utf8'), 'player edited model');
   assert.equal(await fs.readFile(path.join(backup, '_leftovers', 'shaders', 'extra.bls'), 'utf8'), 'player shader');
+
+  // A failed state commit must restore the active files and all parked originals.
+  await setThirdPartyEnabled(root, 1, true);
+  const originalRename = fs.rename;
+  let injected = false;
+  fs.rename = (async (from: string, to: string) => {
+    if (!injected && from.endsWith('_QMThirdParty.json.tmp')) {
+      injected = true; throw Error('injected third-party state failure');
+    }
+    return originalRename(from, to);
+  }) as typeof fs.rename;
+  try {
+    await assert.rejects(setThirdPartyEnabled(root, 1, false), /injected third-party state failure/);
+  } finally { fs.rename = originalRename; }
+  assert.equal((await getThirdPartyState(root)).slots[0].enabled, true);
+  assert.equal(await fs.readFile(path.join(retail, 'units/hero.mdx'), 'utf8'), 'model');
+  assert.equal(await fs.pathExists(path.join(retail, 'QMoff/third-party/shaders')), true);
+  await setThirdPartyEnabled(root, 1, false);
 
   const zip = new JSZip();
   zip.file('Outer/Install Guide.txt', 'ignore');
