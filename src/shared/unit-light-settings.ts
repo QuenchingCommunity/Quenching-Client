@@ -32,14 +32,14 @@ export function resolveUnitLightSettings(settings:{lighting?:unknown;lightingAng
     (typeof settings.shadowLength==='number'&&Number.isFinite(settings.shadowLength)&&settings.shadowLength>=0&&settings.shadowLength<=100);
   const shadow=validShadow?settings.shadowLength as UnitShadowSetting:battle?20:UNIT_SHADOW_DEFAULT;
   const sourceDefaults=settings.lightingAngle===null||shadow==='default'||typeof shadow==='number';
-  return {unitLightAngle:settings.lightingAngle===null?undefined:angle??(battle?230:undefined),
+  return {unitLightAngle:settings.lightingAngle===null?undefined:angle??(battle?230:60),
     unitShadowLength:shadow==='default'||shadow===UNIT_SHADOW_DEFAULT?undefined:shadow,
     ...(sourceDefaults?{unitLightSourceDefaults:true}:{}),};
 }
-/** Battle applies its defaults once; other mode changes preserve independent edits. */
+/** Mode selection applies its direction default; explicit edits/resets are preserved. */
 export function unitLightModeDefaults<T extends {lighting?:unknown;lightingAngle?:number|null;shadowLength?:UnitShadowSetting;rotatingLighting?:boolean;atmosphericLight?:boolean}>(changes:T):T & {lightingAngle?:number|null;shadowLength?:UnitShadowSetting;rotatingLighting?:boolean;atmosphericLight?:boolean} {
   const battle=changes.lighting==='battle'||changes.lighting==='melee';
-  if(!battle)return changes;
+  if(!battle)return changes.lighting===undefined?changes:{...changes,lightingAngle:changes.lightingAngle===undefined?60:changes.lightingAngle};
   return {...changes,lightingAngle:changes.lightingAngle===undefined?230:changes.lightingAngle,shadowLength:changes.shadowLength??20,
     rotatingLighting:changes.rotatingLighting??false,atmosphericLight:changes.atmosphericLight??false};
 }

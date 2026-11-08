@@ -36,7 +36,7 @@ def sha(b):return hashlib.sha256(b).hexdigest()
 validator=ShaderValidator();validated=set();patch_cache={}
 report={'schema':1,'source':'shipped Standard BLS','files':[],
  'hdRpg':{'cloudClear':1.5,'cloudDark':0.5,'diffuse':1.25,'dielectricF0':0.05,'saturation':0.95,'exposure':0.85,'roughnessAdd':-0.1,'roughnessMultiplier':0.95,'normalXY':1.5,'terrainNormalXY':1.5},
- 'hdBattle':{'cloud':False,'baseColorBrightness':0.95,'diffuse':1.25,'groundDiffuse':1.4,'dielectricF0':0.01,'saturation':0.94,'exposure':1,'metallicMultiplier':BATTLE_METALLIC_MULTIPLIER,'roughnessAdd':BATTLE_ROUGHNESS_ADD,'roughnessMultiplier':BATTLE_ROUGHNESS_MULTIPLIER,'fresnelGrazing':[1,1,1],'environmentSpecular':1,'f0Multiplier':[1,1,1],'shadowEnvironmentSpecularRetention':1,'shadowEnvironmentFill':1},
+ 'hdBattle':{'cloud':False,'baseColorBrightness':0.95,'diffuse':1.25,'groundDiffuse':1.6,'foliageDiffuse':1.6,'dielectricF0':0.01,'saturation':0.94,'exposure':1,'metallicMultiplier':BATTLE_METALLIC_MULTIPLIER,'roughnessAdd':BATTLE_ROUGHNESS_ADD,'roughnessMultiplier':BATTLE_ROUGHNESS_MULTIPLIER,'fresnelGrazing':[1,1,1],'environmentSpecular':1,'f0Multiplier':[1,1,1],'shadowEnvironmentSpecularRetention':1,'shadowEnvironmentFill':1},
  'groundSharedGrade':['terrain','cliffblightmiscterrain'],
  'de':{'standardAndRpg':'unchanged','battle':'current DE without clouds'}}
 
@@ -88,10 +88,15 @@ def transform(blob,family,mode,protect_splat=False):
         else:
             configs=[i for i in range(tail,len(lines)) if re.match(r'mad r\d+\.xy, r\d+\.xxxx, l\(',lines[i]) and len(data[i])>=40 and struct.unpack('<I',data[i][-40:-36])[0]==16386 and struct.unpack('<I',data[i][-20:-16])[0]==16386]
             # Identify the final density→direct/shadow multiplier, not noise constants.
-            configs=[i for i in configs if abs(struct.unpack('<f',data[i][-16:-12])[0]-1.5)<1e-6]
+            configs=[i for i in configs if any(abs(struct.unpack('<f',data[i][-16:-12])[0]-v)<1e-6 for v in (1.4,1.5))]
             if len(configs)==1:
-                i=configs[0];slope=list(struct.unpack('<4f',data[i][-36:-20]));clear=list(struct.unpack('<4f',data[i][-16:]));slope[0]=-1.;clear[0]=1.5
+                i=configs[0];slope=list(struct.unpack('<4f',data[i][-36:-20]));clear=list(struct.unpack('<4f',data[i][-16:]));slope[:2]=[-1.,-.6];clear[:2]=[1.5,1.5]
                 data[i]=data[i][:-40]+lit4(slope)+lit4(clear)
+            elif any(re.fullmatch(r'mad r(\d+)\.x, r\1\.x, l\(-0\.700000\), l\(1\.400000\)',l) for l in lines[tail:cloud_end]):
+                # Standard cloud contrast changed independently; RPG keeps its own endpoints.
+                for j in range(tail,cloud_end):
+                    if re.fullmatch(r'mad r(\d+)\.x, r\1\.x, l\(-0\.700000\), l\(1\.400000\)',lines[j]):data[j]=data[j][:-16]+lit(-1)+lit(1.5)
+                    if re.fullmatch(r'mad r\d+\.y, r\d+\.z, l\(-0\.500000\), l\(1\.400000\)',lines[j]):data[j]=data[j][:-16]+lit(-.6)+lit(1.5)
             elif not any(re.fullmatch(r'mad r\d+\.x, -r\d+\.y, r\d+\.x, l\(1\.500000\)',l) for l in lines[max(tail,cloud_end-22):cloud_end]):
                 raise ValueError('Cloud lighting parameter anchor changed')
             counts['cloud_1_5_to_0_5']=1
@@ -144,7 +149,7 @@ def transform(blob,family,mode,protect_splat=False):
                     counts['dielectric_f0_'+str(cfg['dielectricF0']).replace('.','_')]+=1
                 matrix=re.fullmatch(r'dp3 r(\d+)\.z, l\(-0\.030000, -0\.060000, (?:1\.210000|1\.090000), 0\.000000\), r\d+\.xyzx',line)
                 if matrix:grade_rgb(i,int(matrix[1]),cfg)
-            if family in ('terrain','cliffblightmiscterrain') and mode in ('rpg','battle'):
+            if (family in ('terrain','cliffblightmiscterrain') or (family=='foliage' and mode=='battle')) and mode in ('rpg','battle'):
                 cfg=report['hdRpg' if mode=='rpg' else 'hdBattle']
                 if re.fullmatch(r'mul r\d+\.xyz, r\d+\.xyzx, l\(0\.318310, 0\.318310, 0\.318310, 0\.000000\)',line):
                     raw=rows[i][2];native=struct.unpack('<f',raw[-16:-12])[0]

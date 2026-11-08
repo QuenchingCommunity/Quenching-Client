@@ -7,7 +7,7 @@ export function renderingPresetSettings(preset: RenderingPreset) {
   const battle = preset === 'battle';
   return {
     lighting: battle ? 'battle' as const : 'standard' as const,
-    lightingAngle: battle ? 230 : 45,
+    lightingAngle: battle ? 230 : 60,
     shadowLength: battle ? 20 : 50,
     ...(battle?{rotatingLighting:false,atmosphericLight:false}:{}),
     hdrExposure: defaultHdrExposure(battle ? 'battle' : 'standard'),
@@ -25,7 +25,7 @@ export function matchesRenderingPreset(settings: object, preset: RenderingPreset
   if(saved.lightingAngle===null||saved.shadowLength==='default')return false;
   const direction=resolveUnitLightSettings(settings);
   const shadow=direction.unitShadowLength===undefined?50:unitShadowSliderValue(direction.unitShadowLength);
-  const values={...settings,lightingAngle:direction.unitLightAngle??45,shadowLength:shadow===0?'short':shadow===100?'long':shadow};
+  const values={...settings,lightingAngle:direction.unitLightAngle??60,shadowLength:shadow===0?'short':shadow===100?'long':shadow};
   return Object.entries(renderingPresetSettings(preset)).every(([key, value]) => (values as Record<string, unknown>)[key] === value);
 }
 

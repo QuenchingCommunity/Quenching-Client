@@ -29,7 +29,14 @@ for(const length of ['short','long',0,25,50,75,100] as const)for(const angle of 
 }
 for(const value of [null,undefined,-1,101,NaN,Infinity,true,'medium','SHORT','50'])assert.throws(()=>validateUnitShadowLength(value));
 assert.equal(unitShadowSliderValue('short'),0);assert.equal(unitShadowSliderValue('long'),100);assert.equal(unitShadowSliderValue('default'),50);
-assert.deepEqual(resolveUnitLightSettings({}),{unitLightAngle:undefined,unitShadowLength:undefined,unitLightSourceDefaults:true},'missing normal setting uses native DNC at 50%');
+assert.deepEqual(resolveUnitLightSettings({}),{unitLightAngle:60,unitShadowLength:undefined,unitLightSourceDefaults:true},'missing normal setting uses 60 degrees and native shadow at 50%');
+for(const lighting of ['standard','rpg','enhanced']){
+ assert.equal(resolveUnitLightSettings({lighting}).unitLightAngle,60);
+ assert.equal(unitLightModeDefaults({lighting}).lightingAngle,60);
+ assert.equal(unitLightModeDefaults({lighting,lightingAngle:null}).lightingAngle,null);
+ assert.equal(unitLightModeDefaults({lighting,lightingAngle:90}).lightingAngle,90);
+}
+assert.equal(renderingPresetSettings('standard').lightingAngle,60);
 assert.deepEqual(resolveUnitLightSettings({shadowLength:50}),resolveUnitLightSettings({shadowLength:'default'}),'50% and reset use identical raw DNC parameters');
 assert.equal(resolveUnitLightSettings({shadowLength:37}).unitShadowLength,37);
 assert.deepEqual(resolveUnitLightSettings({lighting:'battle'}),{unitLightAngle:230,unitShadowLength:20,unitLightSourceDefaults:true});

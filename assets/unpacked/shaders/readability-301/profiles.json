@@ -4,9 +4,9 @@
   "profiles": {
     "ao_080": {
       "mode": "standard",
-      "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
+      "baseHdSha256": "2bc902a991f7f9292a71f87108f5a73feb6979d4471023179c831abc7d1a7542",
       "files": {
-        "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
+        "ps/hd.bls": "346fdd9f0a34f2f94684a12ef4a309a0cba9c9371e119dd79a23d219eb55d362",
         "ps/fog.bls": "6d6106ab2d91d47f72572fff107ae89936d21118be926a465a7907ce07396bd3",
         "ps/volumetricfog.bls": "af3a89cde0c8826be2bb63db34bfe811ab5d3d559ff4883ea5ebbbdf6f9c78b3"
       }
@@ -22,9 +22,9 @@
     },
     "ao_080_outline": {
       "mode": "standard",
-      "baseHdSha256": "093bfb1f15f5e52cbd28b52d4051f42aa70104d36ff4b1a849b8a786e93ca4be",
+      "baseHdSha256": "2bc902a991f7f9292a71f87108f5a73feb6979d4471023179c831abc7d1a7542",
       "files": {
-        "ps/hd.bls": "1878f0afbccbf310141d49393245fb04c5b0d3ef24b382bd0cdfcfc7540d5177",
+        "ps/hd.bls": "346fdd9f0a34f2f94684a12ef4a309a0cba9c9371e119dd79a23d219eb55d362",
         "ps/fog.bls": "47c7091f6bcfb23e91d211b68778aa684a4b9cbda15d9bfb52e42c2e3e52da93",
         "ps/volumetricfog.bls": "5ae6124a0f18fad358dd722f6e999db8be33814b00cd889d5b3dacf55481fb88"
       }

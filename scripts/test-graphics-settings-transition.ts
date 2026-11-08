@@ -400,14 +400,14 @@ try {
   assert.equal((lightingHtml.match(/settings-lighting-reset/g)||[]).length,2,'two independent default buttons');
   const beforeButtonReset={...fixture.saved};fixture.writes.length=0;
   await fixture.controls['lighting-angle-reset'].onClick();
-  assert.deepEqual(fixture.writes,['lighting-angle']);assert.equal(fixture.saved.lightingAngle,null);
+  assert.deepEqual(fixture.writes,['lighting-angle']);assert.equal(fixture.saved.lightingAngle,60);
   assert.equal(fixture.saved.shadowLength,beforeButtonReset.shadowLength);
   fixture.writes.length=0;await fixture.controls['shadow-length-reset'].onClick();
   assert.deepEqual(fixture.writes,['shadow-length']);assert.equal(fixture.saved.shadowLength,'default');
-  await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.lightingAngle,null);assert.equal(hook.store.modSettings.shadowLength,'default');
+  await hook.loadModSettings('Z:/fixture-game');assert.equal(hook.store.modSettings.lightingAngle,60);assert.equal(hook.store.modSettings.shadowLength,'default');
   const nativeDefaultsHtml=renderToStaticMarkup(React.createElement(SettingsModal,{open:true,onClose(){},isFullPackageInstalled:true}));
   assert(!nativeDefaultsHtml.includes('settings.lighting.sourceDefault'),'no small DNC description under either slider');
-  assert(nativeDefaultsHtml.includes('data-formatted=""'),'native angle shows the default placeholder, without a stray degree suffix');
+  assert(nativeDefaultsHtml.includes('data-formatted="60°"'),'angle reset displays its fixed 60-degree value');
   assert(nativeDefaultsHtml.includes('data-formatted="50%"'),'reset shadow displays 50%');
   assert(!lightingHtml.includes('settings-preview-card'),'lighting never renders the floating explanation panel');
   assert.equal((lightingHtml.match(/data-tooltip-open="false"/g)||[]).length,3,'all lighting sliders disable floating tooltips');

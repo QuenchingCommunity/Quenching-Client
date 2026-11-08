@@ -49,3 +49,5 @@ RPG饱和度与曝光仅修改RGB，不修改alpha。曝光是0.85线性倍率�
 2026-10-28 最终定稿：仅对战，OUTPUT_SATURATION=0.94、HD 非金属 F0=0.01、HD 基色亮度倍率0.95、OUTPUT_EXPOSURE=1。其余对战参数保留，标准和 RPG 不变。见 `artifacts/battle-final-20261028/verification.json` 和 `artifacts/deploy-battle-final-20261028/deployment.json`。
 
 2026-10-29 对战贴花例外：HD 的建筑贴花变体 448／1472 恢复 Standard 材质，只去云影，不套用单位提亮及 ORM／F0／调色修改。详见 [贴花保护](battle-splat-20261029.md)。当前游戏 RPG 配置保持。
+
+2026-11-08：标准云影已改为受光1.4／0.7、阴影内1.4／0.9；对战地形／悬崖／植被漫反射统一1.6，单位与建筑贴花保持。RPG仍保持自己的云影值。见 [最新平衡参数](lighting-balance-20261108.md)。

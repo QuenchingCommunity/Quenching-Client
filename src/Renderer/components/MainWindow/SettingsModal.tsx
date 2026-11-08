@@ -613,10 +613,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           <Button className="settings-lighting-reset" data-testid="lighting-angle-reset"
             aria-label={`${t('settings.lighting.angle')}: ${t('settings.lighting.restoreDefault')}`}
             disabled={sAngle.disabled||isLoading} onMouseDown={event=>event.preventDefault()}
-            onClick={()=>handleSettingChange('lightingAngle',null)}>{t('settings.lighting.restoreDefault')}</Button>
+            onClick={()=>handleSettingChange('lightingAngle',60)}>{t('settings.lighting.restoreDefault')}</Button>
         </div>
         <div className="settings-lighting-angle-controls">
-          <Slider min={0} max={360} step={1} value={modSettings.rotatingLighting?45:lightingAngleDraft??45} disabled={sAngle.disabled || isLoading}
+          <Slider min={0} max={360} step={1} value={modSettings.rotatingLighting?45:lightingAngleDraft??60} disabled={sAngle.disabled || isLoading}
             aria-label={t('settings.lighting.angle')}
             tooltip={{open:false}}
             onChange={setLightingAngleDraft} onChangeComplete={commitLightingAngle} />
