@@ -27,7 +27,8 @@ export const POST_PROCESSING_SHADOW_FILES = [
     'ps/volumetricfog.bls',
 ];
 export const HDR_SHADER_FILES = ['ps/tonemap.bls'];
-export const supportsHdr = (profile: FogProfile): boolean => profile.graphics !== 'sd' && !profile.shaderPack.includes('-legacy-');
+export const supportsHdr = (profile: FogProfile): boolean =>
+    profile.graphics !== 'sd' && profile.shaderPack !== 'shaders203' && !profile.shaderPack.includes('-legacy-');
 const hdrEnabled = (settings: any): boolean => settings?.hdr ?? settings?.postProcessing !== false;
 
 /** 后处理辉光：只控制两份 Bloom 和 Gaussian Blur。 */
@@ -210,6 +211,10 @@ export async function prepareShaderToggles(
             for (const file of OBJECT_SHADER_FILES) await fs.remove(path.join(shadersDir, file));
         }
         await applyResolvedPostProcessing(shadersDir, modSettings, resolved);
+        if (profile.shaderPack === 'shaders203') {
+            await fs.remove(path.join(shadersDir, 'ps', 'volumetricfog.bls'));
+            await fs.remove(path.join(shadersDir, 'ps', 'bloomcombine.bls'));
+        }
         if (enableHdr) await copyBundledResourceIfChanged(hdrSource, path.join(shadersDir, HDR_SHADER_FILES[0]));
         else await fs.remove(path.join(shadersDir, HDR_SHADER_FILES[0]));
     };

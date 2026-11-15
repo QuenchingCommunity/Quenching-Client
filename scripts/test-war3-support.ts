@@ -65,6 +65,12 @@ try {
   assert.equal((await resolveModProfile(root, { versionSelection: 'auto', graphicsSelection: 'de' })).shaderPack, 'shaders-300-legacy-de');
   await writeVersion('2.0.4.24000');
   assert.equal((await resolveModProfile(root, { versionSelection: 'v203', graphicsSelection: 'de' })).graphics, 'hd');
+  for (const versionSelection of ['v30', 'v301'] as const) {
+    const profile = await resolveModProfile(root, { versionSelection, graphicsSelection: 'de' });
+    assert.equal(profile.version, 'v204');
+    assert.equal(profile.graphics, 'hd');
+    assert.equal(profile.shaderPack, 'shaders203');
+  }
   assert.equal((await resolveModProfile(root, { versionSelection: 'v1' })).version, 'v204');
   await fs.outputFile(path.join(root, '.build.info'), 'Active!DEC:1|Version!STRING:0|Product!STRING:0\n1|2.0.3.23000|w3\n1|3.0.1.24368|w3t\n');
   assert.equal((await detectWar3Version(root, 'ptr')).version, '3.0.1.24368', 'explicit destination channel is independent of current selection');

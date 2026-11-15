@@ -7,6 +7,7 @@ import { SKIN_CONFIG } from '../../assets/data/skin-config';
 import { builtInSkins, PanelSkin, skinTargets, warbandChoices } from '../../assets/data/skin-panel-catalog';
 import { SkinSelections, VersionSkinChange, VersionSkinChoice, scopedSkin } from '../../../shared/skin-versions';
 import { activeSkinArtSet } from '../../../shared/active-skin-art-set';
+import { resolveVersionSelection } from '../../../shared/mod-profile';
 import { useWar3Detector } from '../../hooks/useWar3Detector';
 import { useWar3Settings } from '../../hooks/useWar3Settings';
 import { useSound } from '../../hooks/useSound';
@@ -37,9 +38,11 @@ const modelFrom = (original: VersionSkinChange[], changes: VersionSkinChange[], 
 export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPackageInstalled = false }) => {
   const { t } = useTranslation();
   const { currentInstallation } = useWar3Detector();
-  const { modSettings, settings } = useWar3Settings();
+  const { modSettings, settings, detectedVersion } = useWar3Settings();
   const { playSmall, playHover } = useSound();
-  const artSet = activeSkinArtSet(modSettings.graphicsSelection, settings.hd, modSettings.classicMode, settings.detectedGraphics);
+  const effectiveVersion = resolveVersionSelection(modSettings.versionSelection, detectedVersion);
+  const graphics = effectiveVersion === 'v204' && modSettings.graphicsSelection === 'de' ? 'hd' : modSettings.graphicsSelection;
+  const artSet = activeSkinArtSet(graphics, settings.hd, modSettings.classicMode, settings.detectedGraphics);
   const [raceId, setRaceId] = useState('hum');
   const [category, setCategory] = useState<Category>('hero');
   const [unitMode, setUnitMode] = useState<UnitMode>('single');
@@ -255,6 +258,10 @@ export const SkinModal: React.FC<SkinModalProps> = ({ open, onClose, isFullPacka
                 </div>
                 {!isWarband && <div className={styles.choiceMeta}>
                   <span className={styles.skinCount}>{target ? `${Math.max(0, skins.findIndex(item => item.id === currentSkin?.id) + 1)} / ${skins.length} · ${target.name}` : ''}</span>
+                  {target && currentSkin && <button className={styles.addCustom} disabled={!canApply || unavailable}
+                    onClick={() => void apply([{ unitId: target.unitId, skinId: currentSkin.id, changes: currentSkin.config }])}>
+                    {t(selections[artSet]?.[target.unitId] === currentSkin.id ? 'skin.panel.reapply' : 'skin.btn.apply')}
+                  </button>}
                   {target && <button className={styles.addCustom} disabled={busy || loading} onClick={() => { playSmall(); setEditorOpen(true); }}>
                     <span aria-hidden="true">＋</span> {t('skin.editor.title')}
                   </button>}

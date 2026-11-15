@@ -111,7 +111,7 @@ async function writeState(buildDir: string, state: State): Promise<void> {
   finally { await fs.remove(temporary).catch(() => undefined); }
 }
 
-async function readOptionalPackageManifest(buildDir: string): Promise<any | null> {
+export async function readOptionalPackageManifest(buildDir: string): Promise<any | null> {
   // A bundled file list is only a hint for which Quenching files can be
   // parked. Missing/old metadata must never prevent the user from toggling
   // the MOD switch.

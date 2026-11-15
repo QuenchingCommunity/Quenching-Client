@@ -15,6 +15,7 @@ import { setBranchModEnabledOnDisk } from './branch-mod-toggle';
 import { app } from 'electron';
 import { launchViaBattleNet, resolveBattleNetExe } from './battle-net-launcher';
 import { writeMapName } from './map-name';
+import { restoreIncompatibleVisionModules } from './vision-modules';
 
 async function assertSelectedGameBuild(gamePath: string): Promise<void> {
     if (!(await hasGameChannelDirectory(gamePath, getSelectedGameChannel()))) {
@@ -55,6 +56,10 @@ export class GameLauncher {
         const profile = await resolveModProfile(gamePath, settings);
         // Validate even when an old PTR marker happens to name the same pack.
         assertShaderProfileSupported(profile);
+        if (profile.version === 'v204') {
+            await restoreIncompatibleVisionModules(gamePath);
+            await AssetSyncService.ensurePostProcessingConfig(gamePath);
+        }
         const shadersDir = path.join(gamePath, getSelectedGameFolder(), 'shaders');
         if (await readShaderPackMarker(shadersDir) !== profile.shaderPack) {
             if (!(await isFullPackageInstalled(gamePath))) return;

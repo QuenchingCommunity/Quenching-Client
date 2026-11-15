@@ -1389,8 +1389,9 @@ const messages = {
   "settings.hdr.title": "HDR (Tone mapping)",
   "settings.hdr.on.desc": "Adjust brightness and color for smoother highlights and shadows.",
   "settings.hdr.off.desc": "Restore the game’s original tone mapping.",
-  "settings.hdr.unsupported": "This effect is unavailable in the legacy Warcraft 3.0 shaders.",
+  "settings.requiresVersion": "Requires Warcraft III {version} or later.",
 
+  'settings.vision.requires30': "This version of Vision Mod requires Warcraft III 3.0 or later. Use a compatible older version with 2.04.",
   'settings.vision.visionUnits.title': 'Unit enhancements',
   'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
   'settings.vision.visionDecorations.title': 'Doodads',

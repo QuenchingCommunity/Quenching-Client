@@ -9,7 +9,7 @@ import { useWar3Settings } from '../../hooks/useWar3Settings';
 import { useWar3Detector } from '../../hooks/useWar3Detector';
 import { useSound } from '../../hooks/useSound';
 import { useGlobalLoading } from '../GlobalLoadingProvider';
-import { normalizeGraphicsSelection } from '../../../shared/mod-profile';
+import { normalizeGraphicsSelection, resolveVersionSelection } from '../../../shared/mod-profile';
 import './LightingSettings.less';
 
 const { Text } = Typography;
@@ -51,7 +51,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   const { t } = useTranslation();
   const { modSettings, detectedVersion, settings: war3Settings, saveModSettings, toggleGameMode, isLoading } = useWar3Settings();
   // Applied profiles may belong to an earlier installation or game build.
-  const effectiveVersion = modSettings.versionSelection === 'auto' ? detectedVersion : modSettings.versionSelection;
+  const effectiveVersion = resolveVersionSelection(modSettings.versionSelection, detectedVersion);
   const { currentInstallation, detectInstallations } = useWar3Detector();
   const { playSmall, playHover } = useSound();
   const { showLoading, hideLoading } = useGlobalLoading();
@@ -65,7 +65,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
   });
   const isClassicMode = modSettings?.classicMode === true;
   // A previous applied DE profile must not lock an explicit HD selection.
-  const deGraphics = !isClassicMode && normalizeGraphicsSelection(modSettings.graphicsSelection) === 'de';
+  const deGraphics = !isClassicMode && effectiveVersion !== 'v204' && normalizeGraphicsSelection(modSettings.graphicsSelection) === 'de';
   const visualSettingsDisabled = isClassicMode || modSettings?.graphicsSelection === 'sd';
   const [antiHarmonyEnabled, setAntiHarmonyEnabled] = useState(false);
   const [antiHarmonyBusy, setAntiHarmonyBusy] = useState(false);
@@ -282,8 +282,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     if (restrictedInClassic.includes(key) && visualSettingsDisabled) {
       return { disabled: true, reason: t('settings.basic.classicMode.disabled') };
     }
-    if (['hdr','hdrExposure'].includes(key) && effectiveVersion === 'v30') {
-      return { disabled: true, reason: t('settings.hdr.unsupported') };
+    if (['hdr', 'hdrExposure', 'postProcessingOutline', 'improveReadability'].includes(key) && effectiveVersion !== 'v301') {
+      return { disabled: true, reason: t('settings.requiresVersion', { version: '3.0.1' }) };
     }
 
     // 2b. DE graphics: water cannot be adjusted
@@ -342,9 +342,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
     const sPostGlow = getSettingStatus('postProcessingGlow');
     const sOutline = getSettingStatus('postProcessingOutline');
     const sReadability = getSettingStatus('improveReadability');
-    const readabilityAvailable = !visualSettingsDisabled &&
-      effectiveVersion === 'v301' &&
-      modSettings.objectShader && modSettings.postProcessing;
+    const readabilityAvailable = modSettings.objectShader && modSettings.postProcessing;
     const sGlow = getSettingStatus('glow');
 
     return (
@@ -385,10 +383,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           </Col>
           <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.postprocessing.outline.title')}</h3>
-            {renderSettingSwitch(t('settings.postprocessing.outline.title'), Boolean(modSettings.postProcessingOutline ?? false),
+            {renderSettingSwitch(t('settings.postprocessing.outline.title'), effectiveVersion === 'v301' && Boolean(modSettings.postProcessingOutline),
               enabled => handleSettingChange('postProcessingOutline', enabled),
               () => setPreviewInfo({ title: t('settings.postprocessing.outline.title'), desc: t(modSettings.postProcessingOutline ? 'settings.postprocessing.outline.on.desc' : 'settings.postprocessing.outline.off.desc'), image: null }),
-              sOutline.disabled || !modSettings.postProcessing || effectiveVersion !== 'v301')}
+              sOutline.disabled || !modSettings.postProcessing)}
             {renderStatusPlaceholder(sOutline.reason)}
           </Col>
           <Col span={8}>
@@ -401,10 +399,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
           </Col>
           <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.readability.title')}</h3>
-            {renderSettingSwitch(t('settings.readability.title'), Boolean(modSettings.improveReadability ?? false),
+            {renderSettingSwitch(t('settings.readability.title'), effectiveVersion === 'v301' && Boolean(modSettings.improveReadability),
               enabled => handleSettingChange('improveReadability', enabled),
               () => setPreviewInfo({ title: t('settings.readability.title'), desc: t(modSettings.improveReadability ? 'settings.readability.on.desc' : 'settings.readability.off.desc'), image: null }),
               sReadability.disabled || !readabilityAvailable)}
+            {renderStatusPlaceholder(sReadability.reason)}
           </Col>
           <Col span={8}>
             <h3 style={{ color: '#d4af37', marginBottom: '10px', fontSize: '16px', fontFamily: "'Trajan Pro 3', serif" }}>{t('settings.glow.title')}</h3>
@@ -553,11 +552,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose, isF
         <div className="settings-hdr-row">
           <div className="settings-hdr-toggle">
             <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.title')}</h3>
-            {renderSettingSwitch(t('settings.hdr.title'),Boolean(modSettings.hdr),enabled=>handleSettingChange('hdr',enabled),
+            {renderSettingSwitch(t('settings.hdr.title'),effectiveVersion === 'v301' && Boolean(modSettings.hdr),enabled=>handleSettingChange('hdr',enabled),
               undefined,sHdr.disabled)}
             {renderStatusPlaceholder(sHdr.reason)}
           </div>
-          {modSettings.hdr && <div className="settings-hdr-exposure">
+          {effectiveVersion === 'v301' && modSettings.hdr && <div className="settings-hdr-exposure">
             <h3 style={BASIC_SETTINGS_TITLE}>{t('settings.hdr.brightness')}</h3>
             <Slider min={HDR_EXPOSURE_MIN} max={HDR_EXPOSURE_MAX} step={0.01} value={hdrExposureDraft}
               aria-label={t('settings.hdr.brightness')} disabled={sExposure.disabled||isLoading}

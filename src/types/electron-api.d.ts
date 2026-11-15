@@ -55,6 +55,7 @@ interface ThirdPartyState {
 
 interface ElectronAPI {
   getVisionModules: (root:string) => Promise<import('../shared/vision-modules').VisionModules>;
+  visionRequiresWarcraft30: (root: string, source: string) => Promise<boolean>;
   setVisionModule: (root:string,source:string,module:import('../shared/vision-modules').VisionModule,enabled:boolean) => Promise<boolean>;
   showForum: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>;
   setForumBounds: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>;

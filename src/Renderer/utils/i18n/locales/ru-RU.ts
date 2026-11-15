@@ -1386,8 +1386,9 @@ const messages = {
   "settings.hdr.title": "HDR (Тональная компрессия)",
   "settings.hdr.on.desc": "Настраивает яркость и цвет для плавных переходов между светом и тенью.",
   "settings.hdr.off.desc": "Восстанавливает исходную тональную компрессию игры.",
-  "settings.hdr.unsupported": "Этот эффект недоступен в старых шейдерах Warcraft 3.0.",
+  "settings.requiresVersion": "Требуется Warcraft III {version} или новее.",
 
+  'settings.vision.requires30': "Эта версия Vision Mod требует Warcraft III 3.0 или новее. Для 2.04 используйте совместимую старую версию.",
   'settings.vision.visionUnits.title': 'Unit enhancements',
   'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
   'settings.vision.visionDecorations.title': 'Doodads',

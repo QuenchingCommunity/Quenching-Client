@@ -4,6 +4,7 @@ import { IS_TEST_RELEASE } from '../shared/local-release';
 // 暴露安全的API给渲染进程
 const electronAPI: ElectronAPI = {
   getVisionModules: root => ipcRenderer.invoke('vision:modules',root),
+  visionRequiresWarcraft30: (root, source) => ipcRenderer.invoke('vision:requires-warcraft-30', root, source),
   setVisionModule: (root,source,module,enabled) => ipcRenderer.invoke('vision:set-module',root,source,module,enabled),
   showForum: bounds => ipcRenderer.invoke('forum:show', bounds),
   setForumBounds: bounds => ipcRenderer.invoke('forum:bounds', bounds),

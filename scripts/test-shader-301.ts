@@ -25,7 +25,7 @@ const result = await build({
       args.path.endsWith('shared/game-channel') ? undefined : ({ path: args.path, namespace: 'fixture' }));
     plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: `const f=globalThis.__shader301Fixture;` + (
       args.path === 'electron' ? `export const app={getAppPath:()=>process.cwd(),getVersion:()=>"3.6.1",getPath:()=>process.cwd()};
-        export const ipcMain={handle:(name,fn)=>f.handlers.set(name,fn)};`
+        export const ipcMain={handle:(name,fn)=>f.handlers.set(name,fn)};export const nativeImage={};`
       : args.path.endsWith('config-manager') ? `export const configManager={get:key=>key==='gameChannel'?f.channel:key==='modSettings'?f.settings:undefined,set:(key,value)=>{if(key==='modSettings')f.settings=value}};`
       : args.path.endsWith('game-channel') ? `export const getSelectedGameChannel=()=>f.channel; export const getSelectedGameFolder=()=>f.channel==='ptr'?'_ptr_':'_retail_';
         export const getChannelModEnabled=()=>true;export const hasGameChannelDirectory=async()=>true;`
@@ -208,7 +208,7 @@ try {
     assert.equal(profile.dncPack, 'dnc30-de');
     assert.equal(profile.shaderPack, 'shaders-ptr-de');
     await assert.rejects(() => api.syncLightingResources(root, fixtureQuenching, fixture.settings, profile), /shader compatibility is not verified/);
-    await assert.rejects(() => api.GameLauncher.syncDetectedVersionBeforeLaunch(root), /shader compatibility is not verified/, 'existing pack marker must not bypass PTR build validation');
+    await assert.rejects(() => api.GameLauncher.prepareLaunchAssets(root), /shader compatibility is not verified/, 'existing pack marker must not bypass PTR build validation');
     for (const method of ['shader:update-object-shader', 'shader:update-post-processing', 'shader:update-post-processing-glow', 'shader:update-post-processing-outline', 'shader:update-readability']) {
       for (const enabled of [false, true]) await assert.rejects(() => fixture.handlers.get(method)({}, root, enabled), /shader compatibility is not verified/);
     }
@@ -222,6 +222,18 @@ try {
   assert.deepEqual(await snapshotTree(current), retailBefore);
   fixture.parts = [0];
   await assert.rejects(() => api.resolveModProfile(root, { versionSelection: 'v301' }), /Quenching 3\.7 requires/);
+  fixture.channel = 'retail';
+  fixture.parts = [2, 0, 4, 23745];
+  fixture.settings = { versionSelection: 'v301', graphicsSelection: 'hd', hdr: true, postProcessing: true, postProcessingGlow: true };
+  for (const method of ['shader:update-post-processing', 'shader:update-post-processing-glow']) {
+    await fixture.handlers.get(method)({}, root, true);
+  }
+  for (const file of ['fog.bls', 'bloomextract.bls', 'gaussianblur.bls']) {
+    assert.deepEqual(await fs.readFile(path.join(current, 'ps', file)), await fs.readFile(path.join(fixtureQuenching, 'shaders/shaders203/ps', file)));
+  }
+  for (const file of ['tonemap.bls', 'volumetricfog.bls', 'bloomcombine.bls']) {
+    assert.equal(await fs.pathExists(path.join(current, 'ps', file)), false);
+  }
   console.log('PASS: 2.04 / 3.0 / latest selection, independent legacy ZIP installs, Retail/PTR, HD/DE, effect toggles, selected-pack expansion and cleanup');
 } finally {
   delete (globalThis as any).__shader301Fixture;

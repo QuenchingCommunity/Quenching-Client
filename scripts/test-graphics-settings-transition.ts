@@ -385,6 +385,7 @@ try {
   await hook.loadModSettings('Z:/fixture-game');
   assert.equal(hook.store.modSettings.hdr, false, 'Old shadow-off preferences migrate without turning HDR on');
   fixture.saved = withHdr;
+  fixture.saved.versionSelection = 'v301';
   await hook.loadModSettings('Z:/fixture-game');
   assert.equal(hook.store.modSettings.hdr, true, 'HDR preference survives reloading');
   const beforeReadabilityUi = { ...hook.store.modSettings };
@@ -506,7 +507,7 @@ try {
   for (const [selection, detected, stale, disabled] of [
     ['auto','v301',undefined,false], ['auto','v301','v204',false],
     ['auto','v301','v30',false], ['auto','v30','v301',true],
-    ['auto','v204','v301',true], ['auto',null,'v301',true],
+    ['auto','v204','v301',true], ['v301','v204','v301',true], ['auto',null,'v301',true],
     ['v301',null,'v204',false], ['v30','v301','v301',true],
   ] as const) {
     hook.store.detectedVersion=detected;
@@ -518,6 +519,13 @@ try {
       assert(control,label);assert.equal(/\bdisabled/.test(control[1]),disabled,`${label}: ${selection}/${detected}/${stale}`);
     }
   }
+  hook.store.detectedVersion = 'v204';
+  hook.store.modSettings = { ...beforeReadabilityUi, versionSelection: 'v301', graphicsSelection: 'hd', hdr: true };
+  fixture.category = 'lighting';
+  const oldLightingHtml = renderToStaticMarkup(React.createElement(SettingsModal, { open: true, onClose() {}, isFullPackageInstalled: true }));
+  const hdrSwitch = [...oldLightingHtml.matchAll(/<button([^>]*role="switch"[^>]*)>/g)].find(match => match[1].includes('aria-label="settings.hdr.title"'));
+  assert(hdrSwitch && /\bdisabled/.test(hdrSwitch[1]) && hdrSwitch[1].includes('aria-checked="false"'));
+  assert(!oldLightingHtml.includes('settings-hdr-exposure'));
   fixture.detectedVersion={source:'local',version:'3.0.1.24371',parts:[3,0,1,24371]};
   fixture.saved={...fixture.saved,versionSelection:'auto',resolvedVersion:'v204'};
   await hook.loadModSettings('Z:/fixture-game');

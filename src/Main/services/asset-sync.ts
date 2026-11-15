@@ -18,15 +18,15 @@ import { UNPACKED_RESOURCE_DIRS } from '../../shared/bundled-resource-paths.mjs'
 import { applyDncLighting } from './dnc-lighting';
 import { patchRotatingUnitLighting } from './rotating-lighting';
 import { withResourceDirectory } from './resource-directory-queue';
-import { applyShaderToggles, supportsHdr } from './fog-shader-override';
+import { applyShaderToggles, HDR_SHADER_FILES, supportsHdr } from './fog-shader-override';
 import { isThirdPartyQuenchingPaused, markKnownQuenching } from './third-party-resources';
-import { BundledResourceRoot, createResourceSourceCache, syncBundledResourceFiles } from './managed-resource-files';
+import { createResourceSourceCache, syncBundledResourceFiles } from './managed-resource-files';
 import { getInstalledModState } from './mod-update-service';
 import { readCurrentModVersion } from './mod-integrity-service';
 import { refreshUnitSkinBaseline, skinEraForVersion, skinProfileForGraphics, switchUnitSkinProfile, syncUnitSkinBattleMode, unitSkinTemplate } from './unit-skin-profile';
 import { destructableSkinTemplate } from './destructable-skin-profile';
 import { syncClientWebUIFiles } from './webui-assets-service';
-import { copyPostProcessingConfigIfMissing, POST_PROCESSING_CONFIG_FILE, setPostProcessingAoEnabled, setPostProcessingTonemapEnabled, setPostProcessingBloomEnabled } from './post-processing-config';
+import { applyPostProcessingConfigTemplate, POST_PROCESSING_CONFIG_FILE } from './post-processing-config';
 import { gameChannelFolder } from '../../shared/game-channel';
 import { normalizeWar3RootPath } from './war3-path';
 import { isShaderDirectoryLock, renameShaderDirectory, replaceLockedShaderFiles } from './shader-directory';
@@ -41,20 +41,6 @@ const PROFILE_DNC_MARKER = '.quenching-dnc-profile';
 async function writeProfileMarker(dir: string, name: string): Promise<void> {
   await fs.ensureDir(dir);
   await fs.writeFile(path.join(dir, name), `${new Date().toISOString()}\n`, 'utf8');
-}
-
-export function getKnownShaderResourceRoots(quenchingDir: string): BundledResourceRoot[] {
-  const hd = getQuenchingResourcePath(quenchingDir, 'shaders300Hd');
-  const ptrHd = getQuenchingResourcePath(quenchingDir, 'shadersPtrHd');
-  return [
-    { source: getQuenchingResourcePath(quenchingDir, 'shaders203') },
-    { source: getQuenchingResourcePath(quenchingDir, 'shaders300De') },
-    { source: getQuenchingResourcePath(quenchingDir, 'shadersPtrDe') },
-    { source: path.join(hd, 'vs'), targetPrefix: 'vs' },
-    ...['standard', 'melee', 'rpg'].map(name => ({ source: path.join(hd, 'ps', name), targetPrefix: 'ps' })),
-    { source: path.join(ptrHd, 'vs'), targetPrefix: 'vs' },
-    ...['standard', 'melee', 'rpg'].map(name => ({ source: path.join(ptrHd, 'ps', name), targetPrefix: 'ps' })),
-  ];
 }
 
 function lightingResourceSources(quenchingDir: string, profile: ModProfile, lighting: string, shaderQuenchingDir = quenchingDir): Array<[string, string]> {
@@ -205,7 +191,8 @@ export async function syncLightingResources(
       }
     });
     await AssetSyncService.ensurePostProcessingConfig(war3Path, postProcessingAoFor(profile, lighting),
-      supportsHdr(profile) && (modSettings?.hdr ?? modSettings?.postProcessing !== false), undefined, resolveHdrExposure(modSettings || {}));
+      supportsHdr(profile) && (modSettings?.hdr ?? modSettings?.postProcessing !== false),
+      modSettings?.postProcessingGlow !== false, resolveHdrExposure(modSettings || {}));
     report('shaders', 90);
     let replacedInPlace = false;
     if (existing) {
@@ -297,6 +284,7 @@ export async function syncProfileResources(
   }
   if (skinOnly) {
     onProgress?.('layout', 80);
+    if (profile.version === 'v204') await AssetSyncService.ensurePostProcessingConfig(war3Path);
     await syncGraphicsLayout(war3Path, 'sd');
     configManager.set('modSettings', {
       ...modSettings,
@@ -428,47 +416,37 @@ export class AssetSyncService {
     return true;
   }
 
-  /**
-   * Basic client file. When the selected branch's MOD switch is on, install
-   * PostProcessingConfig.txt if that branch does not already have one.
-   * The other branch stays vanilla. An existing file keeps its values except
-   * AO and Tonemap, which follow the selected profile/settings. A full package is not required.
-   */
+  /** Keep the current branch's post-processing files compatible with its profile. */
   static async ensurePostProcessingConfig(war3Path: string, aoEnabled?: boolean, hdrEnabled?: boolean, glowEnabled?: boolean, hdrExposure?: number): Promise<void> {
     const root = normalizeWar3RootPath(war3Path);
     if (!root) return;
     const settings = configManager.get('modSettings');
-    if (settings?.graphicsSelection === 'sd' || settings?.classicMode === true) return;
-
-    const source = path.join(await this.getAssetsDir(), 'quenching', POST_PROCESSING_CONFIG_FILE);
-    if (!(await fs.pathExists(source))) {
-      throw new Error(`PostProcessingConfig source missing: ${source}`);
-    }
-
     const channel = getSelectedGameChannel();
     if (!getChannelModEnabled(channel)) return;
     if (!(await hasGameChannelDirectory(root, channel))) return;
     const profile = await resolveModProfile(root, settings || {});
     assertShaderProfileSupported(profile);
     const buildDir = path.join(root, gameChannelFolder(channel));
-    const copied = await copyPostProcessingConfigIfMissing(buildDir, source);
-    if (copied) console.log(`[AssetSync] Installed ${POST_PROCESSING_CONFIG_FILE} into ${gameChannelFolder(channel)}`);
-
-    let ao = aoEnabled;
-    if (ao === undefined) {
-      ao = postProcessingAoFor(profile, settings?.lighting || 'standard');
+    if (profile.version === 'v204') {
+      const configPath = path.join(buildDir, POST_PROCESSING_CONFIG_FILE);
+      await withResourceDirectory(configPath, () => rm(configPath, { force: true }));
+      for (const file of HDR_SHADER_FILES) {
+        await rm(path.join(buildDir, 'shaders', file), { force: true });
+      }
+      return;
     }
-    if (await setPostProcessingAoEnabled(buildDir, ao)) {
-      console.log(`[AssetSync] ${POST_PROCESSING_CONFIG_FILE}: AO ${ao ? 'enabled' : 'disabled'}`);
-    }
-    await setPostProcessingTonemapEnabled(buildDir, supportsHdr(profile) &&
-      (hdrEnabled ?? settings?.hdr ?? settings?.postProcessing !== false), hdrExposure ?? resolveHdrExposure(settings || {}));
-    const bloom = glowEnabled ?? settings?.postProcessingGlow !== false;
-    await setPostProcessingBloomEnabled(buildDir, bloom);
+    if (profile.graphics === 'sd') return;
+    const source = path.join(await this.getAssetsDir([], false), 'quenching', POST_PROCESSING_CONFIG_FILE);
+    await applyPostProcessingConfigTemplate(buildDir, source, {
+      ao: aoEnabled ?? postProcessingAoFor(profile, settings?.lighting || 'standard'),
+      hdr: supportsHdr(profile) && (hdrEnabled ?? settings?.hdr ?? settings?.postProcessing !== false),
+      bloom: glowEnabled ?? settings?.postProcessingGlow !== false,
+      exposure: hdrExposure ?? resolveHdrExposure(settings || {}),
+    });
   }
 
   /** Replace unitskin files built from an older bundled baseline (startup, and forced after a package install). */
-  static async refreshUnitSkinBaseline(war3Path: string, options: { force?: boolean } = {}): Promise<void> {
+  static async refreshUnitSkinBaseline(war3Path: string, options: { force?: boolean; restoreSavedSkins?: boolean } = {}): Promise<void> {
     if (!getChannelModEnabled(getSelectedGameChannel())) return;
     if (await isThirdPartyQuenchingPaused(war3Path)) return;
     if (!(await isFullPackageInstalled(war3Path))) return;
@@ -481,18 +459,24 @@ export class AssetSyncService {
     });
     const retroUnits = configManager.get('retroSkinUnits') === true;
     const retroBuildings = configManager.get('retroSkinBuildings') === true;
+    const selections = (configManager.get('skinSelections') || {})[path.resolve(war3Path).toLowerCase()] || {};
     const result = await refreshUnitSkinBaseline(
       await resolveRetailDir(war3Path),
       path.join(await this.getAssetsDir(['skin']), 'quenching'),
       skinProfileForGraphics(profile.graphics, retroUnits, retroBuildings),
       skinEraForVersion(profile.version),
-      { ...options, selections: (configManager.get('skinSelections') || {})[path.resolve(war3Path).toLowerCase()] || {} },
+      { force: options.force, selections },
     );
     if (result.refreshed && result.profile === 'hd-retro') {
       const { retroSkinService } = await import('./retro-skin-service');
       await retroSkinService.apply({ unitsEnabled: retroUnits, buildingsEnabled: retroBuildings });
     }
     await syncUnitSkinBattleMode(await resolveRetailDir(war3Path), result.profile, result.era, { ...modSettings, resolvedVersion: profile.version });
+    if (options.restoreSavedSkins && Object.values(selections).some(group => Object.keys(group).length > 0)) {
+      const { versionSkinService } = await import('./version-skin-service');
+      const warnings = await versionSkinService.restoreSelections(war3Path, { ifActiveMissing: !result.refreshed });
+      if (warnings.length) console.warn('[AssetSync] Some saved skins could not be restored:', warnings.join('；'));
+    }
   }
 
   static async syncConfiguredAssets(

@@ -11,8 +11,10 @@ const compiled = await build({
   stdin: { contents: 'export * from "./src/Main/services/branch-mod-toggle";export * from "./src/Main/services/vision-modules";export * from "./src/Main/services/third-party-resources";', resolveDir: process.cwd(), loader: 'ts' },
   bundle: true, write: false, platform: 'node', format: 'cjs', packages: 'external',
   plugins: [{ name: 'branch-startup-fixture', setup(plugin) {
-    plugin.onResolve({ filter: /^\.\/(game-channel|full-package-service|asset-sync)$/ }, args => ({ path: args.path, namespace: 'fixture' }));
-    plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: args.path.endsWith('asset-sync')
+    plugin.onResolve({ filter: /^\.\/(game-channel|full-package-service|asset-sync|local-files-service)$/ }, args => ({ path: args.path, namespace: 'fixture' }));
+    plugin.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: args.path.endsWith('local-files-service')
+      ? 'export const ensureLocalFiles=async()=>{};'
+      : args.path.endsWith('asset-sync')
       ? 'export const AssetSyncService={getAssetsDir:async()=>{throw Error("Expected explicit fixture assets");}};'
       : args.path.endsWith('full-package-service')
       ? 'export const isFullPackageInstalled=async()=>false;'

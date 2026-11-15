@@ -56,7 +56,7 @@
 .toggle:hover { color: #e5c654; }
 .showcase { position: relative; flex: 1; min-width: 0; min-height: 0; overflow: hidden; border-left: 1px solid rgba(212,175,55,.14); background: radial-gradient(ellipse at 50% 60%, rgba(75,71,65,.2), rgba(3,4,6,.28) 67%); }
 .halo { position: absolute; inset: 0; background: radial-gradient(ellipse 42% 42% at 50% 57%, var(--team-glow), transparent 75%); opacity: .68; pointer-events: none; }
-.model { position: absolute; inset: 3% 0 5%; }
+.model { position: absolute; inset: 2% 2% 36px; transform: translateY(-8px); }
 .warbandPreview { position: absolute; inset: 3% 0 7%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .warbandPreview img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 26px rgba(0,0,0,.45)); }
 .warbandPreview span { padding: 20px; color: #c9b579; text-align: center; font-size: 15px; }
@@ -69,4 +69,12 @@
 .retroRow { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid rgba(212,175,55,.15); }
 .retroRow small { display: block; margin-top: 3px; color: #89827b; }
 @media (max-width: 1050px) { .sidebar { flex-basis: 150px; } .category { gap: 8px; padding-left: 10px; font-size: 15px; } .category img { flex-basis: 36px; width: 36px; height: 36px; } .controls { flex-basis: 56%; padding: 18px 12px 14px 16px; } .race { flex-basis: 50px; width: 50px; height: 50px; } .target { flex-basis: 54px; width: 54px; height: 54px; } }
-@media (max-width: 760px) { .sidebar { flex-basis: 88px; } .category { flex-direction: column; gap: 4px; padding: 10px 2px; font-size: 12px; text-align: center; } .sidebarFoot { display: none; } .content { flex-direction: column; } .controls { flex: 1 1 auto; overflow-y: auto; } .showcase { flex: 0 0 35%; border-left: 0; border-top: 1px solid rgba(212,175,55,.14); } .model { inset: 0; } }
+@media (max-width: 760px) {
+  .sidebar { flex-basis: 88px; }
+  .category { flex-direction: column; gap: 4px; padding: 10px 2px; font-size: 12px; text-align: center; }
+  .sidebarFoot { display: none; }
+  .content { flex-direction: column; }
+  .controls { flex: 1 1 auto; overflow-y: auto; }
+  .showcase { order: -1; flex: 0 0 46%; border-left: 0; border-bottom: 1px solid rgba(212,175,55,.14); }
+  .model { inset: 2% 1% 28px; }
+}

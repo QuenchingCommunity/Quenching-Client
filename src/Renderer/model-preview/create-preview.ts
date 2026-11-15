@@ -56,7 +56,6 @@ export async function createPreview(canvas: HTMLCanvasElement, source: { bytes: 
     if (!viewer.addHandler(cjsDefault(mdx), solver, parser.version > 800)) throw new Error('MDX shader initialization failed');
     const scene = viewer.addScene();
     scene.alpha = !!options.transparent; scene.color = [0.035, 0.04, 0.05];
-    scene.viewport = [0, 0, canvas.width, canvas.height];
     const model: any = await viewer.load(parser, solver);
     check();
     if (!model?.geosets.length) throw new Error(errors.join('; ') || 'Model has no renderable geosets');
@@ -72,9 +71,9 @@ export async function createPreview(canvas: HTMLCanvasElement, source: { bytes: 
     const min = extent.min, max = extent.max;
     const center = Array.from(min, (v, i) => (v + max[i]) * 0.5 * scale);
     const radius = Math.max(20, Math.hypot(...Array.from(min, (v, i) => (max[i] - v) * scale)) / 2);
-    const aspect = canvas.width / canvas.height;
-    const distance = radius / Math.sin(Math.min(Math.PI / 8, Math.atan(Math.tan(Math.PI / 8) * aspect))) * 0.85 * (options.viewDistance || 1);
-    scene.camera.perspective(Math.PI / 4, aspect, 1, distance + radius * 10);
+    // Leave room below the mesh for the feet and the rotation hint.
+    center[2] -= radius * 0.10;
+    let distance = 0;
     // Start halfway between the front and side, like the original skin artwork.
     let angle = -Math.PI / 4;
     const orbit = (delta: number) => {
@@ -82,11 +81,17 @@ export async function createPreview(canvas: HTMLCanvasElement, source: { bytes: 
       scene.camera.moveToAndFace([center[0] + Math.cos(angle) * distance, center[1] + Math.sin(angle) * distance,
         center[2] + distance * 0.28], center as any, [0, 0, 1]);
     };
-    orbit(0);
-    // mdx-m3-viewer's HD vertex shader subtracts a view-space vertex position
-    // from u_lightPos. Supplying a world-space position put the key light behind
-    // many DE models, leaving only the shader's very dim ambient term.
-    scene.lightPosition = [-distance * 0.25, distance * 0.55, distance * 0.75];
+    const resize = () => {
+      const aspect = canvas.width / canvas.height;
+      const halfFov = Math.min(Math.PI / 8, Math.atan(Math.tan(Math.PI / 8) * aspect));
+      distance = radius / Math.sin(halfFov) * 1.12 * (options.viewDistance || 1);
+      scene.viewport = [0, 0, canvas.width, canvas.height];
+      scene.camera.perspective(Math.PI / 4, aspect, 1, distance + radius * 10);
+      orbit(0);
+      // The HD shader expects the key light in view space.
+      scene.lightPosition = [-distance * 0.25, distance * 0.55, distance * 0.75];
+    };
+    resize();
     // Async solvers begin before the viewer adds resource promises to its own queue.
     let pending = -1;
     while (pending !== cache.size) { pending = cache.size; await Promise.all(cache.values()); await viewer.whenAllLoaded(); check(); }
@@ -103,7 +108,7 @@ export async function createPreview(canvas: HTMLCanvasElement, source: { bytes: 
     };
     draw(0);
     if (viewer.gl.getError() !== viewer.gl.NO_ERROR) throw new Error('WebGL error while rendering model');
-    return { viewer, model, parser, instance, missing, omitted, orbit, draw, dispose,
+    return { viewer, model, parser, instance, missing, omitted, orbit, resize, draw, dispose,
       setSequence(index: number) { instance.setSequence(index); instance.setSequenceLoopMode(2); } };
   } catch (error) { dispose(); throw error; }
 }

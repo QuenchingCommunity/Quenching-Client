@@ -3,12 +3,11 @@ import path from 'path';
 import {
   DEFAULT_MOD_PROFILE_SELECTION,
   EffectiveGraphics,
-  EffectiveVersion,
   ModProfile,
   ModProfileSelection,
-  VersionSelection,
   normalizeGraphicsSelection,
   normalizeVersionSelection,
+  resolveVersionSelection,
   isVersion30OrLater,
   isHdShaderPack,
   assertShaderProfileSupported,
@@ -34,10 +33,6 @@ export type ResourcePathKey =
   | 'environmentPublic'
   | 'skin';
 
-function versionFromSelection(selection: VersionSelection, detected: EffectiveVersion): EffectiveVersion {
-  return selection === 'auto' ? detected : selection;
-}
-
 export async function resolveModProfile(
   war3Path: string,
   selection?: Partial<ModProfileSelection> & { classicMode?: boolean; lighting?: string }
@@ -55,7 +50,7 @@ export async function resolveModProfile(
   // This tier is NOT shader-ABI permission: the separate exact-build gate below
   // must authorize every shader write and MOD launch, including manual choices.
   const version = isPtr ? 'v301'
-    : versionFromSelection(versionSelection, detectedVersion);
+    : resolveVersionSelection(versionSelection, detectedVersion) ?? detectedVersion;
   let graphics: EffectiveGraphics = selection?.classicMode === true ? 'sd' : graphicsSelection;
 
   // A saved DE choice must not silently install 3.0 shaders into a 2.x game.

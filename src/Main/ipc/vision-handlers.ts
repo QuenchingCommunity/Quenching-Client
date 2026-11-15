@@ -1,4 +1,4 @@
-import {getVisionModules, setVisionModule} from '../services/vision-modules';
+import {getVisionModules, setVisionModule, visionRequiresWarcraft30, VISION_WARCRAFT_30_REQUIRED} from '../services/vision-modules';
 import { ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
@@ -80,6 +80,7 @@ async function scanVisionMod(visionModPath: string) {
 export function registerVisionHandlers() {
     console.log('[Vision] Vision handlers registered.');
     ipcMain.handle('vision:modules', (_event, root: string) => getVisionModules(root));
+    ipcMain.handle('vision:requires-warcraft-30', (_event, root: string, source: string) => visionRequiresWarcraft30(root, source));
     ipcMain.handle('vision:set-module', (_event, root: string, source: string, module: any, enabled: boolean) => setVisionModule(root,source,module,enabled));
 
     // 处理半身头像
@@ -91,6 +92,7 @@ export function registerVisionHandlers() {
                 throw new Error('未设置或无效的 VisionMod 路径');
             }
 
+            if (enabled && await visionRequiresWarcraft30(war3Path, visionModPath)) throw Error(VISION_WARCRAFT_30_REQUIRED);
             const { portraits, textures, sourcePath: visionRetail } = await scanVisionMod(visionModPath);
             const war3Retail = path.join(war3Path, getSelectedGameFolder());
 
@@ -124,6 +126,7 @@ export function registerVisionHandlers() {
                 throw new Error('未设置或无效比 VisionMod 路径');
             }
 
+            if (enabled && await visionRequiresWarcraft30(war3Path, visionModPath)) throw Error(VISION_WARCRAFT_30_REQUIRED);
             const { enhancements, textures, sourcePath: visionRetail } = await scanVisionMod(visionModPath);
             const war3Retail = path.join(war3Path, getSelectedGameFolder());
 

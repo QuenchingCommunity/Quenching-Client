@@ -23,6 +23,7 @@ const mocks: Record<string, string> = {
   'electron': 'export const app={getPath:k=>k==="appData"?f.appData:f.documents};',
   'game-channel': 'export const getSelectedGameChannel=()=>f.channel,getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_",hasGameChannelDirectory=async()=>true,getChannelModEnabled=()=>f.enabled;',
   'config-manager': 'export const configManager={get:k=>k==="war3Path"?f.root:{}};',
+  'local-files-service': 'export const ensureLocalFiles=async()=>{throw new Error("Unexpected local files registration during launch");};',
   'asset-sync': 'export const AssetSyncService={getAssetsDir:async()=>f.assets,syncConfiguredAssets:async()=>{f.events.push("assets");}};',
   'managed-resource-files': 'export const syncBundledResourceFiles=async()=>{};',
   'full-package-service': 'export const isFullPackageInstalled=async()=>true;',

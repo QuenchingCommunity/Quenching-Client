@@ -16,6 +16,7 @@ import { checkInterruptedClientUpdate, cleanupCompletedClientUpdate } from '#mai
 import { AssetSyncService } from '#main/services/asset-sync';
 import { configManager } from '#main/services/config-manager';
 import { startupResourceBarrier } from '#main/services/startup-resource-barrier';
+import { restoreIncompatibleVisionModules } from '#main/services/vision-modules';
 
 logger.initialize();
 
@@ -70,7 +71,10 @@ app.whenReady().then(async () => {
 		void startupResourceBarrier.foreground(() => AssetSyncService.ensurePostProcessingConfig(configuredGamePath)).catch(error => {
 			console.error('[Main] Startup PostProcessingConfig check failed:', error);
 		});
-		void startupResourceBarrier.foreground(() => AssetSyncService.refreshUnitSkinBaseline(configuredGamePath)).catch(error => {
+		void startupResourceBarrier.exclusive(() => restoreIncompatibleVisionModules(configuredGamePath)).catch(error => {
+			console.error('[Main] Startup Vision Mod compatibility recovery failed:', error);
+		});
+		void startupResourceBarrier.exclusive(() => AssetSyncService.refreshUnitSkinBaseline(configuredGamePath, { restoreSavedSkins: true })).catch(error => {
 			console.error('[Main] Startup unitskin baseline check failed:', error);
 		});
 	}

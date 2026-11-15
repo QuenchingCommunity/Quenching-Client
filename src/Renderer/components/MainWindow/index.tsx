@@ -35,7 +35,7 @@ import { APP_VERSION } from '../../version';
 import { IS_TEST_RELEASE } from '../../../shared/local-release';
 import { isNewerClientVersion } from '../../../shared/client-version';
 import { GameChannel, gameChannelFolder } from '../../../shared/game-channel';
-import { GraphicsSelection, VersionSelection, isVersion30OrLater } from '../../../shared/mod-profile';
+import { GraphicsSelection, VersionSelection, isVersion30OrLater, resolveVersionSelection } from '../../../shared/mod-profile';
 import { supportedWar3Version } from '../../../shared/war3-support';
 import { activeSkinArtSet } from '../../../shared/active-skin-art-set';
 import { buildCombinedUpdatePrompt, type CombinedUpdatePrompt } from '../../../shared/combined-update-prompt';
@@ -579,9 +579,13 @@ export const MainWindow: React.FC = () => {
     });
   };
 
-  const graphicsMode = activeSkinArtSet(modSettings?.graphicsSelection, war3Settings?.hd, modSettings?.classicMode, war3Settings?.detectedGraphics);
-  const selectedGraphics = modSettings.classicMode ? 'sd' : modSettings.graphicsSelection;
   const detectedVersionTier = supportedWar3Version(detectedVersion.split('.').map(Number));
+  const effectiveVersion = resolveVersionSelection(modSettings.versionSelection, detectedVersionTier);
+  const selectedVersion = detectedVersionTier === 'v204' && modSettings.versionSelection !== 'auto'
+    ? 'v204' : modSettings.versionSelection;
+  const selectedGraphics = modSettings.classicMode ? 'sd'
+    : effectiveVersion === 'v204' && modSettings.graphicsSelection === 'de' ? 'hd' : modSettings.graphicsSelection;
+  const graphicsMode = activeSkinArtSet(selectedGraphics, war3Settings?.hd, modSettings?.classicMode, war3Settings?.detectedGraphics);
   const handleProfileChange = async (selection: Partial<ModSettings>) => {
     if (switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod) return;
     const war3Path = currentInstallation?.path || await window.electronAPI?.getConfig?.('war3Path');
@@ -591,8 +595,9 @@ export const MainWindow: React.FC = () => {
     }
 
     const nextVersion = selection.versionSelection ?? modSettings.versionSelection;
-    const nextGraphics = selection.graphicsSelection ?? selectedGraphics;
-    const deAllowed = isVersion30OrLater(nextVersion) || (nextVersion === 'auto' && isVersion30OrLater(detectedVersionTier));
+    const nextGraphics = selection.graphicsSelection ?? (modSettings.classicMode ? 'sd' : modSettings.graphicsSelection);
+    if (detectedVersionTier === 'v204' && isVersion30OrLater(selection.versionSelection)) return;
+    const deAllowed = isVersion30OrLater(resolveVersionSelection(nextVersion, detectedVersionTier));
     if (selection.graphicsSelection === 'de' && !deAllowed) return;
     // Switching to an older build must also leave DE in the same resource transition.
     const change: Partial<ModSettings> = nextGraphics === 'de' && !deAllowed
@@ -1323,13 +1328,15 @@ export const MainWindow: React.FC = () => {
                   ['v204', '2.04'],
                   ['v30', '3.0'],
                   ['v301', t('main.home.v301', 'Latest (3.01)')],
-                ] as [VersionSelection, string][]).map(([value, label]) => (
-                  <button key={value} type="button"
-                    className={`home-option ${modSettings.versionSelection === value ? 'is-active' : ''}`}
-                    aria-pressed={modSettings.versionSelection === value}
-                    disabled={!currentInstallation || switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod}
-                    onClick={() => void handleProfileChange({ versionSelection: value })}>{label}</button>
-                ))}
+                ] as [VersionSelection, string][]).map(([value, label]) => {
+                  const unavailable = detectedVersionTier === 'v204' && isVersion30OrLater(value);
+                  return <button key={value} type="button"
+                    className={`home-option ${selectedVersion === value ? 'is-active' : ''}`}
+                    aria-pressed={selectedVersion === value}
+                    title={unavailable ? t('settings.requiresVersion', { version: value === 'v30' ? '3.0' : '3.0.1' }) : undefined}
+                    disabled={unavailable || !currentInstallation || switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod}
+                    onClick={() => void handleProfileChange({ versionSelection: value })}>{label}</button>;
+                })}
               </div>
             </div>
 
@@ -1344,14 +1351,12 @@ export const MainWindow: React.FC = () => {
                   ['hd', t('main.home.hd', 'HD · Reforged')],
                   ['de', t('main.home.de', 'DE · Definitive')],
                 ] as [GraphicsSelection, string][]).map(([value, label]) => {
-                  const deUnavailable = value === 'de' &&
-                    !isVersion30OrLater(modSettings.versionSelection) &&
-                    !(modSettings.versionSelection === 'auto' && isVersion30OrLater(detectedVersionTier));
+                  const deUnavailable = value === 'de' && !isVersion30OrLater(effectiveVersion);
                   return (
                     <button key={value} type="button"
                       className={`home-option ${selectedGraphics === value ? 'is-active' : ''}`}
                       aria-pressed={selectedGraphics === value}
-                      title={deUnavailable ? t('main.home.deRequires30', 'DE requires Latest (3.01)') : undefined}
+                      title={deUnavailable ? t('settings.requiresVersion', { version: '3.0' }) : undefined}
                       disabled={!currentInstallation || switchingGraphics || switchingChannel || installingFullPackage || isModToggling || updatingMod || deUnavailable}
                       onClick={() => void handleProfileChange({ graphicsSelection: value })}>{label}</button>
                   );
@@ -1396,7 +1401,7 @@ export const MainWindow: React.FC = () => {
               <div className="home-launch-buttons">
               {IS_TEST_RELEASE && navigator.platform.startsWith('Win') && (
                 <Button className="home-offline-test-button" loading={launchingOfflineTest}
-                  disabled={launchingOfflineTest || !hasWar3Directory || gameChannel!=='retail' || installingFullPackage || switchingGraphics || switchingChannel || isModToggling || updatingMod || updatingClient}
+                  disabled={launchingOfflineTest || !hasWar3Directory || gameChannel!=='retail' || detectedVersion.split('.').slice(0, 3).join('.') !== '3.0.1' || installingFullPackage || switchingGraphics || switchingChannel || isModToggling || updatingMod || updatingClient}
                   title={t('main.offlineTest.hint')}
                   onClick={async()=>{
                     playMain();setLaunchingOfflineTest(true);

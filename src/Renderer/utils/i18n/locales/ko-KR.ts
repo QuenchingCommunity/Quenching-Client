@@ -1386,8 +1386,9 @@ const messages = {
   "settings.hdr.title": "HDR (톤 매핑)",
   "settings.hdr.on.desc": "밝기와 색상을 조정하여 밝은 부분과 그림자의 전환을 부드럽게 합니다.",
   "settings.hdr.off.desc": "게임의 기본 톤 매핑으로 복원합니다.",
-  "settings.hdr.unsupported": "워크래프트 3.0의 기존 셰이더에서는 이 효과를 사용할 수 없습니다.",
+  "settings.requiresVersion": "워크래프트 III {version} 이상이 필요합니다.",
 
+  'settings.vision.requires30': "이 Vision Mod 버전에는 워크래프트 III 3.0 이상이 필요합니다. 2.04에서는 호환되는 이전 버전을 사용하세요.",
   'settings.vision.visionUnits.title': 'Unit enhancements',
   'settings.vision.visionUnits.desc': 'Replace unit and building models and textures; keep Quenching tables and skins.',
   'settings.vision.visionDecorations.title': 'Doodads',

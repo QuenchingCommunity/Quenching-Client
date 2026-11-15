@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { build } from 'esbuild';
 import { parseSkinSections } from '../src/shared/skin-versions';
 import { resolveBranchModFile, setBranchModEnabledOnDisk } from '../src/Main/services/branch-mod-toggle';
-import { syncUnitSkinBattleMode } from '../src/Main/services/unit-skin-profile';
+import { refreshUnitSkinBaseline, syncUnitSkinBattleMode } from '../src/Main/services/unit-skin-profile';
 import { SKIN_CONFIG } from '../src/Renderer/assets/data/skin-config';
 import { warbandChoices } from '../src/Renderer/assets/data/skin-panel-catalog';
 import { scopedSkin } from '../src/shared/skin-versions';
@@ -27,7 +27,7 @@ const bundle = await build({ stdin: { contents: 'export {versionSkinService} fro
       const prefix = 'const fixture = globalThis.__skinFixture;';
       const contents = args.path.endsWith('config-manager') ? 'export const configManager = {get: k=>fixture.config[k],set:(k,v)=>{fixture.config[k]=v}};'
         : args.path.endsWith('asset-sync') ? 'export const AssetSyncService={getAssetsDir:async()=>fixture.assets};'
-        : args.path.endsWith('full-package-service') ? 'export async function assertFullPackageInstalled(){throw new Error("fixture: full package absent")}'
+        : args.path.endsWith('full-package-service') ? 'export const isFullPackageInstalled=async()=>false;export async function assertFullPackageInstalled(){throw new Error("fixture: full package absent")}'
         : args.path.endsWith('/skin-service') ? 'export const skinService={enableSkins:async()=>{}};export const usesFullPackageSkinResource=c=>c.some(v=>v.value.startsWith("cos\\\\premium"));'
         : 'export class Storage {open(){throw new Error("fixture: no CASC")} close(){}}';
       return { contents: prefix + contents };
@@ -295,6 +295,45 @@ try {
   config.war3Path = path.join(fixture, 'another-install');
   assert.deepEqual((await service.panel('hd')).selections, {});
   assert.equal(JSON.stringify(config.skinSelections), savedAfterDelete);
+  config.war3Path = fixture;
+  config.retroSkinUnits = false;
+  config.retroSkinBuildings = false;
+  await fs.outputJson(path.join(retail, '.quenching', 'unit-skin-profile.json'),
+    { schema: 1, profile: 'hd-retro', era: 'v30', baseline: 5 });
+  const seaJaina = SKIN_CONFIG.hum.heroes.find(hero => hero.unitId === 'Hamg')!.skins.find(skin => skin.id === 'h1_5')!;
+  await service.apply('hd', [{ unitId: 'Hamg', skinId: seaJaina.id, changes: seaJaina.config }]);
+  const activeJaina = parseSkinSections(await fs.readFile(target, 'utf8')).Hamg;
+  assert.match(activeJaina['file:hd'], /JainaSea/);
+  assert.match(activeJaina['Art:hd'], /BTNJainaSea\.blp$/);
+
+  // 3.6 had selections and scoped fields but no era/baseline marker.
+  const remembered = { hd: { Hamg: 'h1_5', Hpal: 'h2_2' } };
+  config.skinSelections = { [rootKey]: remembered };
+  await fs.outputJson(path.join(retail, '.quenching', 'unit-skin-profile.json'), { schema: 1, profile: 'hd' });
+  await fs.writeFile(target, '[Hamg]\nfile:hd=Units\\Human\\JainaSea\\JainaSea\n[Hpal]\nfile:hd=Units\\Human\\Uther\\Uther\n');
+  const migrated = await refreshUnitSkinBaseline(retail, path.resolve('assets/quenching'), 'hd', 'v30', { selections: remembered });
+  assert.equal(migrated.refreshed, true);
+  const stockAfterMigration = await fs.readFile(target, 'utf8');
+  assert.doesNotMatch(parseSkinSections(stockAfterMigration).Hamg['file:hd'] || '', /JainaSea/i);
+  assert.deepEqual(await service.restoreSelections(fixture, { ifActiveMissing: !migrated.refreshed }), []);
+  let restored = parseSkinSections(await fs.readFile(target, 'utf8'));
+  assert.match(restored.Hamg['file:hd'], /JainaSea/i);
+  assert.match(restored.Hpal['file:hd'], /Uther/i);
+
+  // A player who already upgraded still gets the saved skins back at startup.
+  await fs.writeFile(target, stockAfterMigration);
+  assert.deepEqual(await service.restoreSelections(fixture, { ifActiveMissing: true }), []);
+  restored = parseSkinSections(await fs.readFile(target, 'utf8'));
+  assert.match(restored.Hamg['Art:hd'], /BTNJainaSea/i);
+  assert.match(restored.Hpal['file:hd'], /Uther/i);
+  await fs.utimes(target, 1000, 1000);
+  await service.restoreSelections(fixture, { ifActiveMissing: true });
+  assert.equal((await fs.stat(target)).mtimeMs, 1000000, 'already restored skin table is not rewritten');
+  const disabledTarget = path.join(retail, 'units', 'unitskin-dis.txt');
+  await fs.rename(target, disabledTarget);
+  await service.restoreSelections(fixture, { ifActiveMissing: true });
+  assert.equal(await fs.pathExists(target), false, 'startup does not turn deliberately disabled skins on');
+  assert.deepEqual(config.skinSelections[rootKey], remembered);
   console.log('PASS: per-profile skin writes, concurrent version isolation, persistence, reset, legacy migration, custom version folders, installation isolation');
 } finally {
   // Only remove the exact temporary fixture allocated above, never a game directory.

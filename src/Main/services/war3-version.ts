@@ -1,4 +1,5 @@
 import { getSelectedGameChannel } from './game-channel';
+import { normalizeWar3RootPath } from './war3-path';
 import { assertWar3VersionSupported } from '../../shared/war3-support';
 import { GameChannel, gameChannelFolder } from '../../shared/game-channel';
 import { VersionSelection, normalizeVersionSelection } from '../../shared/mod-profile';
@@ -23,10 +24,6 @@ export type War3VersionInfo = {
     source: 'build.info' | 'exe' | 'unknown';
 };
 
-function normalizeWar3Root(war3Path: string): string {
-    return path.normalize(war3Path.replace(/\\/g, '/').replace(/\/$/, ''));
-}
-
 export function parseVersionParts(version: string): number[] {
     const cleaned = String(version || '')
         .trim()
@@ -49,8 +46,7 @@ export function getUiZipForVersion(version: string | null | undefined, selection
     return tier === 'v204' ? UI_ZIP_20 : UI_ZIP_30;
 }
 
-async function readVersionFromBuildInfo(war3Path: string, channel: GameChannel): Promise<string | null> {
-    const root = normalizeWar3Root(war3Path);
+async function readVersionFromBuildInfo(root: string, channel: GameChannel): Promise<string | null> {
     const candidates = [
         path.join(root, gameChannelFolder(channel), '.build.info'),
         path.join(root, '.build.info'),
@@ -101,47 +97,40 @@ async function readVersionFromBuildInfo(war3Path: string, channel: GameChannel):
     return null;
 }
 
-function getExeCandidates(war3Path: string, channel: GameChannel): string[] {
-    const root = normalizeWar3Root(war3Path);
-    return [
-        path.join(root, gameChannelFolder(channel), 'x86_64', 'Warcraft III.exe'),
-        path.join(root, gameChannelFolder(channel), 'Warcraft III.exe'),
-        ...(channel === 'retail' ? [
-            path.join(root, 'x86_64', 'Warcraft III.exe'),
-            path.join(root, 'Warcraft III.exe'),
-            path.join(root, 'War3.exe'),
-        ] : []),
-    ];
-}
+const exeVersionCache = new Map<string, { stamp: string; version: Promise<string | null> }>();
 
-async function readVersionFromExe(war3Path: string, channel: GameChannel): Promise<string | null> {
-    if (process.platform !== 'win32') {
-        return null;
-    }
+async function readVersionFromExe(candidates: string[]): Promise<string | null> {
+    if (process.platform !== 'win32') return null;
 
-    for (const exePath of getExeCandidates(war3Path, channel)) {
-        if (!(await fs.pathExists(exePath))) {
-            continue;
-        }
-        try {
-            const escaped = exePath.replace(/'/g, "''");
-            const { stdout } = await execFileAsync(
-                'powershell.exe',
-                [
-                    '-NoProfile',
-                    '-NonInteractive',
-                    '-Command',
-                    `[System.Diagnostics.FileVersionInfo]::GetVersionInfo('${escaped}').FileVersion`,
-                ],
-                { windowsHide: true, timeout: 15000 }
-            );
-            const version = String(stdout || '').trim();
-            if (version) {
-                return version;
-            }
-        } catch (error) {
-            console.warn(`[War3Version] Failed to read EXE version from ${exePath}:`, error);
-        }
+    for (const candidate of candidates) {
+        const exePath = path.resolve(candidate);
+        const stat = await fs.stat(exePath).catch(() => null);
+        if (!stat?.isFile()) continue;
+
+        const stamp = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
+        const cached = exeVersionCache.get(exePath);
+        if (cached?.stamp === stamp) return cached.version;
+
+        const version: Promise<string | null> = execFileAsync('powershell.exe', [
+            '-NoProfile', '-NonInteractive', '-Command',
+            '$v = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($env:QUENCHING_VERSION_EXE); ' +
+            'if ($v.FileMajorPart -gt 0) { "{0}.{1}.{2}.{3}" -f $v.FileMajorPart, $v.FileMinorPart, $v.FileBuildPart, $v.FilePrivatePart }',
+        ], {
+            env: { ...process.env, QUENCHING_VERSION_EXE: exePath },
+            windowsHide: true,
+            timeout: 5000,
+        }).then(({ stdout }) => {
+            const value = stdout.trim();
+            return /^\d+\.\d+\.\d+\.\d+$/.test(value) ? value : null;
+        }).catch(error => {
+            if (exeVersionCache.get(exePath)?.version === version) exeVersionCache.delete(exePath);
+            console.warn(`[War3Version] Failed to read EXE version from ${exePath}: ${error.code ?? error.message}`);
+            return null;
+        });
+        exeVersionCache.set(exePath, { stamp, version });
+        // If the selected executable has no readable version, use its install
+        // metadata instead of inspecting an older executable in another layout.
+        return version;
     }
     return null;
 }
@@ -150,12 +139,24 @@ export async function detectWar3Version(
     war3Path: string | undefined | null,
     channel: GameChannel = getSelectedGameChannel(),
 ): Promise<War3VersionInfo> {
-    if (war3Path) {
-        const fromBuild = await readVersionFromBuildInfo(war3Path, channel);
-        if (fromBuild) return { version: fromBuild, parts: parseVersionParts(fromBuild), source: 'build.info' };
-        const fromExe = await readVersionFromExe(war3Path, channel);
+    const root = war3Path ? normalizeWar3RootPath(war3Path) : '';
+    if (root) {
+        const branch = path.join(root, gameChannelFolder(channel));
+        // An update or copied installation can leave build.info behind the game binary.
+        const fromExe = await readVersionFromExe([
+            path.join(branch, 'x86_64', 'Warcraft III.exe'),
+            path.join(branch, 'Warcraft III.exe'),
+            ...(channel === 'retail' ? [path.join(root, 'x86_64', 'Warcraft III.exe')] : []),
+        ]);
         if (fromExe) return { version: fromExe, parts: parseVersionParts(fromExe), source: 'exe' };
-        console.warn(`[War3Version] Could not detect version for: ${war3Path}`);
+
+        const fromBuild = await readVersionFromBuildInfo(root, channel);
+        if (fromBuild) return { version: fromBuild, parts: parseVersionParts(fromBuild), source: 'build.info' };
+        if (channel === 'retail') {
+            const legacy = await readVersionFromExe([path.join(root, 'Warcraft III.exe'), path.join(root, 'War3.exe')]);
+            if (legacy) return { version: legacy, parts: parseVersionParts(legacy), source: 'exe' };
+        }
+        console.warn(`[War3Version] Could not detect ${channel} version for: ${root}`);
     }
     return { version: '', parts: [0], source: 'unknown' };
 }

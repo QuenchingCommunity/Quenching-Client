@@ -34,7 +34,7 @@ const DESC: React.CSSProperties = {
 
 export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose }) => {
   const { t, currentLanguage } = useTranslation();
-  const { modSettings, saveModSettings, isLoading } = useWar3Settings();
+  const { modSettings, saveModSettings, isLoading, detectedVersion } = useWar3Settings();
   const { currentInstallation } = useWar3Detector();
   const { playSmall, playHover } = useSound();
   const { showLoading, hideLoading } = useGlobalLoading();
@@ -42,6 +42,7 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
   const [activeTab, setActiveTab] = useState<TabId>('vision');
   const [thirdPartyState, setThirdPartyState] = useState<ThirdPartyState | null>(null);
   const [visionModules,setVisionModules]=useState<VisionModules>({});
+  const [visionCompatibility, setVisionCompatibility] = useState<'checking' | 'compatible' | 'requires-30' | 'missing'>('checking');
   const [busy, setBusy] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
 
@@ -56,6 +57,17 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
   useEffect(() => { setNameDraft(displayedCurrentName); }, [currentSlot?.id, currentSlot?.name, currentLanguage]);
   const isClassicMode = !!modSettings?.classicMode || modSettings?.graphicsSelection === 'sd';
   const visionReady = !!modSettings?.visionModPath;
+
+  useEffect(() => {
+    const source = modSettings.visionModPath;
+    if (!open || !root || !source || detectedVersion !== 'v204') return;
+    let active = true;
+    setVisionCompatibility('checking');
+    window.electronAPI.visionRequiresWarcraft30(root, source).then(required => {
+      if (active) setVisionCompatibility(required ? 'requires-30' : 'compatible');
+    }).catch(() => { if (active) setVisionCompatibility('missing'); });
+    return () => { active = false; };
+  }, [open, root, modSettings.visionModPath, detectedVersion]);
 
   useEffect(() => {
     if (!open || !root) return;
@@ -147,11 +159,16 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
     </div>
   );
 
-  const visionDisabledReason = isClassicMode
-    ? t('settings.basic.classicMode.disabled')
-    : !visionReady
-      ? t('settings.status.visionmod_required')
-      : undefined;
+  const visionRequires30 = detectedVersion === 'v204' && visionCompatibility === 'requires-30';
+  const visionChecking = detectedVersion === 'v204' && visionCompatibility === 'checking';
+  const visionSourceMissing = detectedVersion === 'v204' && visionCompatibility === 'missing';
+  const visionDisabledReason = visionRequires30
+    ? t('settings.vision.requires30')
+    : isClassicMode
+      ? t('settings.basic.classicMode.disabled')
+      : !visionReady || visionSourceMissing
+        ? t('settings.status.visionmod_required')
+        : undefined;
 
   const renderVisionTab = () => (
     <div style={{ maxWidth: 720 }}>
@@ -159,7 +176,7 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
       <p style={{ ...DESC, marginBottom: 16 }}>
         {t('setup.visionmod.path')}
       </p>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: visionRequires30 ? 12 : 28 }}>
         <div style={{
           flex: 1,
           padding: '10px 14px',
@@ -185,15 +202,17 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({ open, onClose 
         </Button>
       </div>
 
+      {visionRequires30 && <p role="status" style={{ ...DESC, color: '#e1bf74', marginBottom: 20 }}>{visionDisabledReason}</p>}
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28 }}>
         {VISION_MODULES.map(key=><div key={key}>
           <h3 style={TITLE}>{t(`settings.vision.${key}.title`)}</h3>
           <p style={DESC}>{t(`settings.vision.${key}.desc`)}</p>
-          <Checkbox aria-label={t(`settings.vision.${key}.title`)} checked={!!visionModules[key]} disabled={busy||isLoading||(!visionModules[key]&&!!visionDisabledReason)}
+          <Checkbox aria-label={t(`settings.vision.${key}.title`)} checked={!!visionModules[key]} disabled={busy||isLoading||(!visionModules[key]&&(visionChecking||!!visionDisabledReason))}
             onChange={async event=>{const enabled=event.target.checked;setBusy(true);try{await handleSettingChange(key,enabled);setVisionModules(await window.electronAPI.getVisionModules(root!));}catch(error:any){message.error(error?.message||String(error));}finally{setBusy(false);}}}>
             {t(visionModules[key]?'settings.btn.turnon':'settings.btn.turnoff')}
           </Checkbox>
-          {statusHint(visionDisabledReason)}
+          {!visionRequires30 && statusHint(visionDisabledReason)}
         </div>)}
       </div>
     </div>

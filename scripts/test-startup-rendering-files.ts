@@ -19,10 +19,10 @@ const f = { root, assets: path.join(root, 'assets'), channel: 'retail', enabled:
   handlers: new Map<string, (...args: any[]) => Promise<any>>() };
 (globalThis as any).__startupFiles = f;
 const mocks: Record<string, string> = {
-  electron: 'export const app={getAppPath:()=>f.root};export const ipcMain={handle:(channel,fn)=>f.handlers.set(channel,fn)};',
+  electron: 'export const app={getAppPath:()=>f.root};export const ipcMain={handle:(channel,fn)=>f.handlers.set(channel,fn)};export const nativeImage={};',
   'config-manager': 'export const configManager={get:k=>k==="modSettings"?f.settings:k==="gameChannel"?f.channel:k==="war3Path"?f.root:undefined,set:(k,v)=>{if(k==="modSettings")f.settings=v;}};',
   'game-channel': 'export const getSelectedGameChannel=()=>f.channel;export const getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_";export const getChannelModEnabled=()=>f.enabled;export const hasGameChannelDirectory=async()=>true;',
-  'full-package-service': 'export const resolveRetailDir=async root=>root+"/"+(f.channel==="ptr"?"_ptr_":"_retail_");export const isFullPackageInstalled=async()=>false;',
+  'full-package-service': 'export const resolveRetailDir=async root=>root+"/"+(f.channel==="ptr"?"_ptr_":"_retail_");export const isFullPackageInstalled=async()=>false;export const assertFullPackageInstalled=async()=>{throw new Error("Full package is not installed");};',
   'war3-version': 'export const detectWar3Version=async()=>({source:"build.info",parts:[3,0,1,24368],version:"3.0.1.24368"});',
   'mod-update-service': 'export const getInstalledModState=async()=>({sequence:35});',
   'mod-integrity-service': 'export const readCurrentModVersion=async()=>"3.5";',
@@ -190,8 +190,13 @@ try {
     await syncLightingResources(root, q, f.settings, undefined, { forceEnvironment: true });
     assert.equal(parseSkinSections(await fs.readFile(unitSkin, 'utf8')).hfoo['modelScale:hd'], '1.5');
     assert.equal((await fs.readFile(path.join(buildDir, 'shaders/.quenching-shader-pack'), 'utf8')).trim(), channel === 'ptr' ? 'shaders-ptr-hd' : 'shaders203');
+    if (channel === 'retail') {
+      assert.equal(await fs.pathExists(path.join(buildDir, 'shaders/ps/tonemap.bls')), false);
+      assert.equal(await fs.pathExists(path.join(buildDir, 'PostProcessingConfig.txt')), false);
+    } else {
+      assert((await fs.readFile(path.join(buildDir, 'PostProcessingConfig.txt'), 'utf8')).includes('Keep=17'));
+    }
     assert.equal(await fs.readFile(path.join(buildDir, 'environment/foliage/grass.dds'), 'utf8'), 'que-foliage');
-    assert((await fs.readFile(path.join(buildDir, 'PostProcessingConfig.txt'), 'utf8')).includes('Keep=17'));
     // Exercise the real startup/settings sync path with the experiment enabled,
     // including profile, mode and brightness changes after the first application.
     const activeDnc = path.join(buildDir, 'environment/dnc');

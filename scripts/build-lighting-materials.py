@@ -78,7 +78,7 @@ def transform(blob,family,mode,protect_splat=False):
             if any(l.split()[0] in ('if_nz','if_z','else','endif','loop','endloop','switch','endswitch','break') for l in lines[tail:cloud_end]):
                 (out/'debug-inline-cloud.txt').write_text('\n'.join(lines[tail:cloud_end+5]),encoding='utf8')
                 raise ValueError('Cloud removal would cross material control flow')
-        if mode in ('battle','de-battle'):
+        if mode in ('battle','de-battle') or protect_splat:
             # Retain the saved color register until grading is complete. Terrain
             # writes its color matrix directly there; redirecting those writes
             # to o0 first would make later grading read an uninitialized temp.
@@ -178,7 +178,7 @@ def transform(blob,family,mode,protect_splat=False):
     if [(t,b) for t,b in parts(result) if t not in (b'SHEX',b'SHDR')] != [(t,b) for t,b in parts(blob) if t not in (b'SHEX',b'SHDR')]:raise ValueError('Shader interface changed')
     if result not in validated:validator.check(result);validated.add(result)
     # Real output disassembly must lose cloud noise for no-cloud profiles.
-    if mode in ('battle','de-battle') and cloud and any('-v15.' in l for l in c.unpack(result)[1]):raise ValueError('Cloud instructions remain')
+    if (mode in ('battle','de-battle') or protect_splat) and cloud and any('-v15.' in l for l in c.unpack(result)[1]):raise ValueError('Cloud instructions remain')
     patch_cache[key]=(result,dict(counts));return result,dict(counts)
 
 try:
@@ -200,7 +200,7 @@ try:
                 previous_entries=read_bls(assets/pack/'ps/melee'/file.name)[1] if args.battle_splats_only else None
                 for variant,(record,blob) in enumerate(entries):
                     # Verified building-splat path and its 3.01 second-bank variant.
-                    protect_splat=family=='hd' and mode=='battle' and variant in (448,1472)
+                    protect_splat=is_hd and family=='hd' and variant in (448,1472)
                     if protect_splat:
                         ls=c.unpack(blob)[1]
                         if not any('texturecubearray' in l for l in ls) or any(' t4.' in l for l in ls):raise ValueError('Protected splat layout changed')

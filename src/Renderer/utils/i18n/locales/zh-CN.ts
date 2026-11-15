@@ -1392,8 +1392,9 @@ const messages = {
   "settings.hdr.title": "HDR（色调映射）",
   "settings.hdr.on.desc": "调整整体明暗与色彩，让高光和阴影过渡更自然。",
   "settings.hdr.off.desc": "恢复游戏原有的色调映射。",
-  "settings.hdr.unsupported": "魔兽 3.0 的旧着色器没有提供此效果。",
+  "settings.requiresVersion": "需要魔兽 {version} 或更新版本。",
 
+  'settings.vision.requires30': "新版 Vision Mod 需要魔兽 3.0 或更新版本，2.04 请使用兼容的旧版。",
   'settings.vision.visionUnits.title': '单位增强',
   'settings.vision.visionUnits.desc': '替换单位和建筑模型、贴图，保留淬火配置和涂装。',
   'settings.vision.visionDecorations.title': '装饰物变化',

@@ -40,14 +40,24 @@ export const ModelPreview: React.FC<ModelPreviewProps> = ({ unitId, modelPath, f
     const abort = new AbortController();
     let frame = 0, preview: Awaited<ReturnType<typeof import('../../model-preview/create-preview').createPreview>>;
     const canvas = document.createElement('canvas');
-    const bounds = host.current?.getBoundingClientRect();
-    // A large high-DPI WebGL canvas is expensive to redraw continuously.
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = Math.max(480, Math.round((bounds?.width || 480) * pixelRatio));
-    canvas.height = Math.max(320, Math.round((bounds?.height || 320) * pixelRatio));
+    const container = host.current;
+    if (!container) return;
+    const fitCanvas = () => {
+      if (container.clientWidth === 0 || container.clientHeight === 0) return;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = Math.round(container.clientWidth * pixelRatio);
+      const height = Math.round(container.clientHeight * pixelRatio);
+      if (canvas.width === width && canvas.height === height) return;
+      canvas.width = width;
+      canvas.height = height;
+      preview?.resize();
+    };
+    fitCanvas();
+    const sizeObserver = new ResizeObserver(fitCanvas);
+    sizeObserver.observe(container);
     canvas.setAttribute('aria-label', alt);
     Object.assign(canvas.style, { width: '100%', height: '100%', position: 'absolute', inset: '0', opacity: '0', cursor: 'grab' });
-    host.current?.appendChild(canvas);
+    container.appendChild(canvas);
     setReady(false); setState({ key: 'skin.preview.loading' });
     const read = async (path: string, basePath?: string) => {
       const resource = await window.electronAPI.readModelResource(path, basePath, mode);
@@ -77,6 +87,7 @@ export const ModelPreview: React.FC<ModelPreviewProps> = ({ unitId, modelPath, f
         if (abort.signal.aborted) return;
         preview = await createPreview(canvas, source, read, { scale, signal: abort.signal, teamColor, transparent, viewDistance, unitId });
         if (abort.signal.aborted) { preview.dispose(); return; }
+        preview.resize();
         canvas.style.opacity = '1'; setReady(true);
         setState(preview.missing.length ? { key: 'skin.preview.missing', params: { count: preview.missing.length } }
           : { key: Object.values(preview.omitted).some(Boolean) ? 'skin.preview.simplified' : 'skin.preview.live' });
@@ -98,7 +109,7 @@ export const ModelPreview: React.FC<ModelPreviewProps> = ({ unitId, modelPath, f
         if (!abort.signal.aborted) { console.warn('[ModelPreview]', error); setState(previewError(error)); }
       }
     })();
-    return () => { abort.abort(); cancelAnimationFrame(frame); observer.disconnect(); preview?.dispose(); canvas.remove(); };
+    return () => { abort.abort(); cancelAnimationFrame(frame); sizeObserver.disconnect(); observer.disconnect(); preview?.dispose(); canvas.remove(); };
   }, [enabled, modelPath, mode, scale, alt, teamColor, transparent, viewDistance, unitId, retry]);
   return <div className={className} style={{ position: 'relative', width: '100%', height: '100%', background: transparent ? 'transparent' : '#090a0d', overflow: 'hidden' }}>
     {!transparent && fallback && <img src={fallback} alt={alt} style={{ width: '100%', height: '100%', objectFit: 'contain', opacity: ready ? 0 : 1 }} />}

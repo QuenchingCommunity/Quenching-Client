@@ -7,6 +7,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { BOOTSTRAP_ASSETS, RESOURCE_ARCHIVE, RESOURCE_ARCHIVES, RESOURCE_MANIFEST, resourceArchiveFor } from '../src/shared/bundled-resource-paths.mjs';
 import { verifyReadabilityWriters } from './verify-readability-writers.mjs';
+import { verifyBuildingSplats } from './verify-building-splats.mjs';
 
 const require = createRequire(import.meta.url);
 export async function fileHash(file) {
@@ -73,6 +74,7 @@ export async function prepareResourceBundle(root, { requireLegacy = true } = {})
   const source = path.join(root, 'assets/unpacked');
   const destination = path.join(root, 'assets/quenching');
   await verifyReadabilityWriters(path.join(source, 'shaders'));
+  if (requireLegacy) await verifyBuildingSplats(path.join(source, 'shaders'));
   if (requireLegacy) for (const pack of ['shaders-300-legacy-hd', 'shaders-300-legacy-de', 'fog_shaders-legacy']) await fs.access(path.join(source, 'shaders', pack));
   const inventory = await resourceInventory(source);
   const files = Object.fromEntries(Object.entries(inventory).map(([name, record]) => [name, { ...record, archive: resourceArchiveFor(name) }]));

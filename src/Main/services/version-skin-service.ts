@@ -7,7 +7,7 @@ import { configManager } from './config-manager';
 import { skinService, usesFullPackageSkinResource } from './skin-service';
 import { assertFullPackageInstalled } from './full-package-service';
 import { AssetSyncService } from './asset-sync';
-import { assertArtSet, originalSkin, parseSkinSections, writeVersionSkins, SkinArtSet, SkinSections, SkinSelections, VersionSkinChoice } from '../../shared/skin-versions';
+import { assertArtSet, originalSkin, parseSkinSections, scopedSkin, writeVersionSkins, SkinArtSet, SkinSections, SkinSelections, VersionSkinChoice } from '../../shared/skin-versions';
 import { activeSkinEra, activeSkinProfile, storedSkinPath, unitSkinTemplate } from './unit-skin-profile';
 import { repairImportedModelTextures } from './custom-model-textures';
 import { isBranchModDisabled, prepareBranchModFileWrite, resolveBranchModFile } from './branch-mod-toggle';
@@ -84,9 +84,36 @@ class VersionSkinService {
   }
   /** Recover selected skins from persisted IDs after a package replaces unitskin.
    * Never enable disabled skins or write into the other game branch. */
-  async restoreSelections(root = this.root()): Promise<string[]> {
+  async restoreSelections(root = this.root(), options: { ifActiveMissing?: boolean } = {}): Promise<string[]> {
     if (this.key(root) !== this.key(this.root())) throw new Error('游戏目录已切换，请重试');
     const { customSkinService } = await import('./custom-skin-service');
+    if (options.ifActiveMissing) {
+      const saved = (configManager.get('skinSelections') || {})[this.key(root)] || {};
+      const selected = path.join(root, getSelectedGameFolder());
+      const build = await fs.pathExists(selected) ? selected : root;
+      const active = await activeSkinProfile(build) || 'hd';
+      const artSet = active === 'hd-retro' ? 'hd' : active;
+      const choices = savedSkinChoices(artSet, saved[artSet] || {}, customSkinService.getAll()).choices
+        .filter(choice => choice.skinId !== 'original');
+      if (!choices.length) return [];
+      const text = await fs.readFile(path.join(build, 'units', 'unitskin.txt'), 'utf8')
+        .catch((error: NodeJS.ErrnoException) => {
+          if (error.code === 'ENOENT') return null;
+          throw error;
+        });
+      // The missing live file can be an intentional skin-off state.
+      if (text === null) return [];
+      const sections = parseSkinSections(text);
+      const normalized = (value?: string) => value?.replace(/\\/g, '/').toLowerCase();
+      const missing = choices.some(choice => scopedSkin(choice.changes, artSet).some(({ field, value }) => {
+        // Battle mode intentionally changes the applied model scale.
+        const base = field.split(':')[0];
+        if (!value || base === 'modelScale') return false;
+        const current = sections[choice.unitId];
+        return normalized(current?.[field] ?? current?.[base]) !== normalized(value);
+      }));
+      if (!missing) return [];
+    }
     await customSkinService.repairImportedModels();
     const operation = this.queue.then(async () => {
       if (this.key(root) !== this.key(this.root())) throw new Error('游戏目录已切换，请重试');
@@ -231,10 +258,12 @@ class VersionSkinService {
           }
         }
       }
-      const targetProfile = artSet === 'hd' &&
-        (configManager.get('retroSkinUnits') === true || configManager.get('retroSkinBuildings') === true)
-        ? 'hd-retro' : artSet;
       const activeProfile = await activeSkinProfile(retail) || 'hd';
+      const retroPreferred = configManager.get('retroSkinUnits') === true || configManager.get('retroSkinBuildings') === true;
+      // The installed HD table wins over stale preferences for the other HD variant.
+      const targetProfile = artSet === 'hd'
+        ? (activeProfile === 'hd' || activeProfile === 'hd-retro' ? activeProfile : retroPreferred ? 'hd-retro' : 'hd')
+        : artSet;
       const era = await activeSkinEra(retail, configManager.get('modSettings')?.resolvedVersion);
       let target: string;
       if (targetProfile === activeProfile) {

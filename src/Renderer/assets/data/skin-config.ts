@@ -214,6 +214,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
           { unitId: 'hsor', field: 'file', value: 'cos\\hum1\\IsakariMystic' },
           { unitId: 'hmtt', field: 'file', value: 'Units\\Creeps\\WarCart\\WarCart' },
           { unitId: 'hmpr', field: 'file', value: 'Units\\Creeps\\Chaplain\\Chaplain' },
+          { unitId: 'hmpr', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNChaplain.blp' },
           { unitId: 'hrif', field: 'file', value: 'cos\\hum1\\HMv6' },
         ]
       },
@@ -304,6 +305,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '海之女儿吉安娜',
             config: [
               { field: 'file:hd', value: 'Units\\Human\\JainaSea\\JainaSea' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNJainaSea.blp' },
               { field: 'unitSound', value: 'Jaina' },
               { field: 'modelScale:hd', value: '1.15' }
             ]
@@ -698,6 +700,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '部落勇士萨尔',
             config: [
               { field: 'file:hd', value: 'Units\\Orc\\ThrallChampion\\ThrallChampion' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNThrallChampion.blp' },
               { field: 'unitSound', value: 'Thrall' },
               { field: 'modelScale:hd', value: '1.02' }
             ]
@@ -898,6 +901,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '堕落之王阿尔萨斯',
             config: [
               { field: 'file:hd', value: 'Units\\Undead\\FallenKingArthas\\FallenKingArthas' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNFallenKingArthas.blp' },
               { field: 'unitSound', value: 'EvilArthas' },
               { field: 'modelScale:hd', value: '1.15' }
             ]
@@ -907,6 +911,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '女死亡骑士',
             config: [
               { field: 'file:hd', value: 'Units\\Undead\\HeroFemaleDeathKnight\\HeroFemaleDeathKnight' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNHeroFemaleDeathKnight.blp' },
               { field: 'unitSound', value: 'HeroDeathKnight' },
               { field: 'modelScale:hd', value: '1.15' }
             ]
@@ -1098,8 +1103,10 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
         preview: 'cosu_n2.png',
         config: [
           { unitId: 'earc', field: 'file', value: 'units\\nightelf\\Shandris\\Shandris' },
+          { unitId: 'earc', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNShandris.blp' },
           { unitId: 'ebal', field: 'file', value: 'cos\\ne1\\Ballista.mdx' },
           { unitId: 'esen', field: 'file', value: 'units\\NightElf\\Naisha\\Naisha' },
+          { unitId: 'esen', field: 'Art', value: 'ReplaceableTextures\\CommandButtons\\BTNNaisha.blp' },
           { unitId: 'ehpr', field: 'file', value: 'cos\\ne1\\RiddenHippogryph' },
           { unitId: 'ehip', field: 'file', value: 'cos\\ne1\\Hippogryph' },
           { unitId: 'emtg', field: 'file', value: 'cos\\ne1\\MG' },
@@ -1193,6 +1200,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '翡翠梦魇塞纳留斯',
             config: [
               { field: 'file:hd', value: 'Units\\NightElf\\CenariusNightmare\\CenariusNightmare' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNCenariusNightmare.blp' },
               { field: 'unitSound', value: 'HeroKeeperOfTheGrove' },
               { field: 'modelScale:hd', value: '0.9' }
             ]
@@ -1232,6 +1240,7 @@ export const SKIN_CONFIG: Record<string, RaceConfig> = {
             name: '女恶魔猎手',
             config: [
               { field: 'file:hd', value: 'Units\\NightElf\\HeroFemaleDemonHunter\\HeroFemaleDemonHunter' },
+              { field: 'Art:hd', value: 'ReplaceableTextures\\CommandButtons\\BTNHeroFemaleDemonHunter.blp' },
               { field: 'unitSound', value: 'HeroDemonHunter' },
               { field: 'modelScale:hd', value: '1.05' }
             ]

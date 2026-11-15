@@ -1,7 +1,7 @@
 {
 	"name": "quenching-electron-client",
 	"productName": "Quenching Mod Client",
-	"version": "3.7.0",
+	"version": "3.7.1",
 	"main": "dist/main.js",
 	"scripts": {
 		"build:production": "node scripts/set-build-channel.mjs production && npm run build && node scripts/check-production-build.mjs",

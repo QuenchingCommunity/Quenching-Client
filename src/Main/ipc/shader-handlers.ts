@@ -1,12 +1,12 @@
 import {validateHdrExposure} from '../../shared/hdr-exposure';
-import {copyPostProcessingConfigIfMissing,setPostProcessingTonemapEnabled,POST_PROCESSING_CONFIG_FILE} from '../services/post-processing-config';
 import {assertVisionSettingAllowed} from '../services/vision-modules';
 import { getChannelModEnabled, getSelectedGameChannel, getSelectedGameFolder } from '../services/game-channel';
 import { ipcMain } from 'electron';
 import path from 'path';
 import { rm } from 'node:fs/promises';
 import fs from 'fs-extra';
-import { AssetSyncService, getKnownShaderResourceRoots } from '../services/asset-sync';
+import { AssetSyncService } from '../services/asset-sync';
+import { supportsReadability } from '../../shared/rendering-presets';
 import { extractZipArchive } from '../services/zip-extraction';
 import { configManager } from '../services/config-manager';
 import {
@@ -61,6 +61,9 @@ async function applyCurrentShaderToggles(
 ): Promise<void> {
     await assertVisionSettingAllowed(war3Path,'objectShader');
     const { profile, modSettings } = await resolveCurrentShaderProfile(war3Path, overrides);
+    if ((overrides.postProcessingOutline === true || overrides.improveReadability === true) && !supportsReadability(profile)) {
+        throw new Error('增强描边和提高辨识度需要魔兽 3.0.1 或以上版本');
+    }
     const shadersDir = path.join(await resolveShadersBaseDir(war3Path), 'shaders');
     const quenchingDir = path.join(await AssetSyncService.getAssetsDir(), 'quenching');
     await withShaderBundle(quenchingDir, profile.shaderPack, path.dirname(shadersDir), async shaderQuenchingDir => {
@@ -238,12 +241,6 @@ async function stageProfileShaderFiles(
             }
         }
 
-        if (!resolved.zipName.startsWith('shaders-ptr-') && !resolved.zipName.startsWith('shaders-300-')) {
-            for (const root of getKnownShaderResourceRoots(quenchingDir)) {
-                if (root.targetPrefix === stage) candidates.push(path.join(root.source, name));
-                else if (!root.targetPrefix) candidates.push(path.join(root.source, stage, name));
-            }
-        }
         return [...new Set(candidates)];
     };
 
@@ -327,14 +324,12 @@ export function registerShaderHandlers() {
     ipcMain.handle('shader:update-hdr-exposure', async (_event, war3Path: string, value: number) => {
         const exposure=validateHdrExposure(value);
         await assertVisionSettingAllowed(war3Path,'hdrExposure');
-        const {profile,modSettings}=await resolveCurrentShaderProfile(war3Path);
+        const {profile}=await resolveCurrentShaderProfile(war3Path);
         if(!supportsHdr(profile))throw new Error('Overall brightness is unavailable for this game version');
         if(getChannelModEnabled(getSelectedGameChannel())){
             const buildDir=path.join(war3Path,getSelectedGameFolder());
             if(!(await fs.stat(buildDir)).isDirectory())throw new Error('Game branch missing');
-            const source=path.join(await AssetSyncService.getAssetsDir([]),'quenching',POST_PROCESSING_CONFIG_FILE);
-            await copyPostProcessingConfigIfMissing(buildDir,source);
-            await setPostProcessingTonemapEnabled(buildDir,modSettings.hdr ?? modSettings.postProcessing !== false,exposure);
+            await AssetSyncService.ensurePostProcessingConfig(war3Path, undefined, undefined, undefined, exposure);
         }
         configManager.set('modSettings',{...configManager.get('modSettings'),hdrExposure:exposure});
         return true;
@@ -343,9 +338,9 @@ export function registerShaderHandlers() {
     ipcMain.handle('shader:update-hdr', async (_event, war3Path: string, enabled: boolean) => {
         await assertVisionSettingAllowed(war3Path,'hdr');
         if (typeof enabled !== 'boolean') throw new Error('Invalid HDR setting');
-        if (!getChannelModEnabled(getSelectedGameChannel())) return true;
         const { profile } = await resolveCurrentShaderProfile(war3Path);
         if (enabled && !supportsHdr(profile)) throw new Error('HDR tone mapping is unavailable for this game version');
+        if (!getChannelModEnabled(getSelectedGameChannel())) return true;
         if (enabled) await applyCurrentShaderToggles(war3Path, { hdr: true }, HDR_SHADER_FILES);
         else await removeShaderFiles(war3Path, HDR_SHADER_FILES);
         await AssetSyncService.ensurePostProcessingConfig(war3Path, undefined, enabled);

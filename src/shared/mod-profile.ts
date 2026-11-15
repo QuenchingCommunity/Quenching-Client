@@ -48,6 +48,11 @@ export function isVersion30OrLater(version: unknown): boolean {
   return version === 'v30' || version === 'v301';
 }
 
+export function resolveVersionSelection(selection: VersionSelection, detected: EffectiveVersion | null): EffectiveVersion | null {
+  // 2.04 cannot load the shaders or other resources from either 3.x tier.
+  return detected === 'v204' || selection === 'auto' ? detected : selection;
+}
+
 export function isHdShaderPack(pack: ModProfile['shaderPack']): boolean {
   return pack === 'shaders-300-hd' || pack === 'shaders-ptr-hd' || pack === 'shaders-300-legacy-hd';
 }

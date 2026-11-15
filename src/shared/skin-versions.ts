@@ -73,9 +73,9 @@ export function writeVersionSkins(text: string, baseline: SkinSections, artSet: 
       return !scopedFields.some(field => key.toLowerCase() === field || key.toLowerCase().startsWith(`${field}:`));
     });
     lines.splice(start + 1, end - start - 1,
+      ...block,
       ...values.map(c => `${c.field}=${c.value}`),
-      ...qualifiedOriginals.map(([key, value]) => `${key}=${value}`),
-      ...block);
+      ...qualifiedOriginals.map(([key, value]) => `${key}=${value}`));
   }
   return applyBattleUnitScales(lines.join('\r\n'), battle);
 }

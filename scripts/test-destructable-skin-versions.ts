@@ -14,20 +14,22 @@ const quenching = path.join(root, 'assets', 'quenching');
 const fixture: any = { channel: 'retail', parts: [3, 0, 0], config: {}, handlers: {} };
 (globalThis as any).__destructableFixture = fixture;
 const mocks: Record<string, string> = {
-  electron: 'export const app={getAppPath:()=>process.cwd()}; export const ipcMain={handle:(key,handler)=>f.handlers[key]=handler};',
+  // 该用例只测试皮肤表，隔离 Electron 和随资源同步加载的其他功能。
+  electron: 'export const app={getAppPath:()=>process.cwd()}; export const ipcMain={handle:(key,handler)=>f.handlers[key]=handler}; export const nativeImage={};',
   'config-manager': 'export const configManager={get:key=>f.config[key],set:(key,value)=>f.config[key]=value};',
   'game-channel': 'export const getSelectedGameChannel=()=>f.channel,getSelectedGameFolder=()=>f.channel==="ptr"?"_ptr_":"_retail_",getChannelModEnabled=()=>true,hasGameChannelDirectory=async()=>true;',
   'war3-version': 'export const detectWar3Version=async()=>({parts:f.parts,source:"fixture"});',
-  'full-package-service': 'export const resolveRetailDir=async root=>root+"/"+(f.channel==="ptr"?"_ptr_":"_retail_"),isFullPackageInstalled=async()=>true,assertTreeModeAvailable=async()=>{};',
+  'full-package-service': 'export const resolveRetailDir=async root=>root+"/"+(f.channel==="ptr"?"_ptr_":"_retail_"),isFullPackageInstalled=async()=>true,assertFullPackageInstalled=async()=>{},assertTreeModeAvailable=async()=>{};',
   'mod-integrity-service': 'export const readCurrentModVersion=async()=>"3.5";',
   'mod-update-service': 'export const getInstalledModState=async()=>null;',
   'third-party-resources': 'export const isThirdPartyQuenchingPaused=async()=>false,markKnownQuenching=async()=>{};',
-  'dnc-lighting': 'export const applyDncLighting=async()=>{};',
-  'fog-shader-override': 'export const applyShaderToggles=async()=>{}; export const applyIntelAmdBloomForProfile=async()=>{};',
+  'dnc-lighting': 'export const applyDncLighting=async()=>{},renderDncLighting=source=>source;',
+  'fog-shader-override': 'export const applyShaderToggles=async()=>{},applyIntelAmdBloomForProfile=async()=>{},shaderToggleResourcePaths=()=>[],HDR_SHADER_FILES=[],supportsHdr=()=>false;',
   'graphics-layout-service': 'export const restoreSdParkedResources=async()=>{},restoreHdUnitsAndBuildings=async()=>{},parkNonHdUnitsAndBuildings=async()=>{},syncGraphicsLayout=async()=>({waterNeedsReapply:false});',
   'environment-layout-service': 'export const restoreHdPublicEnvironment=async()=>true,parkHdPublicEnvironment=async()=>{};',
-  'post-processing-config': 'export const POST_PROCESSING_CONFIG_FILE="PostProcessingConfig.txt",copyPostProcessingConfigIfMissing=async()=>false,setPostProcessingAoEnabled=async()=>false;',
-  'zip-extraction': 'export const extractZipArchive=async()=>({});',
+  'foliage-service': 'export const syncPublicEnvironmentFoliage=async()=>{};',
+  'post-processing-config': 'export const POST_PROCESSING_CONFIG_FILE="PostProcessingConfig.txt",applyPostProcessingConfigTemplate=async()=>false;',
+  'zip-extraction': 'export const extractZipArchive=async()=>({}),getZipUncompressedBytes=async()=>0;',
   'webui-assets-service': 'export const syncClientWebUIFiles=async()=>{};',
   'war3-path': 'export const normalizeWar3RootPath=root=>root;',
   'ui-service': 'export const UIService={syncConfiguredUI:async()=>{}};',
@@ -148,7 +150,119 @@ try {
   assert.equal(await read(target()), baseline, 'DE original uses the 3.0 table');
   fixture.config.modSettings.tree = 'v18';
   await syncProfileResources(root, quenching, fixture.config.modSettings);
-  assert((await contents()).LTlt.file.includes('/d18/'), 'DE permits manually selected trees');
+  const oldV18 = await contents();
+  assert(oldV18.LTlt.file.includes('/d18/'), 'DE permits manually selected trees');
+  assert.equal(oldV18.BTtc['file:hd'], original.BTtc['file:hd'], '旧 MOD 继续使用原版 HD canopy');
+  assert.equal(oldV18.BTtc['numVar:hd'], '0');
+
+  // 模拟完整安装新资源，再从真实 DE 基准表启用这四组模型。
+  const newTrees = [
+    ['BTtw', 'BarrensTree/BarrensTree', 'BarrensTree/QuenchingBarrensTree', '10', '33'],
+    ['ATtc', 'AshenCanopyTree/AshenCanopyTree', 'AshenvaleTree/QuenchingAshenCanopyTree', '3', '32'],
+    ['CTtc', 'FelwoodCanopyTree/FelwoodCanopyTree', 'AshenvaleTree/QuenchingFelwoodCanopyTree', '3', '32'],
+    ['BTtc', 'BarrensCanopyTree/BarrensCanopyTree', 'BarrensTree/QuenchingBarrensCanopyTree', '3', '32'],
+  ];
+  // 提供选择器要求的文件名，皮肤表测试不读取模型或图集文件内容。
+  async function installTreeFixtures(trees: string[][]) {
+    for (const [, model, texture, count] of trees) {
+      for (let i = 0; i < Number(count); i++) {
+        await fs.outputFile(path.join(retail, `doodads/que/d18/${model}${i}.mdx`), 'fixture');
+      }
+      for (const variant of ['', 'blight']) {
+        for (const role of ['diffuse', 'normal', 'orm']) {
+          await fs.outputFile(path.join(retail, `replaceabletextures/tree/t18/${texture}${variant}_${role}.dds`), 'fixture');
+        }
+      }
+    }
+  }
+  await installTreeFixtures(newTrees);
+  await choose('v18');
+  const deV18 = await contents();
+  for (const [id, model, texture, count, texId] of newTrees) {
+    assert.equal(deV18[id].file, `Doodads/que/d18/${model}`);
+    assert.equal(deV18[id].texFile, `ReplaceableTextures/tree/t18/${texture}`);
+    assert.equal(deV18[id].numVar, count);
+    assert.equal(deV18[id].texID, texId);
+  }
+  assert.equal(deV18.BTtc['file:hd'], deV18.BTtc.file);
+  assert.equal(deV18.BTtc['numVar:hd'], deV18.BTtc.numVar);
+  await choose('v16');
+  const deV16 = await contents();
+  assert.equal(deV16.BTtc['file:hd'], original.BTtc['file:hd']);
+  assert.equal(deV16.BTtc['numVar:hd'], '0');
+  for (const [id] of newTrees) assert.equal(deV16[id].file, original[id].file);
+
+  // D16 圆冠树必须具备每个变体的站立、死亡伴随模型和三个季节的正常、腐地图集。
+  const cityscapeSeasons = { YTct: '', YTwt: 'w', YTft: 'a' };
+  for (let i = 0; i < 3; i++) {
+    for (const state of ['', 'd', 's']) {
+      await fs.outputFile(path.join(retail, `doodads/que/d16/Citytree${i}${state}.mdx`), 'fixture');
+    }
+  }
+  for (const season of Object.values(cityscapeSeasons)) {
+    for (const variant of ['', 'blight']) {
+      for (const role of ['diffuse', 'normal', 'orm']) {
+        await fs.outputFile(path.join(retail, `replaceabletextures/tree/t16/CityscapeTree/QuenchingCityscapeTree${season}${variant}_${role}.dds`), 'fixture');
+      }
+    }
+  }
+  const missingCityscape = path.join(retail, 'doodads/que/d16/Citytree2d.mdx');
+  await fs.unlink(missingCityscape);
+  await choose('v16');
+  for (const id of Object.keys(cityscapeSeasons)) assert.deepEqual((await contents())[id], deV16[id]);
+  await fs.writeFile(missingCityscape, 'fixture');
+  await choose('v16');
+  const d16Cityscape = await contents();
+  for (const [id, season] of Object.entries(cityscapeSeasons)) {
+    assert.equal(d16Cityscape[id].file, 'Doodads/que/d16/Citytree');
+    assert.equal(d16Cityscape[id].texFile, `ReplaceableTextures/tree/t16/CityscapeTree/QuenchingCityscapeTree${season}`);
+    assert.equal(d16Cityscape[id].numVar, '3');
+    assert.equal(d16Cityscape[id].texID, '31');
+  }
+  await choose('v18');
+  const restoredD18 = await contents();
+  for (const id of Object.keys(cityscapeSeasons)) assert.deepEqual(restoredD18[id], deV18[id]);
+  assert.deepEqual(restoredD18.YTst, original.YTst);
+
+  // 即使旧版自定义冬季模型仍在本地，HD 配置也应重新使用原版诺森德和冰冠对象。
+  const winterTrees = [
+    ['NTtw', 'NorthrendTree/NorthrendTree', 'NorthrendTree/QuenchingNorthrendTree', '10', '34'],
+    ['ITtw', 'IcecrownTree/IcecrownTree', 'AshenvaleTree/QuenchingIcecrownTree', '10', '32'],
+  ];
+  await installTreeFixtures(winterTrees);
+  fixture.config.modSettings.graphicsSelection = 'hd';
+  await choose('v18');
+  for (const [id] of winterTrees) assert.deepEqual((await contents())[id], original[id]);
+
+  // 第四套雪地图集齐备后，D18 和 D16 分别在 HD 和 DE 使用同样的四季圆冠资源。
+  for (const variant of ['', 'blight']) {
+    for (const role of ['diffuse', 'normal', 'orm']) {
+      await fs.outputFile(path.join(retail, `replaceabletextures/tree/t16/CityscapeTree/QuenchingCityscapeTreeSnow${variant}_${role}.dds`), 'fixture');
+    }
+  }
+  await choose('v18');
+  const modernD18 = await contents();
+  const fourSeasons = { ...cityscapeSeasons, YTst: 'Snow' };
+  for (const [id, season] of Object.entries(fourSeasons)) {
+    assert.deepEqual(modernD18[id], {
+      ...original[id],
+      file: 'Doodads/que/d16/Citytree',
+      texFile: `ReplaceableTextures/tree/t16/CityscapeTree/QuenchingCityscapeTree${season}`,
+      numVar: '3',
+    });
+  }
+  assert.deepEqual(modernD18.WTst, restoredD18.WTst);
+  assert.equal(modernD18.WTst.file, 'Doodads/que/d18/LordaeronTree/LordaeronTree');
+  assert.equal(modernD18.WTst.texFile, 'ReplaceableTextures/tree/t18/LordaeronTree/LordaeronSnowTree');
+  fixture.config.modSettings.graphicsSelection = 'de';
+  await choose('v16');
+  const modernD16 = await contents();
+  for (const id of Object.keys(fourSeasons)) assert.deepEqual(modernD16[id], modernD18[id]);
+  fixture.config.modSettings.tree = 'v18';
+  await syncProfileResources(root, quenching, fixture.config.modSettings);
+  const syncedD18 = await contents();
+  for (const id of Object.keys(fourSeasons)) assert.deepEqual(syncedD18[id], modernD18[id]);
+  for (const [id] of winterTrees) assert.deepEqual(syncedD18[id], original[id]);
   const beforeSd = await read(target());
   fixture.config.modSettings.graphicsSelection = 'sd';
   await syncProfileResources(root, quenching, fixture.config.modSettings);

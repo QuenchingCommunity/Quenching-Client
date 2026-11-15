@@ -14,6 +14,7 @@ assert.equal(section['file:sd'], 'new-sd');
 assert.equal(section['file:hd'], 'hd-choice');
 assert.equal(section['file:de'], 'de-choice');
 assert.equal(section.file, 'legacy');
+assert(sd.indexOf('file=legacy') < sd.indexOf('file:sd=new-sd'), 'selected version fields follow common fallback rows');
 assert.equal(section['Art:sd'], 'original-icon');
 assert.equal(section['unitSound:sd'], 'Footman');
 assert.equal(section['file:sd:melee,V0'], undefined);
@@ -38,6 +39,14 @@ for (const race of Object.keys(SKIN_CONFIG)) {
     for (const target of targets) {
       assert.equal(builtInSkins(race, target.unitId, 'de').length, 0);
       const sdSkins = builtInSkins(race, target.unitId, 'sd');
+      if (category === 'hero') {
+        for (const skin of builtInSkins(race, target.unitId, 'hd')) {
+          const fields = scopedSkin(skin.config, 'hd');
+          if (fields.some(change => change.field === 'file:hd')) {
+            assert(fields.some(change => change.field === 'Art:hd'), `Missing HD button icon: ${target.unitId}/${skin.id}`);
+          }
+        }
+      }
       if (category !== 'hero') assert.equal(sdSkins.length, 0);
       sdCount += sdSkins.length;
     }

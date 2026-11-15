@@ -1,4 +1,5 @@
-import { getSelectedGameFolder } from './game-channel';
+import { getSelectedGameChannel, getSelectedGameFolder } from './game-channel';
+import { ensureLocalFiles } from './local-files-service';
 import fs from 'fs-extra';
 import path from 'path';
 import { configManager } from './config-manager';
@@ -79,6 +80,7 @@ export class SkinService {
     const dirs = await this.getUnitsDir();
     if (!dirs) return;
     if (await isBranchModDisabled(dirs.baseDir)) return;
+    await ensureLocalFiles(getSelectedGameChannel());
 
     const unitskinPath = path.join(dirs.unitsDir, 'unitskin.txt');
     const disabledPath = path.join(dirs.unitsDir, 'unitskin-dis.txt');
